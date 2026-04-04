@@ -61,7 +61,7 @@ def generate_pdf(contract_id):
         
         
     ##elements.append(Paragraph("PFE PROJECT ISIL-70", styles['MyTitle']))
-     # Create a simple 2-column table
+     # Create a simple 2-column table bouklila
         header_table = Table([
     [Image(logo_path, width=120, height=70), 
      Paragraph("PFE PROJECT ISIL-70", styles['MyTitle'])]
