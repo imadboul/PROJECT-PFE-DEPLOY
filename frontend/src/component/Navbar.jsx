@@ -1,0 +1,164 @@
+import { useContext, useState } from "react";
+import { NavLink } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
+
+export default function Navbar() {
+  const { logout, user } = useContext(AuthContext);
+
+  const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const linkStyle = ({ isActive }) =>
+    `px-3 py-2 text-lg ${
+      isActive ? "text-orange-500" : "text-white font-medium"
+    } hover:text-orange-500`;
+
+  return (
+    <nav className="px-6 py-3 flex items-center justify-between">
+      {/* Logo */}
+      <NavLink to="/Home" className="flex items-center gap-2 font-semibold">
+        <img src="/logo-sonatrach-white-text.svg" className="w-8 h-8" />
+        <span className="text-white font-bold text-xl">Sonatrach</span>
+      </NavLink>
+
+      {/* Desktop Links */}
+      <div className="hidden md:flex items-center gap-4">
+        <NavLink to="/Contracts" className={linkStyle}>
+          Contracts
+        </NavLink>
+        <NavLink to="/Sold" className={linkStyle}>
+          Sold
+        </NavLink>
+        <NavLink to="/Bills" className={linkStyle}>
+          Bills
+        </NavLink>
+        <NavLink to="/Invoices" className={linkStyle}>
+          Invoices
+        </NavLink>
+        {["admin", "superAdmin"].includes(user?.role) && (
+          <NavLink to="/Sign" className={linkStyle}>
+            Sign Up
+          </NavLink>
+        )}
+        <NavLink to="/" onClick={logout} className={linkStyle}>
+          Logout
+        </NavLink>
+      </div>
+
+      {/* Right Side */}
+      <div className="flex items-center gap-4">
+        {/* Desktop Message */}
+        <button className="hidden md:block relative text-xl text-white cursor-pointer hover:text-orange-500">
+          <i className="fa-regular fa-message"></i>
+          <span className="absolute -top-2 -right-2 text-xs bg-orange-500 text-white px-1 rounded-full">
+            3
+          </span>
+        </button>
+
+        {/* mobile */}
+        <button
+          onClick={() => setOpen(!open)}
+          className="text-xl text-white cursor-pointer hover:text-orange-500 md:hidden"
+        >
+          <i className="fa-solid fa-bars"></i>
+        </button>
+
+        {/* Menu (optional dropdown - language) */}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="text-xl text-white cursor-pointer hover:text-orange-500 hidden md:block"
+        >
+          <i className="fa-solid fa-language"></i>
+        </button>
+
+        {mobileOpen && (
+          <div className="absolute right-3 top-12 border rounded shadow-md flex flex-col">
+            <button className="px-4 py-2 cursor-pointer text-white hover:bg-white/10 flex items-center gap-2">
+              <i className="fa-solid text-blue-300 fa-language"></i> FR
+            </button>
+
+            <button className="px-4 py-2 cursor-pointer text-white hover:bg-white/10 flex items-center gap-2">
+              <i className="fa-solid text-blue-300 fa-language"></i> AR
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* MOBILE FULL MENU */}
+      {open && (
+        <div className="absolute top-16 left-0 w-full bg-black/70 border-t shadow-md md:hidden flex flex-col p-4 gap-2 z-50">
+          <NavLink
+            onClick={() => setOpen(!open)}
+            to="/Contracts"
+            className={linkStyle}
+          >
+            Contracts
+          </NavLink>
+          <NavLink
+            onClick={() => setOpen(!open)}
+            to="/Sold"
+            className={linkStyle}
+          >
+            Sold
+          </NavLink>
+          <NavLink
+            onClick={() => setOpen(!open)}
+            to="/Bills"
+            className={linkStyle}
+          >
+            Bills
+          </NavLink>
+          <NavLink
+            onClick={() => setOpen(!open)}
+            to="/Invoices"
+            className={linkStyle}
+          >
+            Invoices
+          </NavLink>
+
+          {/* Message */}
+
+          <NavLink
+            to="/notifications"
+            onClick={() => setOpen(!open)}
+            className={linkStyle}
+          >
+            <div className="flex items-center gap-2">
+              <i className="fa-regular fa-message"></i>
+              Messages
+              <span className="ml-auto bg-orange-500 text-white text-xs px-3 rounded-full">
+                3
+              </span>
+            </div>
+          </NavLink>
+
+          {/* Language */}
+          <NavLink
+            onClick={() => setOpen(!open)}
+            to="#"
+            className="px-3 py-2 hover:text-orange-500 text-white flex items-center gap-2"
+          >
+            <i className="fa-solid text-blue-300 fa-language"></i> FR
+          </NavLink>
+
+          <NavLink
+            onClick={() => setOpen(!open)}
+            to="#"
+            className="px-3 py-2 hover:text-orange-500 text-white flex items-center gap-2"
+          >
+            <i className="fa-solid text-blue-300 fa-language"></i> AR
+          </NavLink>
+
+          {/* Logout */}
+          <NavLink
+            to="/"
+            onClick={logout}
+            className="px-3 py-2 text-white hover:text-orange-500 flex items-center gap-2"
+          >
+            Logout
+          </NavLink>
+        </div>
+      )}
+    </nav>
+  );
+}
