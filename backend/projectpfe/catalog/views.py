@@ -92,11 +92,11 @@ def contract(request):
     
         if(role == 'client'):
         
-            contracts = contractserializer(Contract.objects.filter(client_id = client_id), many= True)
+            contracts = contractreadserializer(Contract.objects.filter(client_id = client_id), many= True)
             return Response ( { "contracts" : contracts.data }, status=status.HTTP_200_OK )
     
         else:
-            contracts = contractcreateserializer(Contract.objects.all(), many= True)
+            contracts = contractreadserializer(Contract.objects.all(), many= True)
             return Response ( { "contracts" : contracts.data }, status=status.HTTP_200_OK )
     
     
