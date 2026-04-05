@@ -13,7 +13,7 @@ import Notifications from "./pages/Notifications";
 import ProtectedRoute from "./component/ProtectedRoute";
 import SuperAdminRoute from "./component/SuperAdminRoute";
 import AddProductType from "./component/AddProductType";
-import AddContract from "./component/AddContract";
+import RequestContract from "./component/RequestContract";
 import AddProduct from "./component/AddProduct";
 import EditProductType from "./component/EditProductType";
 
@@ -85,7 +85,7 @@ function App() {
           <Route path="/Invoices" element={<Invoice />} />
           <Route path="/Bills" element={<Bills />} />
           <Route path="/Notifications" element={<Notifications />} />
-          <Route path="/AddContract" element={<AddContract />} />
+          <Route path="/AddContract" element={<RequestContract />} />
         </Route>
       </Routes>
     </div>

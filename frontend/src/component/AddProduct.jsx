@@ -177,7 +177,7 @@ function AddProduct() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 bg-orange-500 hover:bg-orange-600 rounded text-white"
+            className="w-full py-2 font-bold bg-orange-600 hover:bg-orange-700 rounded text-white"
           >
             {loading ? "Loading..." : "Create Product"}
           </button>

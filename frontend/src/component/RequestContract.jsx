@@ -5,7 +5,7 @@ import { createContract } from "../context/services/contractService";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 
-function AddContract() {
+function RequestContract() {
   const [productTypes, setProductTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -73,10 +73,10 @@ function AddContract() {
       <div className="w-full  max-w-xl bg-black/60 rounded-2xl shadow-lg p-6 border border-black/60">
 
         <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
-          Add Contract
+          Request Contract
         </h2>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 ">
 
           {/* Product Type */}
             <select
@@ -161,10 +161,10 @@ function AddContract() {
             className={`w-full mt-4 py-2 rounded-lg text-white transition
             ${loading
                 ? "bg-gray-500 cursor-not-allowed"
-                : "bg-gradient-to-br from-black to-orange-500 hover:to-orange-700"
+                : "font-bold bg-orange-600 hover:bg-orange-700 rounded text-white"
               }`}
           >
-            {loading ? "Loading..." : "Create Contract"}
+            {loading ? "Loading..." : "Request Contract"}
           </button>
 
         </form>
@@ -173,4 +173,4 @@ function AddContract() {
   );
 }
 
-export default AddContract;
+export default RequestContract;

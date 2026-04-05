@@ -93,7 +93,7 @@ function AddTypeProduct() {
             ${
               loading
                 ? "bg-gray-500 cursor-not-allowed"
-                : "bg-gradient-to-br from-black to-orange-500 hover:to-orange-700"
+                : "font-bold bg-orange-600 hover:bg-orange-700 rounded text-white"
             }`}
           >
             {loading ? "Loading..." : "Create Type"}

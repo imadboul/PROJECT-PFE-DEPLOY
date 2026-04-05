@@ -15,7 +15,7 @@ export default function ContractsList() {
       const res = await getContracts();
       setContracts(res.data.contracts || res.data);
     } catch (err) {
-      toast.error("Failed to load contracts");
+      toast.error("Failed to load contracts",err);
     } finally {
       setLoading(false);
     }
@@ -28,6 +28,17 @@ export default function ContractsList() {
   useEffect(() => {
     fetchContracts();
   }, []);
+
+  const formatDate = (date) => {
+  if (!date) return "—";
+  return new Date(date).toLocaleString("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
   if (loading) {
     return <div className="text-white text-center mt-10">Loading...</div>;
@@ -77,17 +88,17 @@ export default function ContractsList() {
 
                   <p>
                     <strong>Start date:</strong>{" "}
-                    {c.start_date}
+                    {formatDate(c.start_date)}
                   </p>
 
                   <p>
                     <strong>End date:</strong>{" "}
-                    {c.end_date}
+                    {formatDate(c.end_date)}
                   </p>
 
                   <p>
                     <strong>Validated at:</strong>{" "}
-                    {c.validated_at}
+                    {formatDate(c.validated_at)}
                   </p>
 
                   <p>
@@ -122,17 +133,17 @@ export default function ContractsList() {
 
               <p>
                 <strong>Start date:</strong>{" "}
-                {selectedContract.start_date}
+                {formatDate(selectedContract.start_date)}
               </p>
 
               <p>
                 <strong>End date:</strong>{" "}
-                {selectedContract.end_date}
+                {formatDate(selectedContract.end_date)}
               </p>
 
               <p>
                 <strong>Validated at:</strong>{" "}
-                {selectedContract.validated_at}
+                {formatDate(selectedContract.validated_at)}
               </p>
 
               <p>
