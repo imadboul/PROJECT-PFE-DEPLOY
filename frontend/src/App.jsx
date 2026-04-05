@@ -1,4 +1,6 @@
 import { Routes, Route, Outlet } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import "./App.css";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Sign from "./pages/Sign";
@@ -9,8 +11,13 @@ import Navbar from "./component/Navbar";
 import Bills from "./pages/Bills";
 import Notifications from "./pages/Notifications";
 import ProtectedRoute from "./component/ProtectedRoute";
-import AdminRoute from "./component/AdminRoute";
-import "./App.css";
+import SuperAdminRoute from "./component/SuperAdminRoute";
+import AddProductType from "./component/AddProductType";
+import EditProductType from "./component/EditProductType";
+import AddContract from "./component/AddContract";
+import AddProduct from "./component/AddProduct";
+import EditProduct from "./component/EditProduct";
+
 /* Layout */
 function Layout() {
   return (
@@ -31,6 +38,7 @@ function App() {
         className="absolute inset-0 w-full h-full object-cover"
       />
       <div className="absolute inset-0 bg-black/30"></div>
+      <Toaster position="bottom-right" />
 
       <Routes>
         {/* Public */}
@@ -47,11 +55,30 @@ function App() {
           <Route
             path="/Sign"
             element={
-              <AdminRoute>
+              <SuperAdminRoute>
                 <Sign />
-              </AdminRoute>
+              </SuperAdminRoute>
             }
           />
+          <Route path="/AddProduct" element={
+            <SuperAdminRoute>
+              <AddProduct />
+            </SuperAdminRoute>} />
+
+          <Route path="/AddProductType" element={
+            <SuperAdminRoute>
+              <AddProductType />
+            </SuperAdminRoute>} />
+
+          <Route path="/EditProduct/:id" element={
+            <SuperAdminRoute>
+              <EditProduct />
+            </SuperAdminRoute>} />
+
+          <Route path="/EditProductType/:id" element={
+            <SuperAdminRoute>
+              <EditProductType />
+            </SuperAdminRoute>} />
 
           <Route path="/Home" element={<Home />} />
           <Route path="/Contracts" element={<ContractsList />} />
@@ -59,6 +86,7 @@ function App() {
           <Route path="/Invoices" element={<Invoice />} />
           <Route path="/Bills" element={<Bills />} />
           <Route path="/Notifications" element={<Notifications />} />
+          <Route path="/AddContract" element={<AddContract />} />
         </Route>
       </Routes>
     </div>

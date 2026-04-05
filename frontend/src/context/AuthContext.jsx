@@ -35,13 +35,12 @@ export default function AuthProvider({ children }) {
       });
 
 
-      return { success: true ,message: "Registration successful.Please check your email to verify your account."};
+      return { success: true, message: "Registration successful.Please check your email to verify your account." };
     } catch (err) {
-  return { success: false, error: err.response?.data };
-}
+      return { success: false, error: err.response?.data };
+    }
   }
 
-  // ✅ LOGIN (JWT from backend)
   async function login(email, password) {
     try {
       const res = await api.post("/client/login/", {
@@ -52,8 +51,9 @@ export default function AuthProvider({ children }) {
       const accessToken = res.data.access;
       const refreshToken = res.data.refresh;
 
-      localStorage.setItem("token", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
+
+      localStorage.setItem("access", accessToken);
+      localStorage.setItem("refresh", refreshToken);
 
       const decoded = jwtDecode(accessToken);
       setUser(decoded);
@@ -66,16 +66,17 @@ export default function AuthProvider({ children }) {
       };
     }
   }
-
   // ✅ LOGOUT
   function logout() {
     localStorage.removeItem("token");
+    localStorage.clear();
+
     setUser(null);
   }
 
   return (
     <AuthContext.Provider
-      value={{ signUp, login, logout, user,loading }}
+      value={{ signUp, login, logout, user, loading }}
     >
       {children}
     </AuthContext.Provider>

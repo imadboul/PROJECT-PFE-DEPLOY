@@ -1,32 +1,62 @@
-// src/api/axios.js
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000"
+  baseURL: "http://127.0.0.1:8000",
 });
 
+// Attach access token
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+// Refresh logic
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
-      const refresh = localStorage.getItem("refresh");
+      try {
+        const refresh = localStorage.getItem("refreshToken");
 
-      const res = await axios.post("http://127.0.0.1:8000/client/refresh/", {
-        refresh: refresh,
-      });
+        if (!refresh) throw new Error("No refresh token");
 
-      localStorage.setItem("access", res.data.access);
+        const res = await api.post("/client/refresh/", {
+          refresh,
+        });
 
-      originalRequest.headers.Authorization = `Bearer ${res.data.access}`;
+        const newAccess = res.data.access;
 
-      return api(originalRequest);
+        // update storage
+        localStorage.setItem("access", newAccess);
+
+        // update header
+        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+
+        return api(originalRequest);
+      } catch (err) {
+        console.log("Refresh failed", err);
+
+        // clear tokens
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+      }
     }
 
     return Promise.reject(error);
   }
 );
+
 export default api;

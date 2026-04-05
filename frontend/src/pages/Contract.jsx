@@ -1,66 +1,73 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getContracts } from "../context/services/contractService";
+import toast from "react-hot-toast";
+import { NavLink } from "react-router-dom";
 
 export default function ContractsList() {
+  const [contracts, setContracts] = useState([]);
   const [showActive, setShowActive] = useState(true);
   const [selectedContract, setSelectedContract] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const contracts = [
-    {
-      id: 1,
-      number: "C-1023",
-      type: "Petrol",
-      Qtetotal: 1000,
-      Qteremaining: 400,
-      isActive: true,
-    },
-    {
-      id: 2,
-      number: "C-2045",
-      type: "Gaz",
-      Qtetotal: 2000,
-      Qteremaining: 1500,
-      isActive: true,
-    },
-    {
-      id: 3,
-      number: "C-3067",
-      type: "Gaz",
-      Qtetotal: 2400,
-      Qteremaining: 1000,
-      isActive: false,
-    },
-  ];
+  // fetch data from backend
+  useEffect(() => {
+    fetchContracts();
+  }, []);
+
+
+  // fetch contracts from backend
+  const fetchContracts = async () => {
+    try {
+      setLoading(true);
+      const res = await getContracts();
+      setContracts(res.data.contracts || res.data);
+    } catch (err) {
+      setError("Failed to load contracts");
+      toast.error(error || "Failed to load contracts");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   function changeStatus() {
     setShowActive(!showActive);
   }
 
+  if (loading) {
+    return <div className="text-white text-center mt-10">Loading...</div>;
+  }
+
+
   return (
     <div className="p-6 flex justify-center relative z-10">
       <div className="w-full max-w-3xl flex flex-col gap-4">
-         {/* Header */}
+
+        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-white text-xl font-bold">Contracts</h1>
         </div>
 
-        {/* Toggle Button */}
+        {/* Buttons */}
         <div className="flex justify-between items-center">
           <button
-          onClick={changeStatus}
-          className="border border-white text-white px-4 py-2 rounded hover:bg-white/10 mb-4 self-end cursor-pointer"
-        >
-          {showActive ? "Show InActive" : "Show Active"}
-        </button>
-        <button className="border border-white text-white px-4 py-2 rounded hover:bg-white/10 mb-4 self-start cursor-pointer">
-          request new contract
-        </button>
+            onClick={changeStatus}
+            className="border border-white text-white px-4 py-2 rounded hover:bg-white/10 mb-4 cursor-pointer"
+          >
+            {showActive ? "Show InActive" : "Show Active"}
+          </button>
+
+          <NavLink
+            to="/AddContract"
+            className="border border-white text-white px-4 py-2 rounded hover:bg-white/10 mb-4 cursor-pointer">
+            Request new contract
+          </NavLink>
         </div>
-        
-        
 
         {/* Cards */}
-        {contracts.map((c) => {
-          if (showActive ? c.isActive : !c.isActive) {
+        {contracts
+          .filter((c) => (showActive ? c.isActive : !c.isActive))
+          .map((c) => {
             const used = c.Qtetotal - c.Qteremaining;
             const percentage = (used / c.Qtetotal) * 100;
 
@@ -101,20 +108,17 @@ export default function ContractsList() {
                 </div>
               </div>
             );
-          }
-          return null;
-        })}
+          })}
       </div>
 
-      {/* Modal Details */}
+      {/* Modal */}
       {selectedContract && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
           <div className="bg-transparent border border-white text-white p-6 rounded-xl w-[300px] md:w-[400px] relative">
 
-            {/* Close button */}
             <button
               onClick={() => setSelectedContract(null)}
-              className="absolute top-2 right-3 text-gray-600 text-white hover:text-red-500 cursor-pointer text-xl"
+              className="absolute top-2 right-3 text-white hover:text-red-500 text-xl"
             >
               ✕
             </button>
@@ -123,10 +127,10 @@ export default function ContractsList() {
               Contract #{selectedContract.number}
             </h2>
 
-            <p className="font-bold"><strong>Type:</strong> {selectedContract.type}</p>
-            <p className="font-bold"><strong>Total:</strong> {selectedContract.Qtetotal}</p>
-            <p className="font-bold"><strong>Remaining:</strong> {selectedContract.Qteremaining}</p>
-            <p className="font-bold">
+            <p><strong>Type:</strong> {selectedContract.type}</p>
+            <p><strong>Total:</strong> {selectedContract.Qtetotal}</p>
+            <p><strong>Remaining:</strong> {selectedContract.Qteremaining}</p>
+            <p>
               <strong>Status:</strong>{" "}
               {selectedContract.isActive ? "Active" : "Inactive"}
             </p>

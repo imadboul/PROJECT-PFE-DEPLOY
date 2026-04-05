@@ -9,11 +9,13 @@ import {
 import { FaXTwitter } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const { login, user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [authError, setAuthError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -22,14 +24,24 @@ export default function Login() {
   } = useForm();
 
   async function onSubmit(data) {
+    setLoading(true);
     const result = await login(data.email, data.password);
 
-    if (result.success) {
-      navigate("/Home");
-    } else {
-      setAuthError(result.error);
+    try {
+      if (result.success) {
+        toast.success("Login successful");
+        navigate("/Home");
+      } else {
+        setAuthError(result.error);
+        toast.error("Login failed");
+      }
+    } catch (err) {
+      toast.error(authError||"Failed to load contracts");
+    } finally {
+      setLoading(false); 
     }
   }
+
 
   return (
     <div className="min-h-screen relative flex items-center justify-center z-10 p-4">
@@ -77,9 +89,9 @@ export default function Login() {
               })}
             />
             <div className="relative top-0 mb-2">
-            {errors.email && (
-              <p className="absolute top-0 left-0 right-0 text-red-500 text-sm">{errors.email.message}</p>
-            )}
+              {errors.email && (
+                <p className="absolute top-0 left-0 right-0 text-red-500 text-sm">{errors.email.message}</p>
+              )}
             </div>
           </div>
 
@@ -95,9 +107,9 @@ export default function Login() {
               })}
             />
             <div className="relative top-0 mb-2">
-            {errors.password && (
-              <p className="absolute top-0 left-0 right-0 text-red-500 text-sm">{errors.password.message}</p>
-            )}
+              {errors.password && (
+                <p className="absolute top-0 left-0 right-0 text-red-500 text-sm">{errors.password.message}</p>
+              )}
             </div>
           </div>
           <div className="relative top-0 mb-3">
@@ -106,14 +118,19 @@ export default function Login() {
                 {authError}
               </div>
             )}
-            </div>
+          </div>
 
           {/* BUTTON */}
           <button
-            type="submit"
-            className="mt-3 w-full py-3 bg-gradient-to-br from-black to-orange-500 text-white rounded-lg font-semibold hover:from-black hover:to-orange-700 transition"
+            onClick={handleSubmit}
+            disabled={loading}
+            className={`w-full mt-6 py-2 rounded-lg text-white transition 
+               ${loading
+                ? "bg-gray-500 cursor-not-allowed"
+                : "bg-gradient-to-br from-black to-orange-500 hover:from-black hover:to-orange-700"}
+           `}
           >
-            Log in
+            {loading ? "Loading..." : "Login"}
           </button>
 
           <div className="flex items-center text-sm text-orange-500 mt-2 justify-center">

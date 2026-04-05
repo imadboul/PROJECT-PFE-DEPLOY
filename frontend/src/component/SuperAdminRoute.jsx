@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
 
-function AdminRoute({ children }) {
+function SuperAdminRoute({ children }) {
   const { user, loading } = useContext(AuthContext);
 
   if (loading) return <div>Loading...</div>;
@@ -11,6 +11,6 @@ function AdminRoute({ children }) {
     return <Navigate to="/" />;
   }
 
-  return user.role === "Admin" ? children : <Navigate to="/Home" />;
+  return user.role === "superAdmin" ? children : <Navigate to="/Home" />;
 }
-export default AdminRoute
+export default SuperAdminRoute

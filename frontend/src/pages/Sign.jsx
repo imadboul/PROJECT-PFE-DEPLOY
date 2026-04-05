@@ -3,10 +3,12 @@ import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AuthContext } from "../context/AuthContext";
 import { FaUserPlus } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 export default function Sign() {
   const { signUp } = useContext(AuthContext);
   const [authError, setAuthError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const {
@@ -19,12 +21,22 @@ export default function Sign() {
   const password = watch("password");
 
   async function onSubmit(data) {
-    const result = await signUp(data);
-    if (result.success) {
-      navigate("/");
-      alert("chick your email");
-    } else {
-      setAuthError(result.error);
+    setLoading(true); 
+
+    try {
+      const result = await signUp(data);
+
+      if (result.success) {
+        toast.success("Sign up successful");
+        navigate("/Home");
+      } else {
+        setAuthError(result.error);
+        toast.error("Sign up failed");
+      }
+    } catch (err) {
+      toast.error(authError||"Failed to load contracts");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -119,8 +131,16 @@ export default function Sign() {
               )}
             </div>
 
-            <button className="w-full mt-6 py-2 bg-gradient-to-br from-black to-orange-500 text-white text-white rounded-lg hover:bg-gray-800 transition">
-              Sign Up
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className={`w-full mt-6 py-2 rounded-lg text-white transition 
+               ${loading
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-gradient-to-br from-black to-orange-500 hover:from-black hover:to-orange-700"}
+           `}
+            >
+              {loading ? "Loading..." : "Sign Up"}
             </button>
 
             <p className="text-sm text-center">
