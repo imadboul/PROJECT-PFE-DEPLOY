@@ -33,7 +33,7 @@ export default function Sign() {
         setAuthError(result.error);
         toast.error("Sign up failed");
       }
-    } catch (err) {
+    } catch (authError) {
       toast.error(authError||"Failed to load contracts");
     } finally {
       setLoading(false);
