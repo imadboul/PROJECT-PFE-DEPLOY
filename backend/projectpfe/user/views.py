@@ -11,6 +11,7 @@ from .models import Client, Notification
 from django.core import signing
 from rest_framework.renderers import JSONRenderer
 from .auth import create_jwt ,decode_jwt
+from .wraps import jwt_must
 import json
 
 # توليد token للتأكيد
@@ -100,6 +101,17 @@ def refresh_access(request):
     access_token, _ = create_jwt(user)
 
     return Response({"accessToken": access_token})
+
+
+@api_view(['GET'])
+@jwt_must
+def get_notifications(request):
+    try:
+        notifications = NotificationSerializer(Notification.objects.filter(user_id = request.user_id), many = True)
+        return Response({"notifications": notifications.data }, status=status.HTTP_200_OK)
+    except Notification.DoesNotExist:
+        return Response ( { "error" : 'user does not exist'}, status=status.HTTP_400_BAD_REQUEST )
+        
     
 def notify_all_superadmin(title,content,link):
     

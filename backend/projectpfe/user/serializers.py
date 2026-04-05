@@ -18,11 +18,11 @@ class ClientSerializer(serializers.ModelSerializer):
         return client
 
 
-class notificationSerializer(serializers.ModelSerializer):
-
+ 
+class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
-        fields = ["title", "content", "viewed", "link"]
+        exclude = ['user', 'id']  
 
 
 class loginSerializer(serializers.Serializer):
