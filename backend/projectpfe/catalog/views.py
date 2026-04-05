@@ -124,13 +124,19 @@ def validatecontract(request):
         return Response ( { "error" : serializer.errors}, status=status.HTTP_400_BAD_REQUEST )
     
 @api_view(['GET'])
+@jwt_must
 def contractpdf(request,id):
     
     try:
-        contract = Contract.objects.get(id = id)
-        return generate_pdf(contract.id)
+        if request.role in ['admin','superAdmin']:
+            contract = Contract.objects.get(id = id)
+            return generate_pdf(contract.id)
+        else:
+            contract = Contract.objects.get(id = id, client_id = request.user_id)
+            return generate_pdf(contract.id)
+            
     except Contract.DoesNotExist:
-        return Response ( { "error" : "does not exist"}, status=status.HTTP_400_BAD_REQUEST )
+        return Response ( { "error" : "does not exist  or you do not have permission"}, status=status.HTTP_400_BAD_REQUEST )
         
 
 
