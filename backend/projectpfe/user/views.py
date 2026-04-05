@@ -34,7 +34,7 @@ def signup(request):
     if serializer.is_valid():
         user = serializer.save()
 
-        token = generatetoken(user)
+        token = generatetoken(user) # type: ignore
         verify_link = f"http://localhost:8000/client/verifyEmail/{token}/"
         
         
@@ -43,7 +43,7 @@ def signup(request):
             'verify email',
             f'click here: {verify_link}',
             settings.EMAIL_HOST_USER,
-            [user.email]
+            [user.email] # type: ignore
         )
 
         return Response(
@@ -59,7 +59,7 @@ def login(request):
     serializer = loginSerializer(data=request.data)
 
     if serializer.is_valid():
-        client = serializer.validated_data['user']
+        client = serializer.validated_data['user'] # type: ignore
 
         access, refresh = create_jwt(client)
 
@@ -93,7 +93,7 @@ def refresh_access(request):
     if not serializer.is_valid():
         return Response(serializer.errors, status=401)
 
-    payload = serializer.validated_data['payload']
+    payload = serializer.validated_data['payload'] # type: ignore
 
     user = Client.objects.get(id=payload.get("user_id"))
 
