@@ -9,6 +9,11 @@ function AddProduct() {
   const [productTypes, setProductTypes] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const unitOptions = [
+    { value: "liter", label: "Liter" },
+    { value: "kilogram", label: "Kilogram" },
+  ];
+
   const {
     register,
     handleSubmit,
@@ -18,14 +23,13 @@ function AddProduct() {
     formState: { errors },
   } = useForm();
 
-  const options = productTypes.map(type => ({
+  const options = productTypes.map((type) => ({
     value: type.id,
-    label: type.name
+    label: type.name,
   }));
 
   const selectedType = watch("productType");
 
-  // Fetch product types
   useEffect(() => {
     const fetchProductTypes = async () => {
       try {
@@ -48,6 +52,7 @@ function AddProduct() {
         name: data.name,
         description: data.description,
         unit_price: Number(data.unitPrice),
+        unit: data.unit,
         qte_left: Number(data.qteLeft),
         product_type: Number(data.productType),
       };
@@ -75,47 +80,193 @@ function AddProduct() {
     <div className="min-h-screen flex items-center justify-center bg-transparent text-white">
       <div className="w-full max-w-xl bg-black/60 rounded-2xl shadow-lg p-6 border border-black/60">
 
-        <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
-          Add Product
-        </h2>
+        {/* Header */}
+        <div>
+          <button
+            className="placeholder-white text-2xl font-bold hover:text-orange-500"
+            onClick={() => window.history.back()}
+          >
+            <i className="fa-solid fa-arrow-left"></i>
+          </button>
+
+          <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
+            Add Product
+          </h2>
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Product Type */}
+          <div className="flex items-center gap-4">
+
+            <div className="flex-1">
+              <Controller
+                name="productType"
+                control={control}
+                rules={{ required: "Product type is required" }}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    options={options}
+                    placeholder="Select Product Type"
+                    styles={{
+                      control: (base, state) => ({
+                        ...base,
+                        backgroundColor: "rgba(7, 7, 7, 0.11)",
+                        borderColor: state.isFocused ? "#f97316" : "#000",
+                        boxShadow: "none",
+                        fontSize: "20px",
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        backgroundColor: "rgba(0, 0, 0, 0.66)",
+                      }),
+                      option: (base, state) => ({
+                        ...base,
+                        backgroundColor: state.isFocused
+                          ? "rgba(247, 77, 9, 0.96)"
+                          : "rgba(0, 0, 0, 0.66)",
+                        color: "#fff",
+                        cursor: "pointer",
+                      }),
+                      singleValue: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                      placeholder: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                    }}
+                    onChange={(selected) => field.onChange(selected.value)}
+                    value={options.find((opt) => opt.value === field.value)}
+                  />
+                )}
+              />
+              <div className="relative bottom-0 mb-4">
+                {errors.productType && (
+                  <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
+                    {errors.productType.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Add Type */}
+            <NavLink to="/AddProductType" className="text-orange-400 text-xl hover:text-orange-600 transition">
+              <i className="fa-solid fa-plus"></i>
+            </NavLink>
+
+            {/* Edit Type */}
+            <NavLink
+              to={selectedType ? `/EditProductType/${selectedType}` : "#"}
+              onClick={(e) => {
+                if (!selectedType) {
+                  e.preventDefault();
+                  toast.error("Select a product type first");
+                }
+              }}
+              className="text-orange-400 text-xl hover:text-orange-600 transition"
+            >
+              <i className="fa-solid fa-pen"></i>
+            </NavLink>
+
+          </div>
 
           {/* Name */}
           <input
             type="text"
             placeholder="Name"
             {...register("name", { required: "Name is required" })}
-            className="w-full text-xl p-2 border border-black rounded"
+            className="w-full text-xl placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
-          {errors.name && (
-            <p className="text-red-500 text-xs text-center">
-              {errors.name.message}
-            </p>
-          )}
+          <div className="relative bottom-4 mb-4">
+            {errors.name && (
+              <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
+                {errors.name.message}
+              </p>
+            )}
+          </div>
 
           {/* Description */}
           <textarea
             placeholder="Description"
             {...register("description")}
-            className="w-full text-xl p-2 border border-black rounded"
+            className="w-full text-xl placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
 
-          {/* Unit Price */}
-          <input
-            type="number"
-            placeholder="Unit Price"
-            {...register("unitPrice", {
-              required: "Unit price is required",
-              min: { value: 1, message: "Must be > 0" },
-            })}
-            className="w-full text-xl p-2 border border-black rounded"
-          />
-          {errors.unitPrice && (
-            <p className="text-red-500 text-xs text-center">
-              {errors.unitPrice.message}
-            </p>
-          )}
+          {/* Price + Unit */}
+          <div className="flex items-center gap-4">
+
+            {/* Price */}
+            <div className="flex-1">
+              <input
+                type="number"
+                placeholder="Unit Price"
+                {...register("unitPrice", {
+                  required: "Unit price is required",
+                  min: { value: 1, message: "Must be > 0" },
+                })}
+                className="w-full text-xl placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+              <div className="relative bottom-1 mb-4">
+                {errors.unitPrice && (
+                  <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
+                    {errors.unitPrice.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Unit */}
+            <div className="w-40">
+              <Controller
+                className="focus:outline-none focus:ring-2 focus:ring-orange-500"
+                name="unit"
+                control={control}
+                defaultValue="liter"
+                rules={{ required: "Unit is required" }}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    options={unitOptions}
+                    placeholder="Select Unit"
+                    styles={{
+                      control: (base, state) => ({
+                        ...base,
+                        backgroundColor: "rgba(7, 7, 7, 0.11)",
+                        borderColor: state.isFocused ? "#f97316" : "#000",
+                        boxShadow: "none",
+                        fontSize: "20px",
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        backgroundColor: "rgba(0, 0, 0, 0.66)",
+                      }),
+                      option: (base, state) => ({
+                        ...base,
+                        backgroundColor: state.isFocused
+                          ? "rgba(247, 77, 9, 0.96)"
+                          : "rgba(0, 0, 0, 0.66)",
+                        color: "#fff",
+                        cursor: "pointer",
+                      }),
+                      singleValue: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                      placeholder: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                    }}
+                    onChange={(selected) => field.onChange(selected.value)}
+                    value={unitOptions.find((opt) => opt.value === field.value)}
+                  />
+                )}
+              />
+            </div>
+
+          </div>
 
           {/* Quantity */}
           <input
@@ -125,110 +276,23 @@ function AddProduct() {
               required: "Quantity is required",
               min: { value: 1, message: "Must be > 0" },
             })}
-            className="w-full text-xl p-2 border border-black rounded"
+            className="w-full text-xl placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
-          {errors.qteLeft && (
-            <p className="text-red-500 text-xs text-center">
-              {errors.qteLeft.message}
-            </p>
-          )}
-
-          {/* Product Type */}
-          <div className="flex items-center gap-4">
-            {/* Product Type */}
-            <Controller
-              name="productType"
-              control={control}
-              rules={{ required: "Product type is required" }}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  options={options}
-                  placeholder="Select Product Type"
-                  styles={{
-                    control: (base, state) => ({
-                      ...base,
-                      backgroundColor: "rgba(7, 7, 7, 0.11)",
-                      borderColor: state.isFocused ? "#f97316" : "#000",
-                      boxShadow: "none",
-                      fontSize: "20px",
-                      "&:hover": {
-                        border: "1px solid #f97316"
-                      }
-                    }),
-
-                    menu: (base) => ({
-                      ...base,
-                      backgroundColor: "rgba(0, 0, 0, 0.66)"
-                    }),
-
-                    option: (base, state) => ({
-                      ...base,
-                      backgroundColor: state.isFocused
-                        ? "rgba(247, 77, 9, 0.96)"
-                        : "rgba(0, 0, 0, 0.66)",
-                      color: "#fff",
-                      cursor: "pointer",
-                      fontSize: "20px",
-                      fontWeight: "400",
-                      border: "1px solid #000",
-                      "&:active": {
-                        backgroundColor: "#f97316"
-                      }
-                    }),
-
-                    singleValue: (base) => ({
-                      ...base,
-                      color: "#fff",
-                    }),
-
-                    placeholder: (base) => ({
-                      ...base,
-                      color: "#fff",
-
-                    })
-                  }}
-                  onChange={(selected) => field.onChange(selected.value)}
-                  value={options.find(opt => opt.value === field.value)}
-                />
-              )}
-            />
-
-            {/* Add Type */}
-            <NavLink to="/AddProductType" className="text-orange-400 text-xl">
-              <i className="fa-solid fa-plus"></i>
-            </NavLink>
-
-            {/* Edit Type */}
-            <NavLink
-              to={
-                selectedType
-                  ? `/EditProductType/${selectedType}`
-                  : "#"
-              }
-              onClick={(e) => {
-                if (!selectedType) {
-                  e.preventDefault();
-                  toast.error("Select a product type first");
-                }
-              }}
-              className="text-orange-400 text-xl"
-            >
-              <i className="fa-solid fa-pen"></i>
-            </NavLink>
+          <div className="relative bottom-3 mb-6">
+            {errors.qteLeft && (
+              <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
+                {errors.qteLeft.message}
+              </p>
+            )}
           </div>
 
-          {errors.productType && (
-            <p className="text-red-500 text-xs text-center">
-              {errors.productType.message}
-            </p>
-          )}
+
 
           {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 font-bold bg-orange-600 hover:bg-orange-700 rounded text-white"
+            className="w-full py-2 font-bold bg-orange-600 hover:bg-orange-700 rounded placeholder-white"
           >
             {loading ? "Loading..." : "Create Product"}
           </button>

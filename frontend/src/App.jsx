@@ -15,6 +15,7 @@ import SuperAdminRoute from "./component/SuperAdminRoute";
 import AddProductType from "./component/AddProductType";
 import RequestContract from "./component/RequestContract";
 import RequestPayment from "./component/RequestPayment";
+import PaymentsList from "./pages/payment";
 import AddProduct from "./component/AddProduct";
 import EditProductType from "./component/EditProductType";
 
@@ -88,6 +89,7 @@ function App() {
           <Route path="/Notifications" element={<Notifications />} />
           <Route path="/RequestContract" element={<RequestContract />} />
           <Route path="/RequestPayment" element={<RequestPayment />} />
+          <Route path="/Payment" element={<PaymentsList />} />
         </Route>
       </Routes>
     </div>

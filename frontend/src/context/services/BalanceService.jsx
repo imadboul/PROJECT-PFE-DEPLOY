@@ -3,6 +3,9 @@ import api from "../../api/axios";
 export const getBalances = () => 
     api.get("/finance/balance/");
 
+export const getPayments = () => 
+    api.get("/finance/payments/");
+
 export const createPayment = (data) =>
     api.post("/finance/payments/",data)
     

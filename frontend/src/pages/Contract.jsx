@@ -59,7 +59,7 @@ export default function ContractsList() {
             onClick={changeStatus}
             className="border border-white text-white px-4 py-2 rounded hover:bg-white/10 mb-4 cursor-pointer"
           >
-            {showActive ? "Show InActive" : "Show Active"}
+            {showActive ? "Show No Valide" : "Show Valide"}
           </button>
 
           <NavLink
@@ -85,8 +85,13 @@ export default function ContractsList() {
                 className="cursor-pointer bg-black/50 text-white rounded-2xl p-5 border hover:bg-black/80 transition"
               >
                 <div className="space-y-2 text-sm">
+                  <p className="text-lg font-bold">
+                    <strong>Product type:</strong>{" "}
+                    {c.product_type}
+                  </p>
 
-                  <p>
+                  <div className="flex items-center justify-between">
+                    <p>
                     <strong>Start date:</strong>{" "}
                     {formatDate(c.start_date)}
                   </p>
@@ -95,21 +100,18 @@ export default function ContractsList() {
                     <strong>End date:</strong>{" "}
                     {formatDate(c.end_date)}
                   </p>
-
+                  </div> 
+                  <div className="flex items-center justify-between">                
                   <p>
                     <strong>Validated at:</strong>{" "}
                     {formatDate(c.validated_at)}
                   </p>
 
-                  <p>
-                    <strong>State:</strong>{" "}
+                  <p className="text-green-500">
+                    <strong className="text-white">State:</strong>{" "}
                     {c.state }
                   </p>
-
-                  <p>
-                    <strong>Product type:</strong>{" "}
-                    {c.product_type}
-                  </p>
+                 </div>
 
                 </div>
               </div>
