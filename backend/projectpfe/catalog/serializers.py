@@ -80,7 +80,14 @@ class productcreateserializer(serializers.ModelSerializer):
         
         return data
     
-    
+ 
+class contractreadserializer(serializers.ModelSerializer):
+    product_type = serializers.CharField(source="product_type.name")
+
+    class Meta:
+        model = Contract
+        fields = '__all__'
+     
 class contractcreateserializer(serializers.ModelSerializer):
     
     class Meta:
