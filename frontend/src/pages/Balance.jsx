@@ -1,30 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-
+import { getBalances } from "../context/services/BalanceService";
+import { getProductTypes } from "../context/services/productService";
+import toast from "react-hot-toast";
 
 export default function BalanceList() {
   const [selectedSold, setSelectedSold] = useState(null);
+  const [balances, setBalances] = useState([]);
+  const [productTypes, setProductTypes] = useState([]);
 
-  const sales = [
-    {
-      id: 1,
-      product: "Petrol",
-      totalSold: 1000,
-      paid: 600,
-    },
-    {
-      id: 2,
-      product: "Gaz",
-      totalSold: 2000,
-      paid: 1200,
-    },
-    {
-      id: 3,
-      product: "Gaz",
-      totalSold: 1500,
-      paid: 300,
-    },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const resB = await getBalances();
+        const resP = await getProductTypes();
+
+        setBalances(resB.data.balances || []);
+        setProductTypes(resP.data.types || []);
+
+      } catch (err) {
+        console.log(err);
+        toast.error("Error fetching data");
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Get product type name from id
+  const getProductName = (id) => {
+    const type = productTypes.find(p => p.id === id);
+    return type ? type.name : id;
+  };
 
   return (
     <div className="p-6 flex justify-center relative z-10">
@@ -34,6 +41,7 @@ export default function BalanceList() {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-white text-xl font-bold">Balance</h1>
         </div>
+
         <NavLink
           to="/RequestPayment"
           className="border border-white flex w-1/4 text-white px-4 py-2 rounded hover:bg-white/10 mb-4 cursor-pointer"
@@ -42,50 +50,32 @@ export default function BalanceList() {
         </NavLink>
 
         {/* Cards */}
-        {sales.map((s) => {
-          const remaining = s.totalSold - s.paid;
-          const percentage = (s.paid / s.totalSold) * 100;
+        {balances.map((b) => {
+          const amount = Number(b.amount);
 
           return (
             <div
-              key={s.id}
-              onClick={() => setSelectedSold(s)}
-              className="cursor-pointer bg-black/50 text-white shadow-md rounded-2xl p-5
-               border hover:bg-black/80 transition"
+              key={b.id}
+              onClick={() => setSelectedSold(b)}
+              className="cursor-pointer bg-black/50 text-white shadow-md rounded-2xl p-5 border hover:bg-black/80 transition"
             >
               {/* Header */}
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-lg font-bold">
-                  Product: {s.product}
+                  Product Type: {getProductName(b.productType)}
                 </h2>
 
                 <span className="bg-green-100 text-green-600 px-2 py-1 rounded text-sm">
-                  Sold
+                  Balance
                 </span>
               </div>
 
               {/* Values */}
               <div className="mt-3 text-sm flex justify-between">
-                <p>Total Sold: {s.totalSold} DA</p>
-                <p>Paid: {s.paid} DA</p>
+                <p>Client ID: {b.client}</p>
+                <p>Amount: {amount} DA</p>
               </div>
 
-              <div className="mt-2 text-sm">
-                <p>Remaining Payment: {remaining} DA</p>
-              </div>
-
-              {/* Progress */}
-              <div className="mt-4">
-                <div className="w-full bg-gray-200 h-2 rounded">
-                  <div
-                    className="bg-orange-500 h-2 rounded"
-                    style={{ width: `${percentage}%` }}
-                  ></div>
-                </div>
-                <p className="text-xs mt-1 text-right">
-                  {Math.round(percentage)}% paid
-                </p>
-              </div>
             </div>
           );
         })}
@@ -105,20 +95,11 @@ export default function BalanceList() {
             </button>
 
             <h2 className="text-lg font-bold mb-4">
-              Product: {selectedSold.product}
+              Product Type: {getProductName(selectedSold.productType)}
             </h2>
 
-            <p><strong>Total Sold:</strong> {selectedSold.totalSold} DA</p>
-            <p><strong>Paid:</strong> {selectedSold.paid} DA</p>
-            <p>
-              <strong>Remaining:</strong>{" "}
-              {selectedSold.totalSold - selectedSold.paid} DA
-            </p>
-
-            {/* Payment Button */}
-            <button className="mt-4 w-full cursor-pointer bg-orange-500 py-2 rounded hover:bg-orange-600">
-              Request Payment
-            </button>
+            <p><strong>Client ID:</strong> {selectedSold.client}</p>
+            <p><strong>Amount:</strong> {selectedSold.amount} DA</p>
           </div>
         </div>
       )}

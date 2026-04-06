@@ -27,7 +27,7 @@ function RequestContract() {
   useEffect(() => {
     const fetchProductTypes = async () => {
       try {
-        const res = await getProductTypes("/catalog/productType/");
+        const res = await getProductTypes();
         const data = res.data.types || res.data;
         setProductTypes(Array.isArray(data) ? data : []);
       } catch (err) {
