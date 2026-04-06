@@ -9,7 +9,7 @@ def create_jwt(user: Client):
     access_payload = {
         "user_id": user.id,
         "role": user.role,
-        "exp": datetime.utcnow() + timedelta(hours=2),
+        "exp": datetime.utcnow() + timedelta(days=5),
         "type": "access"
     }
     

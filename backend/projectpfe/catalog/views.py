@@ -15,7 +15,7 @@ from .contractpdf import generate_pdf
 
 
 
-@api_view(['POST', 'GET'])
+@api_view(['POST', 'GET','PUT','DELETE'])
 @jwt_must
 def producttype(request):
     if request.method == 'POST':
@@ -37,9 +37,41 @@ def producttype(request):
         types =  producttypeserializer(ProductType.objects.all() , many = True)
          
         return Response ( { "types" : types.data}, status=status.HTTP_200_OK )
+    if request.method == 'PUT':
+        producttype_id = request.data.get('id')
+        
+        try:
+            type = ProductType.objects.get(id = producttype_id)
+            
+        except ProductType.DoesNotExist:
+                return Response ( { "error" : 'type does not exist'}, status=status.HTTP_400_BAD_REQUEST )
+    
+        update_serializer = producttypecreateserializer(type, data=request.data,partial=True)
+        
+        if update_serializer.is_valid():
+            update_serializer.save()
+                
+            return Response ( { "message" : f'success changes aplied{update_serializer.data}'}, status=status.HTTP_200_OK )
+                
+        else:
+            return Response ( { "error" : update_serializer.errors}, status=status.HTTP_400_BAD_REQUEST )
+    
+    if request.method == 'DELETE':
+        producttype_id = request.data.get('id')
+        
+        try:
+            type = ProductType.objects.get(id = producttype_id)
+            
+        except ProductType.DoesNotExist:
+                return Response ( { "error" : 'type does not exist'}, status=status.HTTP_400_BAD_REQUEST )
+    
+        type.delete()
+        return Response ( { "message" : f'success deleted'}, status=status.HTTP_200_OK )
+                
+                
 
 
-@api_view(['POST','GET'])
+@api_view(['POST','GET','PUT','DELETE'])
 @jwt_must
 def product(request):
     if request.method == 'POST':
@@ -59,6 +91,46 @@ def product(request):
         products =  productserializer(Product.objects.filter(active=True),many=True)
          
         return Response ( { "products" : products.data}, status=status.HTTP_200_OK )
+    if request.method == 'PUT':
+        product_id = request.data.get('id')
+        
+        try:
+            product = Product.objects.get(id = product_id)
+            
+        except Product.DoesNotExist:
+                return Response ( { "error" : 'produt does not exist'}, status=status.HTTP_400_BAD_REQUEST )
+    
+        update_serializer = productcreateserializer(product, data=request.data,partial=True)
+        
+        if update_serializer.is_valid():
+            update_serializer.save()
+                
+            return Response ( { "message" : f'success changes aplied{update_serializer.data}'}, status=status.HTTP_200_OK )
+                
+        else:
+            return Response ( { "error" : update_serializer.errors}, status=status.HTTP_400_BAD_REQUEST )
+    
+    if request.method == 'DELETE':
+        product_id = request.data.get('id')
+        
+        try:
+            product = Product.objects.get(id = product_id)
+            
+        except Product.DoesNotExist:
+                return Response ( { "error" : 'product does not exist'}, status=status.HTTP_400_BAD_REQUEST )
+    
+        product.delete()
+        return Response ( { "message" : f'success deleted'}, status=status.HTTP_200_OK )
+                
+                
+                
+            
+        
+        
+        
+        
+    
+    
 
 
 

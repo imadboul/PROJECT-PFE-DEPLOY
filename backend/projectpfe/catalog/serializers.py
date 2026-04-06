@@ -24,7 +24,6 @@ class producttypeserializer(serializers.ModelSerializer):
     
     
 class productserializer(serializers.ModelSerializer):
-    id = serializers.IntegerField() 
     
     class Meta:
         model = Product
@@ -53,42 +52,29 @@ class producttypecreateserializer(serializers.ModelSerializer):
         model = ProductType
         fields = '__all__'
     
-        
-    def validate(self, data):
-        
-        type = ProductType.objects.filter(name = data.get('name')).exists()
-       
-            
-        if type :
-            raise serializers.ValidationError("already exists ")
-        
-        return data
+
     
     
 class productcreateserializer(serializers.ModelSerializer):
-
     
     class Meta:
         model = Product
         fields = '__all__'
         
     def validate(self, data):
-        STATES = [
-        ("litre", "Litre"),
-        ("kg", "Kilo Gram"),
-    ]
-        type = Product.objects.filter(name = data.get('name')).exists()
+        STATES = ["litre","kg"]
+        
+        if data.get('unit_price') < 0:
+            raise serializers.ValidationError("invalid unit price min 1 da")
         
         if data.get('unit') not in STATES:
             raise serializers.ValidationError("invalid unit only (kg or litre)")
-        if type :
-            raise serializers.ValidationError("already exists exist")
-        
         return data
-    
- 
+
+
 class contractreadserializer(serializers.ModelSerializer):
     product_type = serializers.CharField(source="product_type.name")
+    client = serializers.CharField(source ="client.lastName")
 
     class Meta:
         model = Contract
