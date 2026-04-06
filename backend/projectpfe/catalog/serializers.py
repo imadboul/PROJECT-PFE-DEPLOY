@@ -28,7 +28,7 @@ class productserializer(serializers.ModelSerializer):
     
     class Meta:
         model = Product
-        fields = [ "id","name","description","unit_price","qte_left","product_type","active"]
+        fields = [ "id","name","description","unit_price","qte_left","product_type","active","unit"]
         extra_kwargs = {
             "description" : {"read_only": True},
             "qte_left": {"read_only": True},
@@ -66,15 +66,21 @@ class producttypecreateserializer(serializers.ModelSerializer):
     
     
 class productcreateserializer(serializers.ModelSerializer):
+
     
     class Meta:
         model = Product
         fields = '__all__'
         
     def validate(self, data):
+        STATES = [
+        ("litre", "Litre"),
+        ("kg", "Kilo Gram"),
+    ]
         type = Product.objects.filter(name = data.get('name')).exists()
-       
-            
+        
+        if data.get('unit') not in STATES:
+            raise serializers.ValidationError("invalid unit only (kg or litre)")
         if type :
             raise serializers.ValidationError("already exists exist")
         

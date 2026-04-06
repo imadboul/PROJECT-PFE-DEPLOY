@@ -11,10 +11,15 @@ class ProductType(models.Model):
     
     
 class Product(models.Model):
+    STATES = [
+        ("litre", "Litre"),
+        ("kg", "Kilo Gram"),
+    ]
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=254, unique=True)
     description = models.TextField(blank=True, null=True)
     unit_price = models.DecimalField(max_digits=12,decimal_places=2)
+    unit = models.CharField(max_length=20,choices=STATES, db_index=True)
     qte_left = models.PositiveIntegerField( db_index=True)
     product_type = models.ForeignKey(ProductType, on_delete= models.CASCADE,related_name='products')
     active = models.BooleanField(default=True)
