@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import api from "../api/axios";
-import { jwtDecode } from "jwt-decode";
+import jwtDecode from "jwt-decode"; 
 
 export const AuthContext = createContext(null);
 
@@ -8,7 +8,7 @@ export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore user from token
+  // ✅ Restore user from token
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
 
@@ -17,6 +17,7 @@ export default function AuthProvider({ children }) {
         const decoded = jwtDecode(token);
         setUser(decoded);
       } catch (err) {
+        console.log("Invalid token", err);
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
       }
@@ -25,7 +26,7 @@ export default function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  // LOGIN (FIXED)
+  // ✅ LOGIN
   async function login(email, password) {
     try {
       const res = await api.post("/client/login/", {
@@ -44,19 +45,19 @@ export default function AuthProvider({ children }) {
 
       return { success: true };
     } catch (err) {
-        const errorMessage =
+      const errorMessage =
         err.response?.data?.non_field_errors?.[0] ||
         err.response?.data?.detail ||
         "Login failed";
 
       return {
         success: false,
-        error: errorMessage,
+        error: errorMessage, // ✅ string فقط
       };
     }
   }
 
-  //  SIGNUP
+  // ✅ SIGNUP
   async function signUp(data) {
     try {
       await api.post("/client/signUp/", data);
@@ -71,7 +72,7 @@ export default function AuthProvider({ children }) {
     }
   }
 
-  // LOGOUT (FIXED keys)
+  // ✅ LOGOUT
   function logout() {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
