@@ -6,9 +6,8 @@ import { getNotifications, markNotificationAsViewed } from "../context/services/
 export default function NotificationsPage() {
   const [notification, setNotification] = useState([]);
   const location = useLocation();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  // Fetch notifications
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -24,7 +23,6 @@ export default function NotificationsPage() {
     fetchData();
   }, [location.key]);
 
- 
   const sortedNotifications = useMemo(() => {
     if (!Array.isArray(notification)) return [];
 
@@ -33,28 +31,41 @@ export default function NotificationsPage() {
     );
   }, [notification]);
 
-  const handleMarkAsViewed = async (notif) => {
-  try {
-    
-    await markNotificationAsViewed(notif.id);
+  // normalize link
+  const normalizeLink = (link) => {
+    if (!link) return null;
 
-   
-    setNotification((prev) =>
-      prev.map((n) =>
-        n.id === notif.id ? { ...n, viewed: true } : n
-      )
-    );
-
-   
-    if (notif.link) {
-      navigate(notif.link);
+    if (link.startsWith("http:/") && !link.startsWith("http://")) {
+      link = link.replace("http:/", "http://");
     }
 
-  } catch (err) {
-    console.log(err);
-    toast.error("Failed to update notification");
-  }
-};
+    return link;
+  };
+
+  const handleMarkAsViewed = async (notif) => {
+    try {
+      await markNotificationAsViewed(notif.id);
+
+      setNotification((prev) =>
+        prev.map((n) =>
+          n.id === notif.id ? { ...n, viewed: true } : n
+        )
+      );
+
+      const normalizedLink = normalizeLink(notif.link);
+      if (normalizedLink) {
+        if (normalizedLink.startsWith("http")) {
+          // eslint-disable-next-line react-hooks/immutability
+          window.location.href = normalizedLink; // external
+        } else {
+          navigate(normalizedLink); // internal
+        }
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to update notification");
+    }
+  };
 
   return (
     <div className="p-6 flex justify-center relative z-10">
@@ -73,28 +84,20 @@ export default function NotificationsPage() {
                   : "bg-black/60 border-blue-500/40 hover:bg-black/70"
                 }`}
             >
-              {/* Header */}
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-sm font-semibold text-white truncate">
                   {notif.title}
                 </h2>
 
                 <span className="text-[11px] text-gray-400">
-                  {new Date(notif.date).toLocaleString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {new Date(notif.date).toLocaleString()}
                 </span>
               </div>
 
-              {/* Content */}
               <p className="text-xs text-gray-300 line-clamp-2">
                 {notif.content}
               </p>
 
-              {/* Badge */}
               {!notif.viewed && (
                 <div className="mt-2">
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-600 text-white">
