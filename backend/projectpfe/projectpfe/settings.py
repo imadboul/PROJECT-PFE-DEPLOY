@@ -35,7 +35,8 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
-    'auth',  # ← Your custom header
+    'auth', 
+     
 ]
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -70,7 +71,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'user',
     'catalog',
-    'finance'
+    'finance',
+    'Orders_Manage',
+    'Tax_Service',
+    'Invoices',
     
 ]
 
