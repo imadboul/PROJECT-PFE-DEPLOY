@@ -4,5 +4,5 @@ export const getNotifications = () =>
     api.get("/client/notification/");
 
 export const markNotificationAsViewed = (id) => {
-  return api.patch(`/notifications/${id}`);
+  return api.post(`/notifications/${id}`);
 };
