@@ -22,7 +22,7 @@ class ClientSerializer(serializers.ModelSerializer):
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
-        exclude = ['user', 'id']  
+        exclude = ['user']  
 
 
 class loginSerializer(serializers.Serializer):

@@ -111,6 +111,21 @@ def get_notifications(request):
         return Response({"notifications": notifications.data }, status=status.HTTP_200_OK)
     except Notification.DoesNotExist:
         return Response ( { "error" : 'user does not exist'}, status=status.HTTP_400_BAD_REQUEST )
+
+@api_view(['POST'])
+@jwt_must
+def notificationread(request,id):
+    try:
+        notification = Notification.objects.get(id = id)
+        
+        notification.viewed = True
+        notification.save()
+        return Response({"notifications": 'viewd' }, status=status.HTTP_200_OK)
+    except Notification.DoesNotExist:
+        return Response ( { "error" : 'user does not exist'}, status=status.HTTP_400_BAD_REQUEST )
+        
+        
+    
         
     
 def notify_all_superadmin(title,content,link):

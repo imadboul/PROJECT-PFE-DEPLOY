@@ -36,10 +36,4 @@ class Payment(models.Model):
     
     def __str__(self):
         return f'payment of {self.client} ({self.state})'
-
-    
-    
-
-        
-    
     
