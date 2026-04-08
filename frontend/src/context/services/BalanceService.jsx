@@ -6,6 +6,10 @@ export const getBalances = () =>
 export const getPayments = () => 
     api.get("/finance/payments/");
 
+export const getPaymentById = (id) => {
+  return api.get(`/finance/payments/${id}`);
+};
+
 export const createPayment = (data) =>
     api.post("/finance/payments/",data)
     

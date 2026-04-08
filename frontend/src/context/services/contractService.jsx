@@ -3,6 +3,9 @@ import api from "../../api/axios";
 export const getContracts = () => 
     api.get("/catalog/contract/");
 
+export const getContractById = (id) => {
+  return api.get(`/catalog/contract/${id}`);
+};
 
 export const createContract = (data) =>
   api.post("/catalog/contract/", data);

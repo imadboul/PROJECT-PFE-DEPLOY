@@ -48,13 +48,13 @@ export default function ContractsList() {
     }
   };
 
-  const changeStatus = () => {
-    setShowActive((prev) => !prev);
-  };
-
   useEffect(() => {
     fetchContracts();
   }, []);
+
+  const changeStatus = () => {
+    setShowActive((prev) => !prev);
+  };
 
   const formatDate = (date) => {
     if (!date) return "—";

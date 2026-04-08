@@ -56,7 +56,7 @@ def getbalance(request):
 def get_payment(request,id):
     try:
         payment = paymentreadserializer(Payment.objects.get(id = id))
-        return Response ( { "contract" : payment.data }, status=status.HTTP_200_OK )
+        return Response ( { "payment" : payment.data }, status=status.HTTP_200_OK )
     except Payment.DoesNotExist:
         return Response ( { "error" : "does not exist"}, status=status.HTTP_400_BAD_REQUEST )
     

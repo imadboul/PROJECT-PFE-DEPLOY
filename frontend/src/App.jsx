@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Sign from "./pages/Sign";
 import ContractsList from "./pages/Contract"
+import ContractDetails from "./pages/ContractDetails"
 import BalanceList from "./pages/Balance";
 import Invoice from "./pages/Invoice";
 import Navbar from "./component/Navbar";
@@ -16,6 +17,7 @@ import AddProductType from "./component/AddProductType";
 import RequestContract from "./component/RequestContract";
 import RequestPayment from "./component/RequestPayment";
 import PaymentsList from "./pages/payment";
+import PaymentDetails from "./pages/paymentDetails";
 import AddProduct from "./component/AddProduct";
 import EditProductType from "./component/EditProductType";
 
@@ -71,18 +73,19 @@ function App() {
               <AddProductType />
             </SuperAdminRoute>} />
 
-             <Route path="/EditProductType/:id" element={
+          <Route path="/EditProductType/:id" element={
             <SuperAdminRoute>
-              <EditProductType/>
+              <EditProductType />
             </SuperAdminRoute>} />
-            <Route path="/EditProductType/" element={
+          <Route path="/EditProductType/" element={
             <SuperAdminRoute>
-              <EditProductType/>
+              <EditProductType />
             </SuperAdminRoute>} />
 
 
           <Route path="/Home" element={<Home />} />
-          <Route path="/Contracts" element={<ContractsList />} />
+          <Route path="/contracts" element={<ContractsList />} />
+          <Route path="/contracts/:id" element={<ContractDetails />} />
           <Route path="/Balance" element={<BalanceList />} />
           <Route path="/Invoices" element={<Invoice />} />
           <Route path="/Bills" element={<Bills />} />
@@ -90,6 +93,7 @@ function App() {
           <Route path="/RequestContract" element={<RequestContract />} />
           <Route path="/RequestPayment" element={<RequestPayment />} />
           <Route path="/Payment" element={<PaymentsList />} />
+          <Route path="/Payment/:id" element={<PaymentDetails />} />
         </Route>
       </Routes>
     </div>
