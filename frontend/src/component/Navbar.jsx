@@ -6,10 +6,11 @@ import { useNotifications } from "../context/NotificationContext";
 export default function Navbar() {
 
   const { logout, user } = useContext(AuthContext);
+  const { notifications } = useNotifications();
 
   const [open, setOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { notifications } = useNotifications();
+  
   const linkStyle = ({ isActive }) =>
     `px-3 py-2 text-lg ${isActive ? "text-orange-500" : "text-white font-medium"
     } hover:text-orange-500`;
