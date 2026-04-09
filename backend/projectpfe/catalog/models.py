@@ -50,7 +50,7 @@ class Contract(models.Model):
     validated_at = models.DateTimeField(null=True)
     state = models.CharField(max_length=20,choices=STATES,default="pending", db_index=True)
     validated_by = models.ForeignKey(Client ,on_delete=models.SET_NULL,related_name="validated_contracts",null=True)
-    client = models.ForeignKey(Client,on_delete=models.SET_NULL,related_name='contracts',null=True)
+    client = models.ForeignKey(Client,on_delete=models.SET_NULL,related_name='client_contracts',null=True)
     product_type = models.ForeignKey(ProductType,on_delete=models.CASCADE,related_name='contracts')
     
     def __str__(self):

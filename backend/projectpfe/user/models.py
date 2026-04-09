@@ -38,12 +38,12 @@ class Client(models.Model):
     
 class Notification(models.Model):  
 
-    id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(Client,on_delete= models.CASCADE,related_name='notifications')
-    title = models.CharField(max_length=254)
-    content = models.TextField()
-    viewed = models.BooleanField(default= False)
-    link = models.TextField()
-    date = models.DateTimeField(auto_now_add=True)
+    id      = models.AutoField(primary_key=True)
+    user      = models.ForeignKey(Client,on_delete= models.CASCADE,related_name='notifications')
+    title    = models.CharField(max_length=254)
+    content   = models.TextField()
+    viewed    = models.BooleanField(default= False)
+    link     = models.TextField()
+    date   = models.DateTimeField(auto_now_add=True)
     
     

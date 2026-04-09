@@ -1,15 +1,16 @@
-
-from django.shortcuts import render
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from user.models import Client
 from .models import Order,States,OrderProduct
-from .serializers import OrderSerializer,ValidateOrdersSerializer,RectificativeOrderSerializer,OrderProductFilterSerializerOne,OrderFilterSerializerTow,ClientFilterSerializerOne,OrderFilterSerializerOne
+from .serializers import OrderSerializer,ValidateOrdersSerializer,RectificativeOrderSerializer,OrderProductFilterSerializerOne,OrderFilterSerializerOne,OrderFilterSerializerTow,ClientFilterSerializerOne
 from rest_framework import generics
 from django.db import transaction
-from rest_framework.decorators import api_view
-from catalog.models import Contract,Client
 from .filters import FilterOrderProduct,FilterOrder,FilterOrderAll
+from Tax_Service.taxCalcul import mains_balances
+import logging
 
+logging=logging.getLogger(__name__)
 
 
 class OrderCreateView(generics.CreateAPIView):
@@ -25,18 +26,26 @@ class OrderCreateView(generics.CreateAPIView):
             return Response({  "message": "Failed to create order", "error": str(e)},status.HTTP_400_BAD_REQUEST)
 
 class OrderValidateView(generics.UpdateAPIView):
+    
     def update(self, request, *args, **kwargs):
+        
         try:
             with transaction.atomic():
+                 logging.info("Starting order validation process")
                  serializer=ValidateOrdersSerializer(data=request.data)
                  serializer.is_valid(raise_exception=True)
                  ids=serializer.validated_data['ids']
-                 orders=Order.objects.filter(id__in=ids)
-                 nbOrdes=orders.update(states=States.VALID)
-                 nbLine=OrderProduct.objects.filter(order__in=orders).update(states=States.VALID)
-                 return Response({"message": "Orders validated successfully" , "Number of Orders valid":nbOrdes,"Number Of OrderProduct valid":nbLine }, status=status.HTTP_200_OK)
+                 
+                 nbOrdes=Order.objects.filter(id__in=ids, states=States.PENDING).update(states=States.VALID)
+                 
+                 
+                 if nbOrdes!=0:
+                    mains_balances(Order.objects.filter(id__in=ids) )
+                    logging.info("Updated client balances for validated orders ended successfully") 
+                 
+                 return Response({"message": "Orders validated successfully" , "Number of Orders valid":nbOrdes}, status=status.HTTP_200_OK)
         except Exception as e :
-            return  Response({"message": "Failed to validate orders","error": e.detail}, status=status.HTTP_400_BAD_REQUEST)
+            return  Response({"message": "Failed to validate orders","error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
  
     
 class RectificativeOrderView(generics.CreateAPIView):
@@ -52,6 +61,7 @@ class RectificativeOrderView(generics.CreateAPIView):
             return Response({'error':str(e)},status=status.HTTP_400_BAD_REQUEST)
 
 class OrderListView(generics.ListAPIView):
+   
    def get(self,request,*args,**kwargs):
        try:
            type=kwargs['type']
@@ -59,18 +69,7 @@ class OrderListView(generics.ListAPIView):
               self.queryset=OrderProduct.objects.select_related('order','product').all().distinct()
               self.serializer_class=OrderProductFilterSerializerOne
               self.filterset_class=FilterOrderProduct
-              
-           elif type==2:
-               self.queryset=Order.objects.select_related('client','contract__product_type').prefetch_related('order_orderProduct_items__product').all().distinct()
-               self.serializer_class=OrderFilterSerializerOne
-               self.filterset_class=FilterOrder    
-
-           return self.list(request,*args,**kwargs)  
-       except Exception as e:
-             return Response({'error':str(e)},status=status.HTTP_400_BAD_REQUEST) 
-    
-    
-""" elif type == 2:
+           elif type == 2:
                      filtered = FilterOrder(
                          request.GET,
                          queryset=Order.objects.select_related('client', 'contract__product_type')
@@ -86,10 +85,24 @@ class OrderListView(generics.ListAPIView):
                              seen.add(key)
                              result.append(order)
                  
-                     serializer = OrderFilterSerializer1(result, many=True)
-                     return Response(serializer.data)"""
-    
-   
-    
-    
-    
+                     serializer = OrderFilterSerializerTow(result, many=True)
+                     return Response(serializer.data)
+              
+           elif type==3:
+               self.queryset=Order.objects.select_related('client','contract__product_type').prefetch_related('order_orderProduct_items__product').all().distinct()
+               self.serializer_class=OrderFilterSerializerOne
+               self.filterset_class=FilterOrder   
+           elif type==4:
+               self.queryset=Client.objects.prefetch_related('client_contracts__contract_order_items','client_contracts__product_type').all().distinct()
+               self.serializer_class=ClientFilterSerializerOne
+               self.filterset_class=FilterOrderAll
+
+           return self.list(request,*args,**kwargs)  
+       except Exception as e:
+             return Response({'error':str(e)},status=status.HTTP_400_BAD_REQUEST) 
+         
+@api_view(['PUT'])     
+def inValid(request):
+    Order.objects.update(states=States.PENDING)
+    return Response({'data':'bien'})
+            

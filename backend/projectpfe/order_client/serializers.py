@@ -4,6 +4,7 @@ from .models import Order,OrderProduct
 from catalog.models import Client,Contract,ProductType,Product
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from Invoices.models import Invoice , States
 
 
 #serializer for client contract order productType filter
@@ -47,7 +48,7 @@ class OrderProductFilterSerializerOne(serializers.ModelSerializer):
     product=ProductFilterSerializerOne(many=False)
     class Meta:
         model=OrderProduct
-        fields=["id", "type","qte","unit","states","order","product" ]
+        fields=["id","qte","unit","order","product" ]
    
  
  
@@ -87,15 +88,20 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         
         with transaction.atomic():
+             invoice=Invoice.objects.get(contract=validated_data['contract'],states=States.NO_VALID)
+             if not invoice :
+                 invoice=Invoice( Contract=validated_data['contract'] )
+                 invoice.save()
+                 
              order_items=validated_data.pop( 'order_orderProduct_items' )
-             order=Order.objects.create(**validated_data)
+             order=Order(**validated_data,invoice=invoice)
+             order.save()
              
              for order_item in order_items:
                  orderProduct=OrderProduct(
                  product=order_item['product'],
                  qte=order_item['qte'],
                  unit=order_item['unit'],
-                 type=order.type,
                  order=order,
                  ) 
                  orderProduct.save()
@@ -115,12 +121,19 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
         def create(self,validated_data):
             order=get_object_or_404(Order,id=validated_data['id_parent'])
             with transaction.atomic():    
+                invoice=Invoice.objects.filter(id=order.invoice.id,states=States.NO_VALID).first()
+                if not invoice:
+                    invoice=Invoice.objects.create(
+                        contract=order.contract,
+                        type=validated_data['type_choise']
+                    )
                 order_items=validated_data.pop('order_orderProduct_items')
                 newOrder=Order.objects.create(
                     contract=order.contract,
                     client=order.client,
                     parent_order=order,
                     type=validated_data['type_choise'],
+                    invoice=invoice
                 )
                 
                 for order_item in order_items :
@@ -128,7 +141,6 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
                        product=order_item['product'],
                        qte=order_item['qte'],
                        unit=order_item['unit'],
-                       type=newOrder.type,
                        order=newOrder,  
                     )
                     orderProduct.save()

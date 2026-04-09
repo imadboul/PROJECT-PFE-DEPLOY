@@ -4,6 +4,7 @@ from user.models import Client
 
 
 
+
 class FilterOrderAll(django_filters.FilterSet):
     type= django_filters.CharFilter(field_name='type',lookup_expr='iexact')
     states=django_filters.CharFilter(field_name='client_contracts__contract_order_items__states',lookup_expr='iexact') 
@@ -19,8 +20,8 @@ class FilterOrderAll(django_filters.FilterSet):
 
 
 class FilterOrderProduct(django_filters.FilterSet):
-    type= django_filters.CharFilter(field_name='type',lookup_expr='iexact')
-    states=django_filters.CharFilter(field_name='states',lookup_expr='iexact') 
+    type= django_filters.CharFilter(field_name='order__type',lookup_expr='iexact')
+    states=django_filters.CharFilter(field_name='order__states',lookup_expr='iexact') 
     date_created=django_filters.DateFilter(field_name='order__date_created',lookup_expr='date')
     date_created__gte=django_filters.DateFilter(field_name='order__date_created',lookup_expr='date__gte')
     date_created__lte=django_filters.DateFilter(field_name='order__date_created',lookup_expr='date__lte')
