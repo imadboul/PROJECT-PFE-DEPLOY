@@ -176,24 +176,29 @@ def contract(request):
 @api_view(['POST'])
 @jwt_must
 def validatecontract(request):
+    try:
+
     
-    serializer = contractserializer(data = request.data)
+        serializer = contractserializer(data = request.data)
+        
+        if serializer.is_valid():
+            
+            contract = Contract.objects.get(id = serializer.validated_data['id'] )  # type: ignore
+            
+            contract.state = serializer.validated_data['state'] # type: ignore
+            contract.validated_at = timezone.now()
+            contract.validated_by_id = request.user_id # type: ignore
+            
+            contract.save()
+            
+            notify_a_client(contract.client_id,'CONTRACT UPDATE', f'your contract number{ contract.id } has beed {contract.state} by a super admin',f'http://localhost:5173/Contracts/{contract.id}') # type: ignore
+            
+            return Response ( { "message" : f"contract {contract.state} "}, status=status.HTTP_200_OK )
+        else:
+            return Response ( { "error" : serializer.errors}, status=status.HTTP_400_BAD_REQUEST )
     
-    if serializer.is_valid():
-        
-        contract = Contract.objects.get(id = serializer.validated_data['id'] )  # type: ignore
-        
-        contract.state = serializer.validated_data['state'] # type: ignore
-        contract.validated_at = timezone.now()
-        contract.validated_by_id = request.user_id # type: ignore
-        
-        contract.save()
-        
-        notify_a_client(contract.client_id,'CONTRACT UPDATE', f'your contract number{ contract.id } has beed {contract.state} by a super admin',f'http://localhost:5173/Contracts/{contract.id}') # type: ignore
-        
-        return Response ( { "message" : f"contract {contract.state} "}, status=status.HTTP_200_OK )
-    else:
-        return Response ( { "error" : serializer.errors}, status=status.HTTP_400_BAD_REQUEST )
+    except Exception as e :
+        return  Response({"errors": str(e)}, status=status.HTTP_400_BAD_REQUEST) # type: ignore
 
 @api_view(['GET'])
 @jwt_must

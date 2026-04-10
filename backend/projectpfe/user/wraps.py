@@ -1,6 +1,7 @@
 from functools import wraps
 from django.http import JsonResponse , HttpRequest
 from .auth import decode_jwt
+from .models import Client
 
 
 
@@ -17,7 +18,9 @@ def jwt_must(func):
         
         data = decode_jwt(token)
         
-        if not data or data == "expired" or data.get("type") != 'access': # type: ignore
+        client = Client.objects.filter(id = data["user_id"]) # type: ignore
+        
+        if not data or data == "expired" or data.get("type") != 'access' or not client.exists(): # type: ignore
             return JsonResponse({"error": "invalid token"}, status=401)
         
         request.user_id = data["user_id"] # type: ignore

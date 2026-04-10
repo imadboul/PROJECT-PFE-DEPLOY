@@ -57,6 +57,12 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 ALLOWED_HOSTS = []
 
+#filters
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ]
+}
 
 # Application definition
 
@@ -73,6 +79,7 @@ INSTALLED_APPS = [
     'catalog',
     'finance',
     'Orders_Manage',
+    'order_client',
     'Tax_Service',
     'Invoices',
     

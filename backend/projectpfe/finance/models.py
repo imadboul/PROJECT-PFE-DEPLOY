@@ -4,7 +4,7 @@ from catalog.models import ProductType
 from decimal import Decimal
 class Balance(models.Model):
     id = models.AutoField
-    client = models.ForeignKey(Client , on_delete=models.CASCADE,related_name='balances')
+    client = models.ForeignKey(Client , on_delete=models.CASCADE,related_name='client_balances')
     productType = models.ForeignKey(ProductType, on_delete= models.CASCADE, related_name='balances')
     amount = models.DecimalField(max_digits=12, decimal_places=2, default= Decimal('0'))
     
