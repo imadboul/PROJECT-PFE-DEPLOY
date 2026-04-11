@@ -57,7 +57,7 @@ def tax_price(taxs,orderProduct,invoice):
                          additional_taxPrice_qte(invoice,orderProduct.product.name,orderProduct.qte*-1,orderProduct.unit,tax_price*-1,tax.tax.name)
                     else:
                           additional_taxPrice_qte(invoice,orderProduct.product.name,orderProduct.qte,orderProduct.unit,tax_price,tax.tax.name)
-        qte_unit=unitchange(orderProduct.qte,orderProduct.unit,tva.product.unit)
+        qte_unit=unitchange(orderProduct.qte,orderProduct.unit,tva.product.unit) # type: ignore
         HT=(qte_unit*orderProduct.product.unit_price)
         TTC=(HT+total_tax)*(1+tva.par_unit/100)
         TVA=(HT+total_tax)*tva.par_unit/100

@@ -37,7 +37,7 @@ class OrderValidateView(generics.UpdateAPIView):
                  
                  serializer=ValidateOrdersSerializer(data=request.data)
                  serializer.is_valid(raise_exception=True)
-                 ids=serializer.validated_data['ids']
+                 ids=serializer.validated_data['ids'] # type: ignore
                  #validated_by=request.user_id                 
                  nbOrdes=Order.objects.filter(id__in=ids, states=States.PENDING).update(states=States.VALID)                 
                  if nbOrdes!=0:
