@@ -10,25 +10,27 @@ from .filters import *
 from Tax_Service.taxCalcul import mains_balances,unitchange
 from rest_framework.exceptions import ValidationError
 from user.wraps import *
-from projectpfe.utils.response import success_response
+from projectpfe.utils.response import success_response,paginated_response,MyPagination
+from django.utils.decorators import method_decorator
 
 
 
+
+#@method_decorator(jwt_must, name='dispatch')
 class OrderCreateView(generics.CreateAPIView):
+    
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-
+    
     def create(self,request,*args,**kwargs):
-        
             serializer=self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
-            
             return success_response(data=None,message='Order created successfully',status_code=201)
             
        
 
-
+#@method_decorator(jwt_must, name='dispatch')
 class OrderValidateView(generics.UpdateAPIView):
     
     def update(self, request, *args, **kwargs):
@@ -47,7 +49,7 @@ class OrderValidateView(generics.UpdateAPIView):
                  return success_response(data=nbOrdes,message='number Order validated successfully',status_code=200)
         
  
-    
+#@method_decorator(jwt_must, name='dispatch')   
 class RectificativeOrderView(generics.CreateAPIView):
     queryset=Order.objects.all()
     serializer_class=RectificativeOrderSerializer
@@ -58,22 +60,19 @@ class RectificativeOrderView(generics.CreateAPIView):
             self.perform_create(serializer)
             return success_response(data=None,message='Order Rectificative successfully',status_code=201)
 
-
+#@method_decorator(jwt_must, name='dispatch')
 class OrderListView(generics.ListAPIView):
    
    def get(self,request,*args,**kwargs):
        
-           type=kwargs['type']
+           type=int(kwargs['type'])
            if type==1:
               self.queryset=OrderProduct.objects.select_related('order','product').all().distinct()
               self.serializer_class=OrderProductFilterSerializerOne
-              self.filterset_class=FilterOrderProduct
+              self.filterset_class=FilterOrderProduct    
            elif type == 2:
-                     filtered = FilterOrder(
-                         request.GET,
-                         queryset=Order.objects.select_related('client', 'contract__product_type')
-                     ).qs
-                 
+                     filtered = FilterOrder(   request.GET, queryset=Order.objects.select_related('client', 'contract__product_type')).qs 
+                                     
                      seen = set()
                      result = []
                  
@@ -84,9 +83,12 @@ class OrderListView(generics.ListAPIView):
                              seen.add(key)
                              result.append(order)
                  
-                     serializer = OrderFilterSerializerTow(result, many=True)
-                     return success_response(data=serializer.data , message="filter successfully",status_code=201)
-              
+                     
+                     paginator = MyPagination()
+                     page = paginator.paginate_queryset(result, request)
+                     serializer =OrderFilterSerializerTow(page, many=True)
+                     response=paginated_response(paginator=paginator,serializer=serializer)
+                     return success_response(data=response , message="filter successfully",status_code=201)  
            elif type==3:
                self.queryset=Order.objects.select_related('client','contract__product_type').prefetch_related('order_orderProduct_items__product').all().distinct()
                self.serializer_class=OrderFilterSerializerOne
@@ -95,8 +97,13 @@ class OrderListView(generics.ListAPIView):
                self.queryset=Client.objects.prefetch_related('client_contracts__contract_order_items','client_contracts__product_type').all().distinct()
                self.serializer_class=ClientFilterSerializerOne
                self.filterset_class=FilterOrderAll
-           response = super().list(request, *args, **kwargs)
-           return  success_response(data=response.data , message="filter  successfully",status_code=201) 
+           
+           paginator = MyPagination()
+           page = paginator.paginate_queryset(self.queryset, request)
+           serializer = self.serializer_class(page, many=True)
+           response=paginated_response(paginator=paginator,serializer=serializer)
+           
+           return  success_response(data=response , message="filter  successfully",status_code=201) 
        
  
          

@@ -87,14 +87,28 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model=Order
         fields=['contract','client','client_order','order_orderProduct_items']
+    def validate(self, data):
         
+        
+        
+        if data['contract'].client.id != data['client'].id or data['contract'].state!="validated" :
+            raise serializers.ValidationError('This client does not have this contract.')
+        
+        product_type_id=data['contract'].product_type.id
+    
+        for product in data['order_orderProduct_items']:
+            if product['product'].product_type.id != product_type_id:
+                raise serializers.ValidationError('This contract does not include this type of product.') 
+           
+        return super().validate(data)   
     
     def create(self, validated_data):
         
         with transaction.atomic():
-             invoice=Invoice.objects.get(contract=validated_data['contract'],states=States.NO_VALID)
+            
+             invoice=Invoice.objects.filter(contract=validated_data['contract'],states=States.NO_VALID)
              if not invoice :
-                 invoice=Invoice( Contract=validated_data['contract'] )
+                 invoice=Invoice( contract=validated_data['contract'] )
                  invoice.save()
                  
              order_items=validated_data.pop( 'order_orderProduct_items' )
