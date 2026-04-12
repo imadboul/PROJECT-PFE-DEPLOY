@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { getBalances } from "../context/services/BalanceService";
-import { getProductTypes } from "../context/services/productService";
 import toast from "react-hot-toast";
 
 export default function BalanceList() {
   const [balances, setBalances] = useState([]);
-  const [productTypes, setProductTypes] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -15,11 +13,9 @@ export default function BalanceList() {
     const fetchData = async () => {
       try {
         const resB = await getBalances();
-        console.log("Balance response:", resB.data);
-        const resP = await getProductTypes();
+        
 
-        setBalances(resB.data.balances ||resB.data|| []);
-        setProductTypes(resP.data.types || []);
+        setBalances(resB.data.data.results || []);
       }catch (error) {
         const msg =
         error.response?.data?.error ||
@@ -31,11 +27,6 @@ export default function BalanceList() {
 
     fetchData();
   }, [location.key]);
-
-  const getProductName = (id) => {
-    const type = productTypes.find((p) => p.id === id);
-    return type ? type.name : id;
-  };
 
   return (
     <div className="p-6 flex justify-center relative z-10">
@@ -67,7 +58,7 @@ export default function BalanceList() {
             >
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-lg font-bold">
-                  Product Type: {getProductName(b.productType)}
+                  Product Type: {b.productType}
                 </h2>
               </div>
 

@@ -46,11 +46,11 @@ def payments(request):
 @jwt_must
 def getbalance(request):
         paginator = MyPagination()
-
+        print(request.role) 
         if request.role == 'client':
             queryset = Balance.objects.filter(client_id=request.user_id)
         else:
-            queryset = Balance.objects.all().order_by('-created_at')
+            queryset = Balance.objects.all()
 
         result_page = paginator.paginate_queryset(queryset, request)
         serializer = balanceserializer(result_page, many=True)

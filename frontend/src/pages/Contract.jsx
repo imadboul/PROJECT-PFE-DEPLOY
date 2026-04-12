@@ -12,11 +12,11 @@ export default function ContractsList() {
   const [loading, setLoading] = useState(false);
   const { fetchNotifications } = useNotifications();
 
-  // ✅ Validate
+  //  Validate
   const handleValidate = async (id) => {
     try {
       await validateContract(id);
-     // await fetchNotifications();
+     await fetchNotifications();
       toast.success("Contrat validated");
       setSelectedContract(null);
       fetchContracts();
@@ -29,7 +29,7 @@ export default function ContractsList() {
       }
   };
 
-  // ✅ Reject
+  // Reject
   const handleReject = async (id) => {
     try {
       await rejectContract(id);
@@ -64,20 +64,26 @@ export default function ContractsList() {
   };
 
   const fetchContracts = async () => {
-    try {
-      setLoading(true);
-      const res = await getContracts();
-      setContracts(res.data.contracts || res.data);
-    }catch (error) {
-        const msg =
-        error.response?.data?.error ||
-        "Error fatching data";
+  try {
+    setLoading(true);
 
-      toast.error(msg);
-      } finally {
-      setLoading(false);
-    }
-  };
+    const res = await getContracts();
+
+    const data =res.data.data.contracts 
+  
+
+    setContracts(Array.isArray(data) ? data : []);
+
+  } catch (error) {
+    const msg =
+      error.response?.data?.error ||
+      "Error fetching data";
+
+    toast.error(msg);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchContracts();

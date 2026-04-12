@@ -28,18 +28,18 @@ function EditProduct() {
     formState: { errors },
   } = useForm();
 
-  //  units (FIX)
-  const unitOptions = [
-    { value: "liter", label: "Liter" },
-    { value: "kg", label: "Kg" },
-  ];
+const unitOptions = [
+  { value: "KG", label: "Kilogram" },
+  { value: "L", label: "Liter" },
+  { value: "HL", label: "Hectoliter" },
+  { value: "TM", label: "Tonne" },
+];
 
-  // load product types
   useEffect(() => {
     const fetchTypes = async () => {
       try {
         const res = await getProductTypes();
-        const data = res?.data.types;
+        const data = res.data.data.types;
         setProductTypes(data);
       } catch (error) {
         const msg =
@@ -61,14 +61,13 @@ function EditProduct() {
 
   const selectedType = watch("productType");
 
-  // load product if edit
   useEffect(() => {
     if (!id) return;
 
     const fetchData = async () => {
       try {
         const res = await getProducts();
-        const data = res?.data?.products || res?.data || res;
+        const data = res.data.data.products ;
 
         const current = data.find((p) => p.id === Number(id));
 
@@ -85,7 +84,7 @@ function EditProduct() {
         setValue("name", current.name);
         setValue("description", current.description);
         setValue("unitPrice", current.unit_price);
-        setValue("qteLeft", current.qte_left);
+        setValue("density", current.density);
         setValue("unit", current.unit);
         setValue("productType", current.product_type);
       } catch (error) {
@@ -107,7 +106,7 @@ function EditProduct() {
 
 
       const res = await getProductTypes();
-      const data = res.data.types;
+      const data = res.data.data.types;
       setProductTypes(Array.isArray(data) ? data : []);
     } catch (error) {
       const msg =
@@ -127,7 +126,7 @@ function EditProduct() {
         description: data.description,
         unit_price: Number(data.unitPrice),
         unit: data.unit,
-        qte_left: Number(data.qteLeft),
+        density: Number(data.density||0),
         product_type: Number(data.productType),
       };
 
@@ -353,17 +352,28 @@ function EditProduct() {
             )}
           </div>
 
-          {/* Quantity */}
+          {/* density */}
           <input
             type="number"
-            placeholder="Quantity Left"
-            {...register("qteLeft", { required: "quantity required"})}
-            className="w-full text-xl placeholder-white p-2 border border-black rounded focus:ring-2 focus:ring-orange-500"
+            placeholder="density"
+            {...register("density", {
+              required: "density is required",
+              min: {
+                value: 0,
+                message: "density must be >= 0",
+              },
+              max: {
+                value: 1,
+                message: "density must be <= 1",
+              },
+            })}
+            step="0.001"
+            className="w-full text-xl placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
-          <div className="relative bottom-5 mb-5">
-            {errors.qteLeft && (
+          <div className="relative bottom-5 mb-6">
+            {errors.density && (
               <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
-                {errors.qteLeft.message}
+                {errors.density.message}
               </p>
             )}
           </div>

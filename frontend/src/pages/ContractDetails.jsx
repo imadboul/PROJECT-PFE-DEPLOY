@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, NavLink } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   getContractById,
@@ -20,8 +20,8 @@ export default function ContractDetails() {
     try {
       setLoading(true);
       const res = await getContractById(id);
-      setContract(res.data.contract);
-      setSelectedContract(null); // مباشرة modal مفتوح
+      setContract(res.data.data);
+      setSelectedContract(null); 
     }catch (error) {
         const msg =
         error.response?.data?.error ||
@@ -40,7 +40,7 @@ export default function ContractDetails() {
   const handleValidate = async (contractId) => {
     try {
       await validateContract(contractId);
-      //await fetchNotifications();
+      await fetchNotifications();
       toast.success("Validated");
       fetchContract();
     }catch (error) {

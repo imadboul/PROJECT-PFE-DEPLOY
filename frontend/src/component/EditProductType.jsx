@@ -24,7 +24,7 @@ function EditProductType() {
     const fetchData = async () => {
       try {
         const res = await getProductTypes();
-        const data = res.data.types || res.data;
+        const data = res.data.data.types 
 
         const current = data.find((t) => t.id === Number(id));
 

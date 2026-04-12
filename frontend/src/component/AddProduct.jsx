@@ -9,11 +9,12 @@ function AddProduct() {
   const [productTypes, setProductTypes] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const unitOptions = [
-    { value: "litre", label: "Litre" },
-    { value: "kilogram", label: "Kilogram" },
-  ];
-
+const unitOptions = [
+  { value: "KG", label: "Kilogram" },
+  { value: "L", label: "Liter" },
+  { value: "HL", label: "Hectoliter" },
+  { value: "TM", label: "Tonne" },
+];
   const {
     register,
     handleSubmit,
@@ -32,14 +33,14 @@ function AddProduct() {
     const fetchProductTypes = async () => {
       try {
         const res = await getProductTypes();
-        const data = res.data.types || res.data;
+        const data = res.data.data.types || res.data;
         setProductTypes(Array.isArray(data) ? data : []);
       } catch (error) {
         const msg =
-        error.response?.data?.error ||
-        "Error creating product";
+          error.response?.data?.error ||
+          "Error creating product";
 
-      toast.error(msg);
+        toast.error(msg);
       }
     };
 
@@ -56,7 +57,7 @@ function AddProduct() {
         description: data.description,
         unit_price: Number(data.unitPrice),
         unit: data.unit.value,
-        qte_left: Number(data.qteLeft),
+        density: Number(data.density ?? 0),
         product_type: Number(data.productType),
       };
 
@@ -69,6 +70,7 @@ function AddProduct() {
       const msg =
         error.response?.data?.error ||
         "Error creating product";
+        console.log(error.response?.data);
 
       toast.error(msg);
     } finally {
@@ -256,20 +258,28 @@ function AddProduct() {
             )}
           </div>
 
-          {/* Quantity */}
+          {/* density */}
           <input
             type="number"
-            placeholder="Quantity Left"
-            {...register("qteLeft", {
-              required: "Quantity is required",
-              min: { value: 1, message: "Must be > 0" },
+            placeholder="density"
+            {...register("density", {
+              required: "density is required",
+              min: {
+                value: 0,
+                message: "density must be >= 0",
+              },
+              max: {
+                value: 1,
+                message: "density must be <= 1",
+              },
             })}
+            step="0.001"
             className="w-full text-xl placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
-          <div className="relative bottom-3 mb-6">
-            {errors.qteLeft && (
+          <div className="relative bottom-5 mb-6">
+            {errors.density && (
               <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
-                {errors.qteLeft.message}
+                {errors.density.message}
               </p>
             )}
           </div>

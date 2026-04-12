@@ -5,14 +5,12 @@ import {
   rejectPayment,
   validatePayment,
 } from "../context/services/BalanceService";
-import { getProductTypes } from "../context/services/productService";
 import toast from "react-hot-toast";
 import { useNotifications } from "../context/NotificationContext";
 
 
 export default function PaymentDetails() {
   const [payment, setPayment] = useState(null);
-  const [productTypes, setProductTypes] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [loading, setLoading] = useState(false);
   const { fetchNotifications } = useNotifications();
@@ -25,13 +23,10 @@ export default function PaymentDetails() {
       setLoading(true);
 
       const resP = await getPaymentById(id);
-      const resT = await getProductTypes();
 
-      const paymentData = resP.data.payment || resP.data;
-      const typesData = resT.data.types || resT.data;
+      const paymentData = resP.data.data || resP.data;
 
       setPayment(paymentData);
-      setProductTypes(Array.isArray(typesData) ? typesData : []);
     }catch (error) {
         const msg =
         error.response?.data?.error ||
@@ -51,7 +46,7 @@ export default function PaymentDetails() {
   const handleValidate = async (id) => {
     try {
       await validatePayment(id);
-      //await fetchNotifications();
+      await fetchNotifications();
       toast.success("Payment validated");
       setSelectedPayment(null);
       fetchPayment();
@@ -98,11 +93,7 @@ export default function PaymentDetails() {
     });
   };
 
-  // Get product name
-  const getProductName = (id) => {
-    const type = productTypes.find((p) => p.id === id);
-    return type ? type.name : id;
-  };
+
 
   if (loading) {
     return <div className="text-white text-center mt-10">Loading...</div>;
@@ -144,7 +135,7 @@ export default function PaymentDetails() {
 
             <p>
               <strong>Product:</strong>{" "}
-              {getProductName(payment.productType)}
+              {payment.productType}
             </p>
 
             <div className="flex justify-between">
@@ -204,7 +195,7 @@ export default function PaymentDetails() {
 
               <p>
                 <strong>Product:</strong>{" "}
-                {getProductName(selectedPayment.productType)}
+                {selectedPayment.productType}
               </p>
 
               <p>

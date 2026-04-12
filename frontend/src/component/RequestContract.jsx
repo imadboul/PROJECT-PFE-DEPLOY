@@ -28,7 +28,7 @@ function RequestContract() {
     const fetchProductTypes = async () => {
       try {
         const res = await getProductTypes();
-        const data = res.data.types || res.data;
+        const data = res.data.data.types;
         setProductTypes(Array.isArray(data) ? data : []);
       }catch (error) {
         const msg =

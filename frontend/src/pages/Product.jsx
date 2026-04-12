@@ -15,7 +15,7 @@ export default function ProductsList() {
     try {
       const res = await getProducts();
 
-      const data = res?.data.products;
+      const data = res.data.data.products;
 
       setProducts(Array.isArray(data) ? data : []);
 
@@ -69,16 +69,19 @@ export default function ProductsList() {
             >
               <div className="space-y-2 text-sm">
 
+                <div className="flex justify-between">
                 <p><strong>Name:</strong> {product.name}</p>
+                <p><strong>Product Type:</strong> {product.product_type}</p>
+                </div>
                 <p><strong>Description:</strong> {product.description}</p>
 
                 <div className="flex justify-between">
                   <p><strong>Price:</strong> {product.unit_price} DA</p>
-                  <p><strong>Qty:</strong> {product.qte_left}</p>
+                  <p><strong>Unit:</strong> {product.unit}</p>
                 </div>
 
                 <div className="flex justify-between">
-                  <p><strong>Unit:</strong> {product.unit}</p>
+                  <p><strong>Density:</strong> {product.density}</p>
                   <p className={product.active ? "text-green-500" : "text-red-500"}>
                     <strong className="text-white">State:</strong>{" "}
                     {product.active ? "Active" : "Inactive"}
@@ -109,7 +112,7 @@ export default function ProductsList() {
               <p><strong>Name:</strong> {selectedProduct.name}</p>
               <p><strong>Description:</strong> {selectedProduct.description}</p>
               <p><strong>Price:</strong> {selectedProduct.unit_price} DA</p>
-              <p><strong>Quantity:</strong> {selectedProduct.qte_left}</p>
+              <p><strong>density:</strong> {selectedProduct.density}</p>
               <p><strong>Unit:</strong> {selectedProduct.unit}</p>
 
               <p className={selectedProduct.active ? "text-green-500" : "text-red-500"}>

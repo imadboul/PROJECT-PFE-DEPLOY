@@ -12,26 +12,22 @@ import { useNotifications } from "../context/NotificationContext";
 
 export default function PaymentsList() {
   const [payments, setPayments] = useState([]);
-  const [productTypes, setProductTypes] = useState([]);
   const [showValidated, setShowValidated] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [loading, setLoading] = useState(false);
   const { fetchNotifications } = useNotifications();
   const location = useLocation();
   const selectedProductType = location.state?.productType;
+  
   //  Fetch data
   const fetchPayments = async () => {
     try {
       setLoading(true);
 
       const resP = await getPayments();
-      const resT = await getProductTypes();
-
-      const paymentsData = resP.data.payments || resP.data;
-      const typesData = resT.data.types || resT.data;
+      const paymentsData = resP.data.data.results || resP.data;
 
       setPayments(Array.isArray(paymentsData) ? paymentsData : []);
-      setProductTypes(Array.isArray(typesData) ? typesData : []);
     }catch (error) {
         const msg =
         error.response?.data?.error ||
@@ -51,7 +47,7 @@ export default function PaymentsList() {
   const handleValidate = async (id) => {
     try {
       await validatePayment(id);
-      //await fetchNotifications();
+      await fetchNotifications();
       toast.success("Payment validated");
       setSelectedPayment(null);
       fetchPayments();
@@ -97,11 +93,7 @@ export default function PaymentsList() {
     });
   };
 
-  // Get product name
-  const getProductName = (id) => {
-    const type = productTypes.find((p) => p.id === id);
-    return type ? type.name : id;
-  };
+
 
   // Filter payments
   const filteredPayments = payments.filter((p) => {
@@ -159,7 +151,7 @@ export default function PaymentsList() {
 
               <p>
                 <strong>Product:</strong>{" "}
-                {getProductName(p.productType)}
+                {p.productType}
               </p>
 
               <div className="flex justify-between">
@@ -217,7 +209,7 @@ export default function PaymentsList() {
 
             <div className="space-y-2 text-sm">
 
-              <p><strong>Product:</strong> {getProductName(selectedPayment.productType)}</p>
+              <p><strong>Product:</strong> {selectedPayment.productType}</p>
               <p><strong>Transfer:</strong> {formatDate(selectedPayment.transferDate)}</p>
               <p><strong>Created:</strong> {formatDate(selectedPayment.created_at)}</p>
               <p><strong>Bank:</strong> {selectedPayment.bankName}</p>
