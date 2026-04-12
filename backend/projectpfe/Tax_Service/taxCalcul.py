@@ -122,8 +122,10 @@ def additional_taxPrice_qte(invoice,invoicesLine,product_name,qte,unit,tax_price
 def unitchange(orderProduct,unit):
     
     
+    
     if (unit==orderProduct.unit):
         return orderProduct.qte
+  
     match unit:
         case 'L':
             match orderProduct.unit:
@@ -241,8 +243,7 @@ def update_invoices_bulk(invoicesFinal):
         ],
         output_field=DecimalField()
     )
-    print(dict(grouped))
-    print(dict(balance_grouped))
+    
     Invoice.objects.filter(id__in=ids).update( HT=ht_case , TVA=tva_case , TTC=ttc_case )
     Balance.objects.filter(id__in=balance_grouped.keys()).update( amount=blc_case )
     
