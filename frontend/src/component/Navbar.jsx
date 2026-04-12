@@ -10,7 +10,7 @@ export default function Navbar() {
 
   const [open, setOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  
+
   const linkStyle = ({ isActive }) =>
     `px-3 py-2 text-lg ${isActive ? "text-orange-500 font-medium" : "text-white font-medium"
     } hover:text-orange-500`;
@@ -117,10 +117,10 @@ export default function Navbar() {
           </NavLink>
           <NavLink
             onClick={() => setOpen(!open)}
-            to="/Sold"
+            to="/Balance"
             className={linkStyle}
           >
-            Sold
+            Balance
           </NavLink>
           <NavLink
             onClick={() => setOpen(!open)}
@@ -136,14 +136,30 @@ export default function Navbar() {
           >
             Invoices
           </NavLink>
-          {/* add product for superAdmin*/}
+          <NavLink
+            onClick={() => setOpen(!open)}
+            to="/product"
+            className={linkStyle}
+          >
+            Product
+          </NavLink>
+          {["admin", "superAdmin"].includes(user?.role) && (
+            <NavLink
+              onClick={() => setOpen(!open)}
+              to="/Sign"
+              className={linkStyle}>
+              Sign Up
+            </NavLink>
+          )}
 
           <NavLink
             onClick={() => setOpen(!open)}
             to="/AddProduct"
             className={linkStyle}>
-            <i className="fa-solid fa-plus"></i>
-            Add Product
+            <div className="flex items-center gap-2">
+              <i className="fa-solid fa-plus"></i>
+              Add Product
+            </div>
           </NavLink>
 
 
@@ -157,9 +173,11 @@ export default function Navbar() {
             <div className="flex items-center gap-2">
               <i className="fa-regular fa-message"></i>
               Messages
-              <span className="ml-auto bg-orange-500 text-white text-xs px-3 rounded-full">
-                3
-              </span>
+              {unreadCount > 0 && (
+                <span className="absolute text-xs bg-orange-500 text-white px-1 rounded-full">
+                  {unreadCount}
+                </span>
+              )}
             </div>
           </NavLink>
 

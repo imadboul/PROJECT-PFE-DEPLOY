@@ -18,7 +18,7 @@ export default function PaymentsList() {
   const { fetchNotifications } = useNotifications();
   const location = useLocation();
   const selectedProductType = location.state?.productType;
-  
+
   //  Fetch data
   const fetchPayments = async () => {
     try {
@@ -28,13 +28,13 @@ export default function PaymentsList() {
       const paymentsData = resP.data.data.results || resP.data;
 
       setPayments(Array.isArray(paymentsData) ? paymentsData : []);
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error fatching data";
 
       toast.error(msg);
-      }finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -51,13 +51,13 @@ export default function PaymentsList() {
       toast.success("Payment validated");
       setSelectedPayment(null);
       fetchPayments();
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error validation";
 
       toast.error(msg);
-      }
+    }
   };
 
   //  Reject
@@ -67,13 +67,13 @@ export default function PaymentsList() {
       toast.success("Payment rejected");
       setSelectedPayment(null);
       fetchPayments();
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error rejection";
 
       toast.error(msg);
-      }
+    }
   };
 
   //  Toggle filter
@@ -149,12 +149,10 @@ export default function PaymentsList() {
           >
             <div className="space-y-2 text-sm">
 
-              <p>
-                <strong>Product:</strong>{" "}
-                {p.productType}
+              <p className="text-lg font-semibold">
+                <strong>Product type:</strong> {p.product_type}
               </p>
-
-              <div className="flex justify-between">
+              <div className="md:flex justify-between">
                 <p>
                   <strong>Transfer:</strong>{" "}
                   {formatDate(p.transferDate)}
@@ -166,7 +164,7 @@ export default function PaymentsList() {
                 </p>
               </div>
 
-              <div className="flex justify-between">
+              <div className="md:flex justify-between">
                 <p>
                   <strong>Bank:</strong> {p.bankName}
                 </p>

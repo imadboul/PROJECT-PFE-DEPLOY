@@ -79,7 +79,7 @@ const unitOptions = [
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent text-white">
+    <div className="min-h-screen flex items-center justify-center bg-transparent text-white px-4">
       <div className="w-full max-w-xl bg-black/60 rounded-2xl shadow-lg p-6 border border-black/60">
 
         {/* Header */}
@@ -100,7 +100,7 @@ const unitOptions = [
           {/* Product Type */}
           <div className="flex items-center gap-6">
 
-            <div className="w-2/3">
+            <div className="w-3/4">
               <Controller
                 name="productType"
                 control={control}
@@ -116,7 +116,7 @@ const unitOptions = [
                         backgroundColor: "rgba(7, 7, 7, 0.11)",
                         borderColor: state.isFocused ? "#f97316" : "#000",
                         boxShadow: "none",
-                        fontSize: "20px",
+                        fontSize: "18px",
                       }),
                       menu: (base) => ({
                         ...base,
@@ -149,13 +149,13 @@ const unitOptions = [
             </div>
 
             {/* Add Type */}
-            <NavLink to="/AddProductType" className="text-orange-400 text-xl hover:text-orange-600 transition">
+            <NavLink to="/AddProductType" className="text-orange-400 text-md md:text-xl hover:text-orange-600 transition">
               <i className="fa-solid fa-plus"></i>
             </NavLink>
           </div>
           <div className="relative bottom-5 mb-7">
             {errors.productType && (
-              <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
+              <p className="absolute top-0 left-0 right-0 text-red-500 text-lg text-center mt-1">
                 {errors.productType.message}
               </p>
             )}
@@ -166,11 +166,11 @@ const unitOptions = [
             type="text"
             placeholder="Name"
             {...register("name", { required: "Name is required" })}
-            className="w-full text-xl placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full text-lg placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
           <div className="relative bottom-4 mb-4">
             {errors.name && (
-              <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
+              <p className="absolute top-0 left-0 right-0 text-red-500 text-lg text-center mt-1">
                 {errors.name.message}
               </p>
             )}
@@ -180,14 +180,14 @@ const unitOptions = [
           <textarea
             placeholder="Description"
             {...register("description")}
-            className="w-full text-xl placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full text-lg placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
 
           {/* Price + Unit */}
           <div className="flex items-center justify-between gap-6">
 
             {/* Price */}
-            <div className="flex">
+            <div className="flex-1">
               <input
                 type="number"
                 placeholder="Unit Price"
@@ -201,7 +201,7 @@ const unitOptions = [
             </div>
 
             {/* Unit */}
-            <div className="flex">
+            <div className="flex-1">
               <Controller
                 className="focus:outline-none focus:ring-2 focus:ring-orange-500"
                 name="unit"
@@ -218,7 +218,7 @@ const unitOptions = [
                         backgroundColor: "rgba(7, 7, 7, 0.11)",
                         borderColor: state.isFocused ? "#f97316" : "#000",
                         boxShadow: "none",
-                        fontSize: "20px",
+                        fontSize: "18px",
                       }),
                       menu: (base) => ({
                         ...base,

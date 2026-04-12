@@ -83,12 +83,12 @@ function RequestContract() {
     };
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-transparent">
+      <div className="min-h-screen flex items-center justify-center bg-transparent px-4">
 
         <div className="w-full  max-w-xl bg-black/60 rounded-2xl shadow-lg p-6 border border-black/60">
 
           <button
-            className="placeholder-white text-2xl cursor-pointer text-white font-bold hover:text-orange-500"
+            className="text-white text-2xl cursor-pointer text-white font-bold hover:text-orange-500"
             onClick={() => window.history.back()}
           >
             <i className="fa-solid fa-arrow-left"></i>
@@ -222,13 +222,12 @@ function RequestContract() {
 
             {/* BUTTON */}
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full mt-4 py-2 rounded-lg text-white transition cursor-pointer"
-            
-            >
-              {loading ? "Loading..." : "Request Contract"}
-            </button>
+            type="submit"
+            disabled={loading}
+            className="w-full py-2 text-white font-bold bg-orange-600 cursor-pointer hover:bg-orange-700 rounded placeholder-white"
+          >
+            {loading ? "Loading..." : "Request Contract"}
+          </button>
 
           </form>
         </div>

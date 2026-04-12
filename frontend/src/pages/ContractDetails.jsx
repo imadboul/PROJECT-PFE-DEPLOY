@@ -111,11 +111,11 @@ export default function ContractDetails() {
         >
           <div className="space-y-2 text-sm">
 
-            <p className="text-lg font-bold">
+            <p className="text-lg font-semibold">
               <strong>Product type:</strong> {contract.product_type}
             </p>
 
-            <div className="flex items-center justify-between">
+            <div className="md:flex items-center justify-between">
               <p>
                 <strong>Start date:</strong>{" "}
                 {formatDate(contract.start_date)}
@@ -127,7 +127,7 @@ export default function ContractDetails() {
               </p>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="md:flex items-center justify-between">
               <p>
                 <strong>Validated at:</strong>{" "}
                 {formatDate(contract.validated_at)}

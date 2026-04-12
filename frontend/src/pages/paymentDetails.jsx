@@ -133,12 +133,11 @@ export default function PaymentDetails() {
         >
           <div className="space-y-2 text-sm">
 
-            <p>
-              <strong>Product:</strong>{" "}
-              {payment.productType}
+            <p className="text-lg font-semibold">
+              <strong>Product type:</strong> {payment.product_type}
             </p>
 
-            <div className="flex justify-between">
+            <div className="md:flex justify-between">
               <p>
                 <strong>Transfer:</strong>{" "}
                 {formatDate(payment.transferDate)}
@@ -150,7 +149,7 @@ export default function PaymentDetails() {
               </p>
             </div>
 
-            <div className="flex justify-between">
+            <div className="md:flex justify-between">
               <p>
                 <strong>Bank:</strong> {payment.bankName}
               </p>

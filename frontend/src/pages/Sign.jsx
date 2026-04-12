@@ -33,13 +33,13 @@ export default function Sign() {
         setAuthError(result.error);
         toast.error("Sign up failed");
       }
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error Sign up";
 
       toast.error(msg);
-      }finally {
+    } finally {
       setLoading(false);
     }
   }
@@ -47,14 +47,14 @@ export default function Sign() {
   return (
     <div className="min-h-screen relative flex items-center justify-center z-10 p-4">
       <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
-        
+
 
         {/* Right Side (Form) */}
         <div className="w-full px-10 py-5">
           <h2 className="text-2xl font-bold m-4 text-center">Sign Up</h2>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="flex gap-4 md:flex-row flex-col">
               <div>
                 <label className="text-sm font-medium">Last Name</label>
                 <input
@@ -74,6 +74,7 @@ export default function Sign() {
                 </div>
               </div>
               <div>
+
                 <label className="text-sm font-medium">First Name</label>
                 <input
                   type="text"
@@ -91,26 +92,28 @@ export default function Sign() {
                   )}
                 </div>
               </div>
-            
 
-            <div>
-              <label className="text-sm font-medium">Phone Number</label>
-              <input
-                type="number"
-                placeholder="Enter your Phone Number"
-                className="w-full mt-2 p-3 bg-gray-100 rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
-                {...register("phoneNumber", {
-                  required: "Phone Number required",
-                })}
-              />
-              <div className="relative top-0 mb-3">
-                {errors.phoneNumber && (
-                  <p className="absolute top-0 left-0 right-0 text-red-500 text-xs text-center mt-1">
-                    {errors.phoneNumber.message}
-                  </p>
-                )}
+
+
+              <div>
+                <label className="text-sm font-medium">Phone Number</label>
+                <input
+                  type="number"
+                  placeholder="Enter your Phone Number"
+                  className="w-full mt-2 p-3 bg-gray-100 rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
+                  {...register("phoneNumber", {
+                    required: "Phone Number required",
+                  })}
+                />
+                <div className="relative top-0 mb-3">
+                  {errors.phoneNumber && (
+                    <p className="absolute top-0 left-0 right-0 text-red-500 text-xs text-center mt-1">
+                      {errors.phoneNumber.message}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
+
             </div>
 
             <div>
@@ -183,8 +186,8 @@ export default function Sign() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-6 py-2 rounded-lg font-bold text-white transition bg-orange-600 cursor-pointer hover:bg-orange-700" 
-               
+              className="w-full mt-6 py-2 rounded-lg font-bold text-white transition bg-orange-600 cursor-pointer hover:bg-orange-700"
+
             >
               {loading ? "Loading..." : "Sign Up"}
             </button>
