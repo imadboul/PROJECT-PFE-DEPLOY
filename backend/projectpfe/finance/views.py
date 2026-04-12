@@ -25,7 +25,7 @@ def payments(request):
             queryset = Payment.objects.all().order_by('-created_at')
 
         result_page = paginator.paginate_queryset(queryset, request)
-        serializer = paymentcreateserializer(result_page, many=True)
+        serializer = paymentreadserializer(result_page, many=True)
 
         return success_response(data=paginated_response(paginator, serializer),message="Payments retrieved successfully",status_code=200)
             
@@ -95,6 +95,9 @@ def validatePayment(request):
         return success_response(message=f"payment {payment.state}",status_code=200) 
     else:
         return error_response(message="failed",errors=serializer.errors)
+    
+    
+    
     
 def check_if_enough(amount, client_id, type_id):
     
