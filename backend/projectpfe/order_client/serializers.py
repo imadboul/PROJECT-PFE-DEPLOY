@@ -5,6 +5,7 @@ from catalog.models import Client,Contract,ProductType,Product
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from finance.views import check_if_enough
+from decimal import Decimal
 
 
 #serializer for client contract order productType filter
@@ -71,13 +72,17 @@ class OrderFilterSerializerTow(serializers.ModelSerializer):
        class Meta:
            model=Orderclient
            fields=['client','contract']
+           
 
 
 #----------------------------------------------------------------------------------------------------
 class OrderProductSerializer(serializers.ModelSerializer):
     class Meta:
         model=OrderProductclient
-        fields=['product','qte']
+        fields=['product','qte','qte_taken']
+        extra_kwargs = {
+         "qte_taken": {"read_only": True},
+}
         
 class OrderSerializer(serializers.ModelSerializer):
     products=OrderProductSerializer(many=True)
@@ -89,13 +94,13 @@ class OrderSerializer(serializers.ModelSerializer):
     def validate_products(self, value):
        total_qte = 0
        total_price = 0
-
+       
        for item in value:
            qte = item.get('qte', 0)
            product = item.get('product')
 
-           total_qte += qte
-           total_price += product.unit_price * qte
+           total_qte += qte 
+           total_price += product.unit_price * qte   #order (1)
 
        self.total_qte = total_qte
        self.total_price = total_price
@@ -121,12 +126,16 @@ class OrderSerializer(serializers.ModelSerializer):
 
         print(  total_qte)
         print(contract.qte_rest())
-        if  total_qte > contract.qte_rest():
+        print(type(total_qte), total_qte)
+        print(type(contract.qte_rest()), contract.qte_rest())
+        if total_qte > contract.qte_rest():
+            print('karim')
             raise serializers.ValidationError(
                 f"declared quantity ({ self.total_qte}) is larger than the quantity left in the contract ({contract.qte_rest()})"
             )
-        
+        print(total_price)
         check = check_if_enough(total_price,request_user_id,contract.product_type)
+        print('karim2')
         if not check['success']:
             raise serializers.ValidationError(check['message'])
             
@@ -153,7 +162,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class OrderreadSerializer(serializers.ModelSerializer):
     client = serializers.CharField(source ="client.lastName")
-    products=OrderProductSerializer(many=True)
+    productsclient=OrderProductSerializer(many=True)
 
     class Meta:
         model=Orderclient
@@ -177,7 +186,7 @@ class ValidateOrdersSerializer(serializers.Serializer):
         try:
             order = Orderclient.objects.get(id = data.get('id'))
         except Orderclient.DoesNotExist:
-             raise serializers.ValidationError("order does not exist ")
+             raise serializers.ValidationError("order does not not  exist ")
         
         return data
     

@@ -2,11 +2,11 @@ from django.db import models
 from catalog.models import Product
 
 class TaxUnit(models.TextChoices):
-    KG='Kg'
-    HL='Hl'
-    TM='Tm'
-    L='l'
-    PR='%'
+    KG='KG','Kilogram'
+    HL='HL','Hectoliter'
+    TM='TM','Ton'
+    L='L','Liter'
+    PR = 'PR', 'Percentage'
 class Tax(models.Model):
     id=models.AutoField(primary_key=True)
     name=models.CharField(null=False,blank=False,max_length=100)

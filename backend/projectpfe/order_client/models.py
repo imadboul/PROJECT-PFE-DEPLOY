@@ -1,5 +1,6 @@
 from django.db import models
 from catalog.models import Contract,Client,Product
+from decimal import Decimal
 
 class States(models.TextChoices):
     
@@ -24,6 +25,7 @@ class OrderProductclient(models.Model):
     order=models.ForeignKey(Orderclient,related_name='productsclient',null=False,blank=False,on_delete=models.PROTECT)
     product=models.ForeignKey(Product,related_name='productsclient',null=False,blank=False,on_delete=models.PROTECT)
     qte=models.DecimalField(null=False,blank=False,max_digits=12,decimal_places=3)
+    qte_taken = models.DecimalField(max_digits=12,decimal_places=3,default=Decimal('0'))
         
 
 

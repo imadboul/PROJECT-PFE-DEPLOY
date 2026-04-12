@@ -1,9 +1,10 @@
 from django.urls import path
-from .views import order , validateorder ,RectificativeOrder,get_order
+from .views import *
 urlpatterns = [
-    path('order/',order),
-    path('validateorder/',validateorder),
-    path('rectificative/', RectificativeOrder),
-    path('order/<int:id>', get_order)
+    path('create/',OrderCreateView.as_view()),
+    path('validat/',OrderValidateView.as_view()),
+    path('rectificative/',RectificativeOrderView.as_view()),
+    path('<int:type>/', OrderListView.as_view()),
+    path('invalid',inValid)
     
 ]

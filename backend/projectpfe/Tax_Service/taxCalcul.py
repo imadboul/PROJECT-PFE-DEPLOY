@@ -1,8 +1,6 @@
 from django.db.models import F
-from rest_framework import status
 from Orders_Manage.models import States
-from rest_framework.response import Response
-from Invoices.models import InvoiceLineAllInfo,Invoice
+from Invoices.models import InvoiceLine,Invoice
 import logging
 logging=logging.getLogger(__name__)
 
@@ -52,14 +50,14 @@ def tax_price(taxs,orderProduct,invoice):
         for tax in taxs_ne_tva:
             match tax.unit:
                 case 'l':
-                    unit_l=unitchange(orderProduct.qte,orderProduct.unit,'l')
+                    unit_l=unitchange(orderProduct,'l')
                     tax_price=unit_l*tax.par_unit
                     total_tax+=tax_price    
                     if(orderProduct.order.type=='mains'):
                          additional_taxPrice_qte(invoice,orderProduct.product.name,orderProduct.qte*-1,orderProduct.unit,tax_price*-1,tax.tax.name)
                     else:
                           additional_taxPrice_qte(invoice,orderProduct.product.name,orderProduct.qte,orderProduct.unit,tax_price,tax.tax.name)
-        qte_unit=unitchange(orderProduct.qte,orderProduct.unit,tva.product.unit)
+        qte_unit=unitchange(orderProduct.qte,orderProduct.unit,tva.product.unit) # type: ignore
         HT=(qte_unit*orderProduct.product.unit_price)
         TTC=(HT+total_tax)*(1+tva.par_unit/100)
         TVA=(HT+total_tax)*tva.par_unit/100
@@ -76,17 +74,16 @@ def tax_price(taxs,orderProduct,invoice):
         logging.error(f"Error in tax_price function: {str(e)}")
         raise Exception(str(e))
     
-def unitchange(qte,unit,unit_product):
-    return qte       
+     
 
 def additional_taxPrice_qte(invoice,product_name,qte,unit,tax_price,tax_name):
     try:
  
-        tax_price_qte=invoice.invoice_InvoiceLineAllInfo_items.filter(product_name=product_name,tax_name=tax_name)
+        tax_price_qte=invoice.invoice_InvoiceLine_items.filter(product_name=product_name,tax_name=tax_name)
         if tax_price_qte.exists():
                 tax_price_qte.update(tax_price=F('tax_price')+tax_price,qte=F('qte')+qte)
         else:           
-            InvoiceLineAllInfo.objects.create(
+            InvoiceLine.objects.create(
                 invoice=invoice,
                 product_name=product_name,
                 qte=qte,
@@ -97,4 +94,45 @@ def additional_taxPrice_qte(invoice,product_name,qte,unit,tax_price,tax_name):
     except Exception as e:
         logging.error(f"Error in additional_taxPrice_qte function: {str(e)}")
         raise Exception(str(e))
+
+
+def unitchange(orderProduct,unit):
+    
+    if (unit==orderProduct.unit):
+        return orderProduct.qte
+    match unit:
+        case 'L':
+            match orderProduct.unit:
+                case 'HL':
+                    return orderProduct.qte*100
+                case 'KG':
+                    return orderProduct.qte/orderProduct.product.density
+                case 'TM':
+                    return orderProduct.qte*1000/orderProduct.product.density
+        case 'HL':
+            match orderProduct.unit:
+                case 'L':
+                    return orderProduct.qte/100
+                case 'KG':
+                    return orderProduct.qte/100*orderProduct.product.density
+                case 'TM':
+                    return orderProduct.qte*10/orderProduct.product.density
+        case 'KG':
+            match orderProduct.unit:
+                case 'L':
+                    return orderProduct.qte*orderProduct.product.density
+                case 'HL':
+                    return orderProduct.qte*100*orderProduct.product.density
+                case 'TM':
+                    return orderProduct.qte*1000 
+        case 'TM':
+            match orderProduct.unit:
+                case 'KG':
+                    return orderProduct.qte/1000
+                case 'HL':
+                    return orderProduct.qte*orderProduct.product.density/10
+                case 'L':
+                    return orderProduct.qte*orderProduct.product.density/1000      
+        
+    
 

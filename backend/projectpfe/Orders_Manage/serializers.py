@@ -5,6 +5,9 @@ from catalog.models import Client,Contract,ProductType,Product
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from finance.views import check_if_enough
+from order_client.models import OrderProductclient
+from django.db import models
+from Invoices.models import Invoice , States
 
 
 #serializer for client contract order productType filter
@@ -73,161 +76,95 @@ class OrderFilterSerializerTow(serializers.ModelSerializer):
            fields=['client','contract']
 
 
-#----------------------------------------------------------------------------------------------------
+#serializer for save order and orderProduct and rectificative 
 class OrderProductSerializer(serializers.ModelSerializer):
     class Meta:
         model=OrderProduct
-        fields=['product','qte']
+        fields=['product','qte','unit']
         
 class OrderSerializer(serializers.ModelSerializer):
-    products=OrderProductSerializer(many=True)
+    order_orderProduct_items=OrderProductSerializer(many=True)
     class Meta:
         model=Order
-        fields=['contract','products']
-        
-        
-    def validate_products(self, value):
-       total_qte = 0
-       total_price = 0
-
-       for item in value:
-           qte = item.get('qte', 0)
-           product = item.get('product')
-
-           total_qte += qte
-           total_price += product.unit_price * qte
-
-       self.total_qte = total_qte
-       self.total_price = total_price
-
-       return value
-        
+        fields=['contract','client','client_order','order_orderProduct_items']
     def validate(self, data):
-        request_user_id = self.context.get('user_id') 
-        contract = data.get('contract')
-        total_qte = getattr(self, 'total_qte', 0)
-        total_price = getattr(self, 'total_price', 0)
         
         
-        if not contract:
-            raise serializers.ValidationError("contract must be provided")
         
-        if contract.client.id != request_user_id:
-            raise serializers.ValidationError("You cannot place an order for another client's contract")
-
-        if contract.state != 'validated':
-            raise serializers.ValidationError("contract is not validated")
+        if data['contract'].client.id != data['client'].id or data['contract'].state!="validated" :
+            raise serializers.ValidationError('This client does not have this contract.')
+        
+        product_type_id=data['contract'].product_type.id
     
-
-        print(  total_qte)
-        print(contract.qte_rest())
-        if  total_qte > contract.qte_rest():
-            raise serializers.ValidationError(
-                f"declared quantity ({ self.total_qte}) is larger than the quantity left in the contract ({contract.qte_rest()})"
-            )
-        
-        check = check_if_enough(total_price,request_user_id,contract.product_type)
-        if not check['success']:
-            raise serializers.ValidationError(check['message'])
-            
-
-        return data
-            
-                
+        for product in data['order_orderProduct_items']:
+            if product['product'].product_type.id != product_type_id:
+                raise serializers.ValidationError('This contract does not include this type of product.') 
+           
+        return super().validate(data)   
+    
     def create(self, validated_data):
         
         with transaction.atomic():
-             order_items=validated_data.pop( 'products' )
-             order=Order.objects.create(**validated_data)
+            
+             invoice=Invoice.objects.filter(contract=validated_data['contract'],states=States.NO_VALID)
+             if not invoice :
+                 invoice=Invoice( contract=validated_data['contract'] )
+                 invoice.save()
+                 
+             order_items=validated_data.pop( 'order_orderProduct_items' )
+             order=Order(**validated_data,invoice=invoice)
+             order.save()
              
              for order_item in order_items:
                  orderProduct=OrderProduct(
                  product=order_item['product'],
                  qte=order_item['qte'],
-                 type=order.type,
+                 unit=order_item['unit'],
                  order=order,
                  ) 
                  orderProduct.save()
         
-        return order 
+        return order
     
-
 class RectificativeOrderSerializer(serializers.ModelSerializer):
-        products=OrderProductSerializer(many=True)
-        parent_order = serializers.PrimaryKeyRelatedField(queryset=Order.objects.all(), required=True)
-        type = serializers.CharField( required=True)
-        
-        
+        Type_Choise=( ('plus') , ('mains')  , )
+        order_orderProduct_items=OrderProductSerializer(many=True)
+        id_parent=serializers.IntegerField(required=True)
+        type_choise=serializers.ChoiceField(choices=Type_Choise)
         class Meta:
             model=Order
-            fields=['parent_order','type','products']
-            
-        def validate(self,data):
-            request_user_id = self.context.get('user_id') 
-            contract = data.get('parent_order')
-            try:
-                order = data.get('parent_order')
-                if order.client_id != request_user_id: # type: ignore
-                    raise serializers.ValidationError("You cannot place an order for another client's contract")
-            
-            except Order.DoesNotExist:
-                raise serializers.ValidationError("parent order does not exist ")
-            
-            return data
-                
+            fields=['id_parent','type_choise','order_orderProduct_items']
         
             
         def create(self,validated_data):
-            with transaction.atomic():  
-                parent_order =  validated_data['parent_order'] 
-                order_products=validated_data['products']
-                request_user_id = self.context.get('user_id')
-                
+            order=get_object_or_404(Order,id=validated_data['id_parent'])
+            with transaction.atomic():    
+                invoice=Invoice.objects.filter(id=order.invoice.id,states=States.NO_VALID).first()
+                if not invoice:
+                    invoice=Invoice.objects.create(
+                        contract=order.contract,
+                        type=validated_data['type_choise']
+                    )
+                order_items=validated_data.pop('order_orderProduct_items')
                 newOrder=Order.objects.create(
-                    contract=parent_order.contract,
-                    client=parent_order.client,
-                    parent_order=parent_order,
-                    type=validated_data['type'],
+                    contract=order.contract,
+                    client=order.client,
+                    parent_order=order,
+                    type=validated_data['type_choise'],
+                    invoice=invoice
                 )
                 
-                for order_product in order_products :
+                for order_item in order_items :
                     orderProduct=OrderProduct(
-                       product=order_product['product'],
-                       qte=order_product['qte'],
-                       order= newOrder
+                       product=order_item['product'],
+                       qte=order_item['qte'],
+                       unit=order_item['unit'],
+                       order=newOrder,  
                     )
                     orderProduct.save()
                 return newOrder   
    
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class OrderreadSerializer(serializers.ModelSerializer):
-    client = serializers.CharField(source ="client.lastName")
-    products=OrderProductSerializer(many=True)
-
-    class Meta:
-        model=Order
-        fields='__all__'
-
             
-#=============================================================================================================     
+#serializer for list validated orders            
 class ValidateOrdersSerializer(serializers.Serializer):
-    id=serializers.IntegerField()  
-    state = serializers.CharField()
-    
-    def validate_state(self, value):
-          
-          
-          STATES = ["pending","validated","rejected"]
-          if not value in STATES:
-              raise serializers.ValidationError("state does not exist ")
-          return value
-
-    def validate(self, data):
-        try:
-            order = Order.objects.get(id = data.get('id'))
-        except Order.DoesNotExist:
-             raise serializers.ValidationError("order does not exist ")
-        
-        return data
-    
+    ids=serializers.ListField(child=serializers.IntegerField(),allow_empty=False)      

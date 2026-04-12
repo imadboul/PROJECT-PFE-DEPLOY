@@ -57,11 +57,11 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 ALLOWED_HOSTS = []
 
-#filters
+#filters-----exception
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend'
-    ]
+    'DEFAULT_FILTER_BACKENDS': [ 'django_filters.rest_framework.DjangoFilterBackend' ],
+     'EXCEPTION_HANDLER': 'projectpfe.utils.exception.custom_exception_handler'
+    
 }
 
 # Application definition
@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     'order_client',
     'Tax_Service',
     'Invoices',
+    
     
 ]
 

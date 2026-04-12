@@ -12,73 +12,164 @@ from catalog.models import Contract,Client
 from django.utils.decorators import method_decorator
 from user.wraps import *
 from user.views import notify_all_admin , notify_a_client
+from .orderclientpdf import generate_pdf
+from projectpfe.utils.response import *
 
 
 
 
-@api_view(['POST','GET'])
+@api_view(['POST', 'GET'])
 @jwt_must
 def order(request):
+
     if request.method == 'POST':
         try:
-            serializer = OrderSerializer(data=request.data, context = {'user_id': request.user_id})
+            serializer = OrderSerializer(
+                data=request.data,
+                context={'user_id': request.user_id}
+            )
+
+            print('imad')
+
             if serializer.is_valid():
                 order = serializer.save(client_id=request.user_id)  # type: ignore
-                notify_all_admin('VALIDATE AN ORDER',f'validate order {order.id}','') # type: ignore
-                return Response({'data': 'Order created successfully wait for validation'}, status=status.HTTP_201_CREATED)
-            else:
-                return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+                print('imadsss')
+
+                notify_all_admin(
+                    'VALIDATE AN ORDER',
+                    f'validate order {order.id}', # type: ignore
+                    ''
+                )
+
+                return success_response(
+                    message="Order created successfully, wait for validation",
+                    status_code=status.HTTP_201_CREATED
+                )
+
+            return error_response(
+                message="Validation failed",
+                errors=serializer.errors
+            )
+
         except Exception as e:
-            return Response({'errorssss': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
-    
+            return error_response(
+                message="Unexpected error",
+                errors=str(e)
+            )
+
     if request.method == 'GET':
+
+        paginator = MyPagination()
+
         if request.role == 'client':
-            orders = OrderreadSerializer(Orderclient.objects.filter(client_id = request.user_id), many= True)
-            return Response({"orders": orders.data}, status=status.HTTP_200_OK)
+            queryset = Orderclient.objects.filter(client_id=request.user_id)
         else:
-            orders = OrderreadSerializer(Orderclient.objects.all(), many= True)
-            return Response({"orders": orders.data}, status=status.HTTP_200_OK)
-    
+            queryset = Orderclient.objects.all()
+
+        result_page = paginator.paginate_queryset(queryset, request)
+        orders = OrderreadSerializer(result_page, many=True)
+
+        return success_response(
+            data=paginated_response(paginator, orders),
+            message="Orders retrieved successfully",
+            status_code=status.HTTP_200_OK
+        )
     
 
         
 
         
-        
-        
-@api_view(['POST'])     
+@api_view(['POST'])
 @jwt_must
 def validateorder(request):
     try:
+
         with transaction.atomic():
-            serializer=ValidateOrdersSerializer(data=request.data)
-            if serializer.is_valid():
-                order = Order.objects.get(id= serializer.validated_data['id'] ) # type: ignore
-                
-                order.state = serializer.validated_data['state'] # type: ignore
-                order.validated_by_id = request.user_id # type: ignore
-                order.save()
-                return Response({"message": "Order validated successfully"}, status=status.HTTP_200_OK)
-            else:
-                return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e :
-        return  Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST) # type: ignore
+            serializer = ValidateOrdersSerializer(data=request.data)
+
+            if not serializer.is_valid():
+                return error_response(
+                    message="Validation failed",
+                    errors=serializer.errors
+                )
+
+            try:
+                order = Orderclient.objects.get(
+                    id=serializer.validated_data['id']  # type: ignore
+                )
+            except Orderclient.DoesNotExist:
+                return error_response(
+                    message="Order does not exist" , status_code=400
+                )
+
+            order.state = serializer.validated_data['state']  # type: ignore
+            order.validated_by_id = request.user_id  # type: ignore
+            order.save()
+
+            return success_response(
+                message="Order validated successfully",
+                status_code=status.HTTP_200_OK
+            )
+
+    except Exception as e:
+        return error_response(
+            message="Unexpected error",
+            errors=str(e)
+        )
  
    
 @api_view(['GET'])
 @jwt_must
-def get_order(request,id):
+def get_order(request, id):
     try:
+        # 🔒 Role-based filtering
         if request.role == 'client':
-            order = OrderreadSerializer(Orderclient.objects.get(id=id,client_id= request.user_id))
-            return Response({"orders": order.data}, status=status.HTTP_200_OK)
+            order = Orderclient.objects.get(
+                id=id,
+                client_id=request.user_id
+            )
         else:
-            order = OrderreadSerializer(Orderclient.objects.get(id=id))
-            return Response({"orders": order.data}, status=status.HTTP_200_OK)
-            
+            order = Orderclient.objects.get(id=id)
+
+        serializer = OrderreadSerializer(order)
+
+        return success_response(
+            data={"order": serializer.data},
+            message="Order retrieved successfully",
+            status_code=status.HTTP_200_OK
+        )
+
     except Orderclient.DoesNotExist:
-        return Response({'error': 'does not exist or you do not have permission' }, status=status.HTTP_400_BAD_REQUEST)
+        return error_response(
+            message="Order does not exist or you do not have permission"
+        )
+
+    except Exception as e:
+        return error_response(
+            message="Unexpected error",
+            errors=str(e)
+        )
+        
+@api_view(['GET'])
+@jwt_must
+def orderclientpdf(request, id):
+
+    try:
+        order = Orderclient.objects.get(id=id)
+
+        # 🔒 client can only access his own order
+        if request.role == 'client' and order.client_id != request.user_id: # type: ignore
+            return error_response(
+                message="Order does not exist or you do not have permission", status_code=400
+            )
+
+        return generate_pdf(id)
+
+    except Orderclient.DoesNotExist:
+        return error_response(
+            message="Order does not exist or you do not have permission" ,status_code=400
+        )
         
         
         

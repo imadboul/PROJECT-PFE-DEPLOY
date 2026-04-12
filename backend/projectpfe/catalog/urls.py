@@ -8,5 +8,5 @@ urlpatterns = [
     path('contract/', contract),
     path('validateContract/', validatecontract),
     path('contractPDF/<int:id>', contractpdf),
-     path('contract/<int:id>', get_contract),
+    path('contract/<int:id>', get_contract),
 ]

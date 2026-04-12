@@ -52,6 +52,14 @@ class paymentcreateserializer(serializers.ModelSerializer):
             "state":{"read_only": True},
             "validated_by": {"read_only": True},
             }
+    def validate_amount(self, value):
+        if value < 10:
+            raise serializers.ValidationError("minimum is 10 DA")
+        
+        if value > 1_000_000_000:  
+            raise serializers.ValidationError("amount too large")
+        
+        return value
         
     def validate(self,data):
          amount = data.get('amount')
