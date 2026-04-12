@@ -8,7 +8,7 @@ from finance.views import check_if_enough
 from order_client.models import OrderProductclient
 from django.db import models
 from Invoices.models import Invoice , States
-
+from user.views import notify_a_client
 
 #serializer for client contract order productType filter
 class ProductTypeFilterSerializerOne(serializers.ModelSerializer):
@@ -106,24 +106,23 @@ class OrderSerializer(serializers.ModelSerializer):
         
         with transaction.atomic():
             
-             invoice=Invoice.objects.filter(contract=validated_data['contract'],states=States.NO_VALID)
-             if not invoice :
-                 invoice=Invoice( contract=validated_data['contract'] )
-                 invoice.save()
+             invoice, created = Invoice.objects.get_or_create( contract=validated_data['contract'], states=States.NO_VALID )  
                  
              order_items=validated_data.pop( 'order_orderProduct_items' )
-             order=Order(**validated_data,invoice=invoice)
-             order.save()
+             order=Order.objects.create(**validated_data,invoice=invoice)
              
-             for order_item in order_items:
-                 orderProduct=OrderProduct(
-                 product=order_item['product'],
-                 qte=order_item['qte'],
-                 unit=order_item['unit'],
-                 order=order,
-                 ) 
-                 orderProduct.save()
-        
+             
+             
+             order_products = [
+                       OrderProduct(
+                       product=item['product'],
+                       qte=item['qte'],
+                       unit=item['unit'],
+                       order=order )
+                       for item in order_items  ]
+
+             OrderProduct.objects.bulk_create(order_products)
+             notify_a_client( order.client ,title="transport",content="***",link='')
         return order
     
 class RectificativeOrderSerializer(serializers.ModelSerializer):

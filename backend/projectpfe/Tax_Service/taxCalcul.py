@@ -1,66 +1,96 @@
 from django.db.models import F
 from Orders_Manage.models import States
 from Invoices.models import InvoiceLine,Invoice
+from finance.models import Balance
+from django.db.models import Case, When, F, Value, DecimalField
+from collections import defaultdict
 import logging
 logging=logging.getLogger(__name__)
 
 def mains_balances(ordersValidated):
-    try:     
-        for order in ordersValidated:
-            invoice=order.invoice
-            ordersProduct=order.order_orderProduct_items.all()
-            HT,TVA,TTC=total_price(ordersProduct,invoice) # order لكل  TTC السعر الكلي 
-            order.client.client_balances.filter(productType=order.contract.product_type).update(amount=F('amount')-TTC)
-            
-            if order.parent_order is not None  and order.parent_order.invoice.states==States.VALID:
-                
-                Invoice.objects.filter(id=invoice.id).update(HT=F('HT')+HT,TVA=F('TVA')+TVA,TTC=F('TTC') + TTC,states=States.VALID)
-            else:
-                Invoice.objects.filter(id=invoice.id).update(HT=F('HT')+HT,TVA=F('TVA')+TVA,TTC=F('TTC') + TTC)
-                   
-    except Exception as e:
         
-        raise Exception(str(e))  
-    
+        
+        
+        
+        
+        invoices=[]
+        invoicesLins=[]
+        
+        for order in ordersValidated:
+            HT, TVA, TTC = total_price( order.order_orderProduct_items.all() ,invoicesLins )
+        
+            invoices.append({
+                "invoice": order.invoice,
+                "HT": HT,
+                "TVA": TVA,
+                "TTC": TTC
+            })
+        
+        update_invoices_bulk(invoices)
+        
+        
+        
+        
+        
+        
+        
+        
+                   
+   
       
-def total_price(ordersProduct,invoice):
-    try:     
+def total_price(ordersProduct, invoicesLins):
+        
         HT,TVA,TTC=0,0,0
         for orderProduct in ordersProduct:
-            taxs=orderProduct.product.product_taxProduct_items.filter(is_active=True )
-            X,Y,Z=tax_price(taxs,orderProduct,invoice) # orderProduct لكل  TTC السعر الكلي
+            Tva=0
+            taxActiv=[]
+            
+            for tax in orderProduct.product.product_taxProduct_items.all():
+                
+                if tax.is_active==True and tax.tax.name!="TVA":
+                    taxActiv.append({  "name":tax.tax.name , "unit":tax.unit , "par_unit":tax.par_unit })
+                    
+                elif tax.is_active==True and tax.tax.name=="TVA":
+                     Tva=tax.par_unit
+            
+            
+            X,Y,Z=tax_price(taxActiv,orderProduct,Tva,invoicesLins)
     
             HT+=X
             TVA+=Y  
             TTC+=Z   
             
         return HT,TVA,TTC
-    except Exception as e:
-       
-        raise Exception(str(e))
     
-def tax_price(taxs,orderProduct,invoice):
-    try:
+    
+def tax_price(taxActiv,orderProduct,Tva,invoicesLins):
         
         
-          
         total_tax=0 
-        tva=taxs.filter(tax__name='TVA').first()
-        taxs_ne_tva=taxs.exclude(tax__name='TVA')
-        for tax in taxs_ne_tva:
-            match tax.unit:
-                case 'l':
-                    unit_l=unitchange(orderProduct,'l')
-                    tax_price=unit_l*tax.par_unit
+        
+        
+        for tax in taxActiv:
+            
+            match tax['unit']:
+              
+                case 'L':
+                    
+                    unit_l=unitchange(orderProduct,'L')
+                    
+                    tax_price=unit_l*tax['par_unit']
+                    
                     total_tax+=tax_price    
                     if(orderProduct.order.type=='mains'):
-                         additional_taxPrice_qte(invoice,orderProduct.product.name,orderProduct.qte*-1,orderProduct.unit,tax_price*-1,tax.tax.name)
+                         additional_taxPrice_qte(orderProduct.order.invoice,invoicesLins,orderProduct.product.name,orderProduct.qte*-1,orderProduct.unit,tax_price*-1,tax['name'])
                     else:
-                          additional_taxPrice_qte(invoice,orderProduct.product.name,orderProduct.qte,orderProduct.unit,tax_price,tax.tax.name)
-        qte_unit=unitchange(orderProduct.qte,orderProduct.unit,tva.product.unit) # type: ignore
+                          additional_taxPrice_qte(orderProduct.order.invoice,invoicesLins,orderProduct.product.name,orderProduct.qte,orderProduct.unit,tax_price,tax['name'])
+       
+        qte_unit=unitchange(orderProduct,orderProduct.product.unit) 
+        
         HT=(qte_unit*orderProduct.product.unit_price)
-        TTC=(HT+total_tax)*(1+tva.par_unit/100)
-        TVA=(HT+total_tax)*tva.par_unit/100
+        
+        TTC=(HT+total_tax)*(1+Tva/100)
+        TVA=(HT+total_tax)*Tva/100
         if(orderProduct.order.type== 'mains'):
             HT*=-1
             TVA*=-1
@@ -70,33 +100,27 @@ def tax_price(taxs,orderProduct,invoice):
         return HT,TVA,TTC
     
     
-    except Exception as e:
-        logging.error(f"Error in tax_price function: {str(e)}")
-        raise Exception(str(e))
-    
+  
      
 
-def additional_taxPrice_qte(invoice,product_name,qte,unit,tax_price,tax_name):
-    try:
+def additional_taxPrice_qte(invoice,invoicesLine,product_name,qte,unit,tax_price,tax_name):
+    
+    invoicesLine.append({
+        "invoice":invoice,
+        "product_name":product_name,
+        "qte":qte,
+        "unit":unit,
+        "tax_price":tax_price,
+        "tax_name":tax_name
+    })
+
+  
  
-        tax_price_qte=invoice.invoice_InvoiceLine_items.filter(product_name=product_name,tax_name=tax_name)
-        if tax_price_qte.exists():
-                tax_price_qte.update(tax_price=F('tax_price')+tax_price,qte=F('qte')+qte)
-        else:           
-            InvoiceLine.objects.create(
-                invoice=invoice,
-                product_name=product_name,
-                qte=qte,
-                unit=unit,
-                tax_price=tax_price,
-                tax_name=tax_name
-            )  
-    except Exception as e:
-        logging.error(f"Error in additional_taxPrice_qte function: {str(e)}")
-        raise Exception(str(e))
+        
 
 
 def unitchange(orderProduct,unit):
+    
     
     if (unit==orderProduct.unit):
         return orderProduct.qte
@@ -134,5 +158,93 @@ def unitchange(orderProduct,unit):
                 case 'L':
                     return orderProduct.qte*orderProduct.product.density/1000      
         
-    
 
+
+    
+    
+      
+
+
+def update_invoices_bulk(invoicesFinal):
+    
+    grouped = defaultdict(lambda: {"blc_id":None,"HT": 0, "TVA": 0, "TTC": 0})
+    
+    
+    for item in invoicesFinal:
+        inv = item["invoice"]
+        contract = inv.contract
+        client = contract.client
+        product_type = contract.product_type
+
+        blc = next(
+            (b for b in client.client_balances.all()
+             if b.productType_id == product_type.id),
+            None
+        )
+
+        inv_id = inv.id
+
+        if blc:
+            grouped[inv_id]["blc_id"] = blc.id
+
+        grouped[inv_id]["HT"] += item["HT"]
+        grouped[inv_id]["TVA"] += item["TVA"]
+        grouped[inv_id]["TTC"] += item["TTC"]
+
+
+    ids = list(grouped.keys())
+    
+    
+    
+    
+    balance_grouped = defaultdict(lambda: 0)
+
+    for data in grouped.values():
+        if data["blc_id"] is not None:
+            balance_grouped[data["blc_id"]] += data["TTC"]
+
+    blc_case = Case(
+        *[
+            When(id=blc_id, then=F("amount") - Value(total_ttc))
+            for blc_id, total_ttc in balance_grouped.items()
+        ],
+        output_field=DecimalField()
+    )
+    
+    ht_case = Case(
+        *[
+            When(id=inv_id, then=F("HT") + Value(data["HT"]))
+            for inv_id, data in grouped.items()
+        ],
+        output_field=DecimalField()
+    )
+
+    tva_case = Case(
+        *[
+            When(id=inv_id, then=F("TVA") + Value(data["TVA"]))
+            for inv_id, data in grouped.items()
+        ],
+        output_field=DecimalField()
+    )
+
+    ttc_case = Case(
+        *[
+            When(id=inv_id, then=F("TTC") + Value(data["TTC"]))
+            for inv_id, data in grouped.items()
+        ],
+        output_field=DecimalField()
+    )
+    blc_case = Case(
+        *[
+            When(id=blc_id, then=F("amount") - Value(total_ttc))
+            for blc_id, total_ttc in balance_grouped.items()
+        ],
+        output_field=DecimalField()
+    )
+    print(dict(grouped))
+    print(dict(balance_grouped))
+    Invoice.objects.filter(id__in=ids).update( HT=ht_case , TVA=tva_case , TTC=ttc_case )
+    Balance.objects.filter(id__in=balance_grouped.keys()).update( amount=blc_case )
+    
+    
+    

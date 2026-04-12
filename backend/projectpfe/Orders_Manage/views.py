@@ -15,17 +15,22 @@ from django.utils.decorators import method_decorator
 
 
 
-
 #@method_decorator(jwt_must, name='dispatch')
 class OrderCreateView(generics.CreateAPIView):
     
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     
+
+        
+    
     def create(self,request,*args,**kwargs):
+    
             serializer=self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
+            
+            
             return success_response(data=None,message='Order created successfully',status_code=201)
             
        
@@ -43,7 +48,12 @@ class OrderValidateView(generics.UpdateAPIView):
                  #validated_by=request.user_id                 
                  nbOrdes=Order.objects.filter(id__in=ids, states=States.PENDING).update(states=States.VALID)                 
                  if nbOrdes!=0:
-                    mains_balances(Order.objects.filter(id__in=ids) )
+                    mains_balances(Order.objects.filter(id__in=ids).prefetch_related(
+                     'order_orderProduct_items__product__product_taxProduct_items',
+                     'client__client_balances',
+                     'contract__product_type',
+                     
+                    ).select_related('invoice'))
                     
                  
                  return success_response(data=nbOrdes,message='number Order validated successfully',status_code=200)
@@ -109,10 +119,14 @@ class OrderListView(generics.ListAPIView):
          
 @api_view(['PUT'])     
 def inValid(request):
-    #Order.objects.update(states=States.PENDING)
-    orderProduct=OrderProduct.objects.get(id=3)
-    x=unitchange(orderProduct,'L')
-    return Response({'data':x})
+    order=Order.objects.prefetch_related(
+                     'order_orderProduct_items__product__product_taxProduct_items',
+                     'client__client_balances',
+                     'contract__product_type',
+                     
+                    ).select_related('invoice').all()
+    mains_balances(order)
+    return Response({'data':'bouklia'})
             
 
     
