@@ -55,6 +55,7 @@ export default function ContractDetails() {
   const handleReject = async (contractId) => {
     try {
       await rejectContract(contractId);
+      await fetchNotifications();
       toast.success("Rejected");
       fetchContract();
     }catch (error) {

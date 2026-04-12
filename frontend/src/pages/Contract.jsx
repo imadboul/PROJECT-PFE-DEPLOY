@@ -16,7 +16,7 @@ export default function ContractsList() {
   const handleValidate = async (id) => {
     try {
       await validateContract(id);
-     await fetchNotifications();
+      await fetchNotifications();
       toast.success("Contrat validated");
       setSelectedContract(null);
       fetchContracts();
@@ -33,6 +33,7 @@ export default function ContractsList() {
   const handleReject = async (id) => {
     try {
       await rejectContract(id);
+      await fetchNotifications();
       toast.success("Payment rejected");
       setSelectedContract(null);
       fetchContracts();
@@ -68,7 +69,6 @@ export default function ContractsList() {
     setLoading(true);
 
     const res = await getContracts();
-
     const data =res.data.data.contracts 
   
 
