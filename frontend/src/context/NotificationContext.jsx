@@ -8,19 +8,27 @@ export const NotificationProvider = ({ children }) => {
 
   const fetchNotifications = async () => {
     try {
+      const token = localStorage.getItem("accessToken");
+
+      if (!token) return;
+
       const res = await getNotifications();
-      const data = res.data.data.results;
+      const data = res.data.notifications;
+
       setNotifications(Array.isArray(data) ? data : []);
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
-        "Error fatching data";
+        "Error fetching data";
 
       toast.error(msg);
-      }
+    }
   };
-
   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) return;
+
     fetchNotifications();
   }, []);
 
