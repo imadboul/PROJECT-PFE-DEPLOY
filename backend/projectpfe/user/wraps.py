@@ -29,7 +29,6 @@ def jwt_must(func):
         if not client.exists():
             return error_response("invalid user", status_code=401)
 
-        # ✅ Attach user info to request
         request.user_id = data["user_id"] # type: ignore
         request.role = data.get("role") # type: ignore
 
@@ -44,11 +43,14 @@ def role_required(roles):
     def dec(func):
         @wraps(func)
         def wrapper(request : HttpRequest, *args, **kwargs):
+   
             if request.role not in roles: # type: ignore
-                return JsonResponse({"error": "you do not have permission"}, status=403)
+                return error_response("you do not have permission", status_code=401)
             return func(request , *args, **kwargs)
         return wrapper
     return dec
         
+
+
 
 
