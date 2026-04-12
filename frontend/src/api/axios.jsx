@@ -3,19 +3,6 @@ import axios from "axios";
 const api = axios.create({
   baseURL: "http://127.0.0.1:8000",
 });
-
-// Attach access token
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
-
-  if (token) {
-    config.headers.Auth = `Bearer ${token}`;
-  }
-
-  return config;
-});
-
-// Refresh logic
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -24,7 +11,8 @@ api.interceptors.response.use(
     if (
       error.response &&
       error.response.status === 401 &&
-      !originalRequest._retry
+      !originalRequest._retry &&
+      !originalRequest.url.includes("/client/refresh/")
     ) {
       originalRequest._retry = true;
 
@@ -38,7 +26,7 @@ api.interceptors.response.use(
           { refresh }
         );
 
-        const newAccess = res.data.access;
+        const newAccess = res.data.accessToken; 
 
         localStorage.setItem("accessToken", newAccess);
 
@@ -46,12 +34,6 @@ api.interceptors.response.use(
 
         return api(originalRequest);
       } catch (error) {
-        const msg =
-          error.response?.data?.error ||
-          "Error refresh";
-
-         console.log(msg)
-
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
 
@@ -64,5 +46,4 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 export default api;

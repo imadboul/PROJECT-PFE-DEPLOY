@@ -40,7 +40,7 @@ export default function ContractDetails() {
   const handleValidate = async (contractId) => {
     try {
       await validateContract(contractId);
-      await fetchNotifications();
+      //await fetchNotifications();
       toast.success("Validated");
       fetchContract();
     }catch (error) {
