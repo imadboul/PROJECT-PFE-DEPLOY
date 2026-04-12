@@ -3,6 +3,8 @@ from .models import *
 
 
 class balanceserializer(serializers.ModelSerializer):
+    productType = serializers.CharField(source="productType.name")
+    client = serializers.CharField(source ="client.lastName")
     
     class Meta:
         model =  Balance
