@@ -7,6 +7,7 @@ from .serializers import *
 from .models import *
 from django.utils import timezone
 from user.views import notify_all_admin , notify_a_client
+from projectpfe.utils.response import *
 
 
 @api_view(['GET','POST'])
@@ -16,15 +17,17 @@ def payments(request):
     
     if request.method == 'GET':
     
+        paginator = MyPagination()
+
         if request.role == 'client':
-        
-        
-            payments = paymentcreateserializer(Payment.objects.filter(client_id = client_id), many = True)
-        
-            return Response ( { "payments" : payments.data}, status=status.HTTP_200_OK )
+            queryset = Payment.objects.filter(client_id=client_id)
         else:
-            payments = paymentcreateserializer(Payment.objects.all().order_by('-created_at'), many = True)
-            return Response ( { "payments" : payments.data}, status=status.HTTP_200_OK )
+            queryset = Payment.objects.all().order_by('-created_at')
+
+        result_page = paginator.paginate_queryset(queryset, request)
+        serializer = paymentcreateserializer(result_page, many=True)
+
+        return success_response(data=paginated_response(paginator, serializer),message="Payments retrieved successfully",status_code=200)
             
     if request.method == 'POST':
         
@@ -36,30 +39,35 @@ def payments(request):
             
             notify_all_admin('validate payment', f' validate payment number {paymennt.id} done by {paymennt.client} ',f'http://localhost:5173/Payment/{paymennt.id}') # type: ignore
             
-            return Response ( { "message" : 'request submitted wait for validation'}, status=status.HTTP_200_OK )
+            return success_response(message="Request submitted, waiting for validation",status_code=201)
         else:
-            return Response ( { "error" : serializer.errors}, status=status.HTTP_400_BAD_REQUEST )
-        
+            return error_response(message="Validation failed",errors=serializer.errors)
 @api_view(['GET'])
 @jwt_must
 def getbalance(request):
-    
-    if request.role == 'client':
-        balcences = balanceserializer(Balance.objects.filter(client_id = request.user_id), many = True) # type: ignore
-        
-        return Response ( { "balances" : balcences.data}, status=status.HTTP_200_OK )
-    else:
-        balcences = balanceserializer(Balance.objects.all(), many = True )
-        return Response ( { "balances" : balcences.data }, status=status.HTTP_200_OK )
+        paginator = MyPagination()
+
+        if request.role == 'client':
+            queryset = Balance.objects.filter(client_id=request.user_id)
+        else:
+            queryset = Balance.objects.all().order_by('-created_at')
+
+        result_page = paginator.paginate_queryset(queryset, request)
+        serializer = balanceserializer(result_page, many=True)
+        return success_response(data=paginated_response(paginator, serializer),message="balnces retrieved successfully",status_code=200)
     
 @api_view(['GET'])
 @jwt_must
 def get_payment(request,id):
     try:
-        payment = paymentreadserializer(Payment.objects.get(id = id))
-        return Response ( { "payment" : payment.data }, status=status.HTTP_200_OK )
+        if request.role == 'client':
+            payment = paymentreadserializer(Payment.objects.get(id = id, client_id = request.user_id))
+            return success_response(data=payment.data,message="payment retrieved successfully",status_code=200)
+        else:
+            payment = paymentreadserializer(Payment.objects.get(id = id))
+            return success_response(data=payment.data,message="payment retrieved successfully",status_code=200)
     except Payment.DoesNotExist:
-        return Response ( { "error" : "does not exist"}, status=status.HTTP_400_BAD_REQUEST )
+        return error_response(message="failed",errors="payment does not exist or you do not have permission")
     
 @api_view(['POST'])
 @jwt_must
@@ -84,9 +92,9 @@ def validatePayment(request):
             balance.save()
             
         
-        return Response ( { "message" : f"payment {payment.state}"}, status=status.HTTP_200_OK )
+        return success_response(message=f"payment {payment.state}",status_code=200) 
     else:
-        return Response ( { "error" : serializer.errors}, status=status.HTTP_400_BAD_REQUEST )
+        return error_response(message="failed",errors=serializer.errors)
     
 def check_if_enough(amount, client_id, type_id):
     
