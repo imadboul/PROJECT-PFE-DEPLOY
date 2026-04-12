@@ -51,7 +51,7 @@ export default function PaymentsList() {
   const handleValidate = async (id) => {
     try {
       await validatePayment(id);
-      await fetchNotifications();
+      //await fetchNotifications();
       toast.success("Payment validated");
       setSelectedPayment(null);
       fetchPayments();

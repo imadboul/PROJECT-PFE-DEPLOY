@@ -41,7 +41,7 @@ export default function NotificationsPage() {
     try {
       await markNotificationAsViewed(notif.id);
 
-      // ✅ update global state (important)
+      //  update global state (important)
       setNotifications((prev) =>
         prev.map((n) =>
           n.id === notif.id ? { ...n, viewed: true } : n

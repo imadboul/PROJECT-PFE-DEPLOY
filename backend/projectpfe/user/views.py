@@ -106,12 +106,10 @@ def refresh_access(request):
 @api_view(['GET'])
 @jwt_must
 def get_notifications(request):
-    try:
-        notifications = NotificationSerializer(Notification.objects.filter(user_id = request.user_id), many = True)
-        return Response({"notifications": notifications.data }, status=status.HTTP_200_OK)
-    except Notification.DoesNotExist:
-        return Response ( { "error" : 'user does not exist'}, status=status.HTTP_400_BAD_REQUEST )
-
+    
+       # notifications = NotificationSerializer(Notification.objects.filter(user_id = request.user_id), many = True)
+       # return Response({"notifications": notifications.data }, status=status.HTTP_200_OK)
+     return Response({"data": "bouklila" })
 @api_view(['POST'])
 @jwt_must
 def notificationread(request,id):

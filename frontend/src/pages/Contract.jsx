@@ -16,7 +16,7 @@ export default function ContractsList() {
   const handleValidate = async (id) => {
     try {
       await validateContract(id);
-      await fetchNotifications();
+     // await fetchNotifications();
       toast.success("Contrat validated");
       setSelectedContract(null);
       fetchContracts();

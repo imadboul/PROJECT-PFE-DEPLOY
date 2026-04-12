@@ -9,7 +9,7 @@ export const NotificationProvider = ({ children }) => {
   const fetchNotifications = async () => {
     try {
       const res = await getNotifications();
-      const data = res.data.notifications;
+      const data = res.data.data.results;
       setNotifications(Array.isArray(data) ? data : []);
     }catch (error) {
         const msg =
