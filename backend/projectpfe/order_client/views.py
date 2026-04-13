@@ -39,7 +39,7 @@ def order(request):
                 notify_all_admin(
                     'VALIDATE AN ORDER',
                     f'validate order {order.id}', # type: ignore
-                    ''
+                    f'http://localhost:5173/order/{order.id}' # type: ignore
                 )
 
                 return success_response(
@@ -106,6 +106,7 @@ def validateorder(request):
             order.state = serializer.validated_data['state']  # type: ignore
             order.validated_by_id = request.user_id  # type: ignore
             order.save()
+            notify_a_client(order.client_id,'ORDER UPDATE',f'your order {order.id} has been validated by an admin do not forget the order notice',f'http://localhost:5173/order/{order.id}') # type: ignore
 
             return success_response(
                 message="Order validated successfully",
@@ -123,7 +124,7 @@ def validateorder(request):
 @jwt_must
 def get_order(request, id):
     try:
-        # 🔒 Role-based filtering
+        
         if request.role == 'client':
             order = Orderclient.objects.get(
                 id=id,
