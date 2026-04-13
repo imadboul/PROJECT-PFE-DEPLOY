@@ -7,7 +7,7 @@ import { useNotifications } from "../context/NotificationContext";
 
 export default function ContractsList() {
   const [contracts, setContracts] = useState([]);
-  const [showActive, setShowActive] = useState(true);
+  const [showValidated, setShowValidated] = useState(true);
   const [selectedContract, setSelectedContract] = useState(null);
   const [loading, setLoading] = useState(false);
   const { fetchNotifications } = useNotifications();
@@ -91,7 +91,7 @@ export default function ContractsList() {
   }, []);
 
   const changeStatus = () => {
-    setShowActive((prev) => !prev);
+    setShowValidated((prev) => !prev);
   };
 
   const formatDate = (date) => {
@@ -124,7 +124,7 @@ export default function ContractsList() {
             onClick={changeStatus}
             className="border border-white text-md  text-white px-3 py-2 rounded hover:bg-white/10 mb-4 cursor-pointer"
           >
-            {showActive ? "Show No Valide" : "Show Valide"}
+            {showValidated ? "Show No Valide" : "Show Valide"}
           </button>
 
           <NavLink
@@ -138,7 +138,7 @@ export default function ContractsList() {
         {/* LIST */}
         {contracts
           .filter((c) =>
-            showActive
+            showValidated
               ? c.state === "validated"
               : c.state !== "validated"
           )

@@ -23,7 +23,7 @@ import EditProductType from "./component/EditProductType";
 import ProductsList from "./pages/Product";
 import EditProduct from "./component/EditProduct";
 import Orders from "./pages/Orders";
-import BillsDetails from "./pages/BillsDetails";
+import BillDetails from "./pages/BillDetails";
 import BillsList from "./pages/Bills";
 
 /* Layout */
@@ -99,7 +99,7 @@ function App() {
 
           <Route path="/Bills/:id" element={
             <SuperAdminRoute>
-              <BillsDetails />
+              <BillDetails />
             </SuperAdminRoute>} />  
 
 
