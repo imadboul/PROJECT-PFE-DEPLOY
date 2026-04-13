@@ -5,6 +5,7 @@ import {
   getContractById,
   validateContract,
   rejectContract,
+  getContractPDF,
 } from "../context/services/contractService";
 import { useNotifications } from "../context/NotificationContext";
 
@@ -16,10 +17,30 @@ export default function ContractDetails() {
   const [loading, setLoading] = useState(false);
   const [selectedContract, setSelectedContract] = useState(null);
 
+
+    const viewContract = async (id) => {
+    try {
+      const res = await getContractPDF(id);
+
+      const file = new Blob([res.data], { type: "application/pdf" });
+      const url = URL.createObjectURL(file);
+
+      window.open(url, "_blank");
+
+    }catch (error) {
+        const msg =
+        error.response?.data?.error ||
+        "Error view";
+
+      toast.error(msg);
+      }
+  };
+
   const fetchContract = async () => {
     try {
       setLoading(true);
       const res = await getContractById(id);
+      await fetchNotifications();
       setContract(res.data.data);
       setSelectedContract(null); 
     }catch (error) {
@@ -208,26 +229,33 @@ export default function ContractDetails() {
                 </p>
 
                 <div className="flex gap-4">
-                  {selectedContract.state === "pending" && (
+                 {selectedContract.state === "pending" && (
                     <>
                       <button
-                        onClick={() =>
-                          handleValidate(selectedContract.id)
-                        }
-                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full bg-green-700 hover:bg-green-800 text-white"
+                        onClick={() => handleValidate(selectedContract.id)}
+                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                           bg-green-700 hover:bg-green-800 
+                           text-white transition"
                       >
                         <i className="fa-solid fa-check text-sm"></i>
                       </button>
 
                       <button
-                        onClick={() =>
-                          handleReject(selectedContract.id)
-                        }
-                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full bg-red-700 hover:bg-red-800 text-white"
+                        onClick={() => handleReject(selectedContract.id)}
+                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                           bg-red-700 hover:bg-red-800 
+                           text-white transition"
                       >
                         <i className="fa-solid fa-xmark text-sm"></i>
                       </button>
                     </>
+                  )}
+                  {selectedContract.state === "validated" && (
+
+                    <button className="text-orange-400 cursor-pointer text-3xl hover:text-orange-600 transition"
+                      onClick={() => viewContract(selectedContract.id)}>
+                      <i class="fa-solid fa-file-pdf"></i>
+                    </button>
                   )}
                 </div>
               </div>

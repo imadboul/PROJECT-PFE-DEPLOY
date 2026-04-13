@@ -23,6 +23,7 @@ export default function PaymentDetails() {
       setLoading(true);
 
       const resP = await getPaymentById(id);
+      await fetchNotifications();
 
       const paymentData = resP.data.data || resP.data;
 
@@ -75,11 +76,6 @@ export default function PaymentDetails() {
       }
   };
 
-  // Toggle (optional if you still need it)
-  const [showValidated, setShowValidated] = useState(true);
-  const changeStatus = () => {
-    setShowValidated((prev) => !prev);
-  };
 
   // Format date
   const formatDate = (date) => {
@@ -116,13 +112,6 @@ export default function PaymentDetails() {
             onClick={() => window.history.back()}
           >
             <i className="fa-solid fa-arrow-left"></i>
-          </button>
-
-          <button
-            onClick={changeStatus}
-            className="border border-white cursor-pointer text-white px-4 py-2 rounded hover:bg-white/10"
-          >
-            {showValidated ? "Show Pending" : "Show Validated"}
           </button>
         </div>
 

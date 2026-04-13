@@ -69,6 +69,7 @@ export default function ContractsList() {
     setLoading(true);
 
     const res = await getContracts();
+    await fetchNotifications();
     const data =res.data.data.contracts 
   
 
