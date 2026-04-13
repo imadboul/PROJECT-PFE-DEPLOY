@@ -55,7 +55,6 @@ export default function PaymentsList() {
       const msg =
         error.response?.data?.error ||
         "Error validation";
-
       toast.error(msg);
     }
   };
@@ -64,6 +63,7 @@ export default function PaymentsList() {
   const handleReject = async (id) => {
     try {
       await rejectPayment(id);
+      await fetchNotifications();
       toast.success("Payment rejected");
       setSelectedPayment(null);
       fetchPayments();
@@ -71,7 +71,6 @@ export default function PaymentsList() {
       const msg =
         error.response?.data?.error ||
         "Error rejection";
-
       toast.error(msg);
     }
   };
