@@ -33,9 +33,17 @@ export default function Navbar() {
         <NavLink to="/Balance" className={linkStyle}>
           Balance
         </NavLink>
-        <NavLink to="/Bills" className={linkStyle}>
+        {["admin", "superAdmin"].includes(user?.role) && (
+          <NavLink to="/Bills" className={linkStyle}>
           Bills
         </NavLink>
+        )}
+        {["client"].includes(user?.role) && (
+        <NavLink to="/Orders" className={linkStyle}>
+          Orders
+        </NavLink>
+        )}
+        
         <NavLink to="/Invoices" className={linkStyle}>
           Invoices
         </NavLink>
@@ -59,7 +67,9 @@ export default function Navbar() {
           <NavLink
             to="/AddProduct"
             className={linkStyle}>
-            <i className="fa-solid fa-plus"></i>
+            {["admin", "superAdmin"].includes(user?.role) && (
+              <i className="fa-solid fa-plus"></i>
+            )}
           </NavLink>
 
           <NavLink to="/notifications" className={linkStyle}>

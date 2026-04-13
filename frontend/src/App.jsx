@@ -9,7 +9,6 @@ import ContractDetails from "./pages/ContractDetails"
 import BalanceList from "./pages/Balance";
 import Invoice from "./pages/Invoice";
 import Navbar from "./component/Navbar";
-import Bills from "./pages/Bills";
 import Notifications from "./pages/Notifications";
 import ProtectedRoute from "./component/ProtectedRoute";
 import SuperAdminRoute from "./component/SuperAdminRoute";
@@ -22,6 +21,9 @@ import AddProduct from "./component/AddProduct";
 import EditProductType from "./component/EditProductType";
 import ProductsList from "./pages/Product";
 import EditProduct from "./component/EditProduct";
+import Orders from "./pages/Orders";
+import BillsDetails from "./pages/BillsDetails";
+import BillsList from "./pages/Bills";
 
 /* Layout */
 function Layout() {
@@ -84,11 +86,20 @@ function App() {
             <SuperAdminRoute>
               <EditProductType />
             </SuperAdminRoute>} />
-            
+
           <Route path="/EditProduct/:id" element={
             <SuperAdminRoute>
               <EditProduct />
             </SuperAdminRoute>} />
+          <Route path="/Bills" element={
+            <SuperAdminRoute>
+              <BillsList />
+            </SuperAdminRoute>} />
+
+          <Route path="/Bills/:id" element={
+            <SuperAdminRoute>
+              <BillsDetails />
+            </SuperAdminRoute>} />  
 
 
           <Route path="/Home" element={<Home />} />
@@ -97,7 +108,7 @@ function App() {
           <Route path="/Balance" element={<BalanceList />} />
           <Route path="/product" element={<ProductsList />} />
           <Route path="/Invoices" element={<Invoice />} />
-          <Route path="/Bills" element={<Bills />} />
+          <Route path="/Orders" element={<Orders />} />
           <Route path="/Notifications" element={<Notifications />} />
           <Route path="/RequestContract" element={<RequestContract />} />
           <Route path="/RequestPayment" element={<RequestPayment />} />
