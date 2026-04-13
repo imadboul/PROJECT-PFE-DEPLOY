@@ -59,13 +59,18 @@ def order(request):
             )
 
     if request.method == 'GET':
+        
 
         paginator = MyPagination()
 
         if request.role == 'client':
             queryset = Orderclient.objects.filter(client_id=request.user_id)
         else:
-            queryset = Orderclient.objects.all()
+            client_id = request.data.get('client_id')
+            if client_id:
+                queryset = Orderclient.objects.filter(client_id = client_id)
+            else:
+                queryset = Orderclient.objects.all()
 
         result_page = paginator.paginate_queryset(queryset, request)
         orders = OrderreadSerializer(result_page, many=True)
@@ -78,7 +83,29 @@ def order(request):
     
 
         
+@api_view(['GET'])
+@jwt_must
+@role_required(['Admin', 'superAdmin'])
+def getclients(request):
 
+    paginator = MyPagination()
+
+    
+    queryset = Client.objects.filter(ordersclient__isnull=False).distinct()
+
+    result_page = paginator.paginate_queryset(queryset, request)
+
+    clients = ClientreadSerializer(result_page, many=True)
+
+    return success_response(
+        data=paginated_response(paginator, clients),
+        message="Clients retrieved successfully",
+        status_code=status.HTTP_200_OK
+    )
+    
+
+        
+    
         
 @api_view(['POST'])
 @jwt_must
