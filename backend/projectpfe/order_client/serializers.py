@@ -34,6 +34,10 @@ class ClientFilterSerializerOne(serializers.ModelSerializer):
         model = Client
         fields = ['id', 'firstName', 'lastName','phoneNumber','client_contracts']
         
+
+        
+    
+        
    
 
 
@@ -175,7 +179,21 @@ class OrderreadSerializer(serializers.ModelSerializer):
 
 
 
-            
+class ClientreadSerializer(serializers.ModelSerializer):
+    numberOrders = serializers.SerializerMethodField()
+    
+
+    class Meta:
+        model = Client
+        fields = ['id', 'firstName', 'lastName','numberOrders']
+        extra_kwargs = {
+         "FirstName": {"read_only": True},
+         "lastName": {"read_only": True},
+         "numberOrders": {"read_only": True}
+}
+        
+    def get_numberOrders(self, obj):
+        return obj.ordersclient.count()
 #=============================================================================================================     
 class ValidateOrdersSerializer(serializers.Serializer):
     id=serializers.IntegerField()  
