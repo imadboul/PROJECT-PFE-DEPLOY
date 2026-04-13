@@ -22,14 +22,14 @@ export default function BillsList() {
         error.response?.data?.message || "Error fetching orders";
       toast.error(msg);
     }
-     setLoading(false);
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
-   const changeStatus = () => {
+  const changeStatus = () => {
     setShowValidated((prev) => !prev);
   };
 
@@ -56,7 +56,7 @@ export default function BillsList() {
       toast.error("Rejection error");
     }
   };
-    if (loading) {
+  if (loading) {
     return <div className="text-white text-center mt-10">Loading...</div>;
   }
 
@@ -111,10 +111,17 @@ export default function BillsList() {
                     </p>
                   </div>
                   <div className="md:flex items-center justify-between">
-                    <p>
-                      <strong>products:</strong>{" "}
-                      {o.productsclient}
-                    </p>
+                    <div>
+                      {o.productsclient?.length > 0
+                        ? o.productsclient.map((p, i) => (
+                          <div key={i} className="text-md">
+                            Product: {p.product} | Qte: {p.qte}
+                          </div>
+                        ))
+                        : "No products"}
+
+                    </div>
+
 
                     <p
                       className={
@@ -162,10 +169,13 @@ export default function BillsList() {
                 {selectedBill.contract}
               </p>
 
-              <p>
-                <strong>products:</strong>{" "}
-                {selectedBill.productsclient}
-              </p>
+              {selectedBill.productsclient?.length > 0
+                ? selectedBill.productsclient.map((p, i) => (
+                  <div key={i} className="text-xs">
+                    Product: {p.product} | Qte: {p.qte}
+                  </div>
+                ))
+                : "No products"}
 
               <p
                 className={

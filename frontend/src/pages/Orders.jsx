@@ -83,7 +83,7 @@ export default function OrderList() {
             to="/RequestOrder"
             className="border border-white cursor-pointer text-white px-3 py-2 rounded hover:bg-white/10 mb-4"
           >
-            request Order
+            Request Order
           </NavLink>
         </div>
 

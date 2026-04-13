@@ -138,7 +138,7 @@ export default function ContractsList() {
         {/* LIST */}
         {contracts
           .filter((c) =>
-            showActive
+            showValidated
               ? c.state === "validated"
               : c.state !== "validated"
           )
