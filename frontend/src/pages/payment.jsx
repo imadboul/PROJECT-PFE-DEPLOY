@@ -24,6 +24,7 @@ export default function PaymentsList() {
       setLoading(true);
 
       const resP = await getPayments();
+      await fetchNotifications();
       const paymentsData = resP.data.data.results;
 
       setPayments(Array.isArray(paymentsData) ? paymentsData : []);

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import Select from "react-select";
 
-function RequestContract() {
+function RequestOrder() {
   const [productTypes, setProductTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();

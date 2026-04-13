@@ -15,6 +15,7 @@ import SuperAdminRoute from "./component/SuperAdminRoute";
 import AddProductType from "./component/AddProductType";
 import RequestContract from "./component/RequestContract";
 import RequestPayment from "./component/RequestPayment";
+import RequestOrder from "./component/requestOrder";
 import PaymentsList from "./pages/payment";
 import PaymentDetails from "./pages/paymentDetails";
 import AddProduct from "./component/AddProduct";
@@ -111,6 +112,7 @@ function App() {
           <Route path="/Orders" element={<Orders />} />
           <Route path="/Notifications" element={<Notifications />} />
           <Route path="/RequestContract" element={<RequestContract />} />
+          <Route path="/RequestOrder" element={<RequestOrder />} />
           <Route path="/RequestPayment" element={<RequestPayment />} />
           <Route path="/Payment" element={<PaymentsList />} />
           <Route path="/Payment/:id" element={<PaymentDetails />} />
