@@ -9,58 +9,58 @@ import { getContracts } from "../context/services/contractService";
 import { getProducts } from "../context/services/productService";
 
 function RequestOrder() {
-  const [loading, setLoading] = useState(false);
   const [contracts, setContracts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [productsList, setProductsList] = useState([]);
+  const [products, setProducts] = useState([{ product: null, qte: "" }]);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
   const { handleSubmit, control } = useForm();
 
-  const [products, setProducts] = useState([
-    { product: null, qte: "" },
-  ]);
-
-  // ================= FETCH DATA =================
+  //  fetch data
   useEffect(() => {
     const fetchData = async () => {
       try {
         const c = await getContracts();
         const p = await getProducts();
 
-        setContracts(c.data.data.contracts || []);
-        setProductsList(p.data.data.products || []);
-      } catch {
-        toast.error("Error loading data");
+        setContracts(Array.isArray(c.data.data.contracts) ? c.data.data.contracts : []);
+        setAllProducts(Array.isArray(p.data.data.products) ? p.data.data.products : []);
+        setProductsList(Array.isArray(p.data.data.products) ? p.data.data.products : []);
+      } catch (error) {
+        const msg =
+          error.response?.data?.error ||
+          "Error creating product";
+
+        toast.error(msg);
       }
     };
 
     fetchData();
   }, []);
 
-  // ================= OPTIONS =================
-  const contractOptions = contracts.map((c) => ({
-    value: c.id,
-    label: `Contract #${c.id}`,
-  }));
-
-  const productOptions = productsList.map((p) => ({
-    value: p.id,
-    label: p.name,
-  }));
-
-  // ================= PRODUCTS HANDLING =================
+  // add product input
   const handleAdd = () => {
     setProducts([...products, { product: null, qte: "" }]);
   };
 
+  //  change value
   const handleChange = (i, field, value) => {
     const newProducts = [...products];
     newProducts[i][field] = value;
     setProducts(newProducts);
   };
+  const contractOptions = contracts.map(c => ({
+    value: c.id,
+    label:`contract ${c.id}`
+  }))
 
-  // ================= SUBMIT =================
+  const productOptions = productsList.map(p => ({
+    value: p.id,
+    label: p.name
+  }))
+  //  submit
   const onSubmit = async (data) => {
     try {
       setLoading(true);
@@ -74,10 +74,9 @@ function RequestOrder() {
       };
 
       await createOrder(payload);
-
-      toast.success("Order created successfully");
+      toast.success("Order created");
       navigate("/orders");
-    } catch (error) {
+    } catch {
       toast.error("Error creating order");
     } finally {
       setLoading(false);
@@ -85,87 +84,118 @@ function RequestOrder() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
 
-      <div className="w-full max-w-xl bg-black/60 rounded-2xl shadow-lg p-6 border border-black/60">
+      <div className="w-full max-w-xl bg-black/60 p-6 rounded-xl">
 
-        {/* BACK BUTTON */}
-        <button
-          className="text-white text-2xl cursor-pointer font-bold hover:text-orange-500"
-          onClick={() => window.history.back()}
-        >
-          <i className="fa-solid fa-arrow-left"></i>
-        </button>
-
-        <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
+        <h2 className="text-center text-orange-500 text-xl mb-4">
           Request Order
         </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
-          {/* ================= CONTRACT SELECT ================= */}
+          {/* CONTRACT */}
           <Controller
             name="contract"
             control={control}
-            rules={{ required: "Contract is required" }}
+            rules={{ required: "contract is required" }}
             render={({ field }) => (
               <Select
                 {...field}
                 options={contractOptions}
                 placeholder="Select Contract"
-                onChange={(val) => field.onChange(val.value)}
-                value={contractOptions.find(
-                  (c) => c.value === field.value
-                )}
                 styles={{
-                  control: (base) => ({
-                    ...base,
-                    backgroundColor: "transparent",
-                    borderColor: "#f97316",
-                    color: "white",
-                  }),
-                  singleValue: (base) => ({
-                    ...base,
-                    color: "white",
-                  }),
+                      control: (base, state) => ({
+                        ...base,
+                        backgroundColor: "rgba(7, 7, 7, 0.11)",
+                        borderColor: state.isFocused ? "#f97316" : "#000",
+                        boxShadow: "none",
+                        fontSize: "18px",
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        backgroundColor: "rgba(0, 0, 0, 0.66)",
+                      }),
+                      option: (base, state) => ({
+                        ...base,
+                        backgroundColor: state.isFocused
+                          ? "rgba(247, 77, 9, 0.96)"
+                          : "rgba(0, 0, 0, 0.66)",
+
+                        cursor: "pointer",
+                      }),
+                      singleValue: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+
+                      placeholder: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                    }}
+                   onChange={(val) => {
+                  field.onChange(val.value);
+
+                  const contract = contracts.find(c => c.id === val.value);
+
+                  // filter products (string compare)
+                  const filtered = allProducts.filter(
+                    (p) => p.product_type === contract.product_type
+                  );
+
+                  setProductsList(filtered);
+                  setProducts([{ product: null, qte: "" }]);
+                
                 }}
+                value={options.find((opt) => opt.value === field.value)}
               />
             )}
           />
 
-          {/* ================= PRODUCTS ================= */}
+          {/* PRODUCTS */}
           {products.map((p, i) => (
-            <div key={i} className="flex gap-2 items-center">
+            <div key={i} className="flex gap-2">
 
-              {/* PRODUCT SELECT */}
               <Select
                 className="w-1/2"
                 options={productOptions}
                 placeholder="Select Product"
-                value={productOptions.find(
-                  (op) => op.value === p.product
-                )}
+                 styles={{
+                      control: (base, state) => ({
+                        ...base,
+                        backgroundColor: "rgba(7, 7, 7, 0.11)",
+                        borderColor: state.isFocused ? "#f97316" : "#000",
+                        boxShadow: "none",
+                        fontSize: "18px",
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        backgroundColor: "rgba(0, 0, 0, 0.66)",
+                      }),
+                      option: (base, state) => ({
+                        ...base,
+                        backgroundColor: state.isFocused
+                          ? "rgba(247, 77, 9, 0.96)"
+                          : "rgba(0, 0, 0, 0.66)",
+
+                        cursor: "pointer",
+                      }),
+                      singleValue: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+
+                      placeholder: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                    }}
                 onChange={(val) =>
                   handleChange(i, "product", val.value)
                 }
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    backgroundColor: "transparent",
-                    borderColor: "#f97316",
-                  }),
-                  singleValue: (base) => ({
-                    ...base,
-                    color: "white",
-                  }),
-                  option: (base) => ({
-                    ...base,
-                    color: "black",
-                  }),
-                }}
               />
 
-              {/* QUANTITY */}
               <input
                 type="number"
                 placeholder="Qte"
@@ -173,27 +203,27 @@ function RequestOrder() {
                 onChange={(e) =>
                   handleChange(i, "qte", e.target.value)
                 }
-                className="w-1/2 p-2 border border-orange-500 rounded text-white bg-transparent focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-1/2 p-2 border rounded text-white bg-transparent"
               />
             </div>
           ))}
 
-          {/* ADD PRODUCT */}
+          {/* ADD */}
           <button
             type="button"
             onClick={handleAdd}
-            className="text-orange-400 border border-orange-500 px-3 py-2 rounded hover:bg-orange-600 hover:text-white transition"
+            className="text-orange-500"
           >
-            + Add Product
+           Add Product
           </button>
 
-          {/* SUBMIT */}
+          {/* 🚀 SUBMIT */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 text-white font-bold bg-orange-600 hover:bg-orange-700 rounded"
+            className="w-full bg-orange-600 text-white py-2 rounded"
           >
-            {loading ? "Loading..." : "Request Order"}
+            {loading ? "Loading..." : "Create Order"}
           </button>
 
         </form>
