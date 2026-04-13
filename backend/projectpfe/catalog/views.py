@@ -121,10 +121,10 @@ def product(request):
         product_type_id = request.data.get('product_type')
         
         if product_type_id:
-            products = productserializer(Product.objects.filter(active=True , product_type_id = product_type_id),many=True)
+            products = productreadserializer(Product.objects.filter(active=True , product_type_id = product_type_id),many=True)
         
         else:
-            products = productserializer(Product.objects.filter(active=True),many=True)
+            products = productreadserializer(Product.objects.filter(active=True),many=True)
             
 
 

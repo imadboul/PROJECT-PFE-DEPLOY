@@ -21,7 +21,14 @@ class producttypeserializer(serializers.ModelSerializer):
             raise serializers.ValidationError("does not exist")
         
         return data
+class productreadserializer(serializers.ModelSerializer):
+    product_type = serializers.CharField(source="product_type.name")
     
+    class Meta:
+        model = Product
+        fields = '__all__'
+        
+
     
 class productserializer(serializers.ModelSerializer):
     
@@ -73,10 +80,24 @@ class productcreateserializer(serializers.ModelSerializer):
 class contractreadserializer(serializers.ModelSerializer):
     product_type = serializers.CharField(source="product_type.name")
     client = serializers.CharField(source ="client.lastName")
+    product_type_id = serializers.CharField(source ="product_type.id")
 
     class Meta:
         model = Contract
-        fields = '__all__'
+        fields = [
+            'id',
+            'start_date',
+            'end_date',
+            'qte_global',
+            'qte_used',
+            'created_at',
+            'validated_at',
+            'state',
+            'validated_by',
+            'client',
+            'product_type',
+             'product_type_id'
+        ]
      
 class contractcreateserializer(serializers.ModelSerializer):
     

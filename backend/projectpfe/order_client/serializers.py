@@ -159,14 +159,21 @@ class OrderSerializer(serializers.ModelSerializer):
         
         return order 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+class OrderProductreadSerializer(serializers.ModelSerializer):
+    product = serializers.CharField(source="product.name")
+    class Meta:
+        model=OrderProductclient
+        fields=['product','qte','qte_taken']
+        
 class OrderreadSerializer(serializers.ModelSerializer):
     client = serializers.CharField(source ="client.lastName")
-    productsclient=OrderProductSerializer(many=True)
+    productsclient= OrderProductreadSerializer(many=True)
 
     class Meta:
         model=Orderclient
         fields='__all__'
+
+
 
             
 #=============================================================================================================     
