@@ -13,6 +13,8 @@ export default function BillDetails() {
   const { fetchNotifications } = useNotifications();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedBill, setSelectedBill] = useState(null);
+
 
   const fetchOrder = async () => {
     try {
@@ -55,17 +57,6 @@ export default function BillDetails() {
     }
   };
 
-  const formatDate = (date) => {
-    if (!date) return "—";
-    return new Date(date).toLocaleString("en-GB", {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   if (loading) {
     return <div className="text-white text-center mt-10">Loading...</div>;
   }
@@ -80,80 +71,147 @@ export default function BillDetails() {
 
         {/* HEADER */}
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-white text-xl font-bold">
-            Bill Details #{order.id}
-          </h1>
-
-          <button
-            className="text-white text-2xl hover:text-orange-500"
-            onClick={() => window.history.back()}
-          >
-            ←
-          </button>
+          <h1 className="text-white text-xl font-bold">Bills</h1>
         </div>
+
 
         {/* CARD */}
-        <div className="bg-black/50 text-white rounded-2xl p-5 border">
-          
-          <p>
-            <strong>Client:</strong> {order.client}
-          </p>
+        <div onClick={() => setSelectedBill(order)}
+         className="cursor-pointer bg-black/50 text-white rounded-2xl p-5 border hover:bg-black/80 transition">
 
-          <p>
-            <strong>Contract:</strong> {order.contract}
-          </p>
+          <div className="space-y-2 text-sm">
+            <p className="text-lg font-semibold">
+              <strong>Order:</strong>{" "}
+              {order.id}
+            </p>
 
-          <p className="mt-2">
-            <strong>Date:</strong> {formatDate(order.date_created)}
-          </p>
+            <div className="md:flex items-center justify-between">
+              <p>
+                <strong>client:</strong>{" "}
+                {order.client}
+              </p>
 
-          <p
-            className={
-              order.state === "validated"
-                ? "text-green-500"
-                : order.state === "rejected"
-                ? "text-red-500"
-                : "text-yellow-500"
-            }
-          >
-            <strong>State:</strong> {order.state}
-          </p>
-
-          {/* PRODUCTS */}
-          <div className="mt-3">
-            <strong>Products:</strong>
-
-            {order.productsclient?.length > 0 ? (
-              order.productsclient.map((p, i) => (
-                <div key={i} className="text-sm ml-3 mt-1">
-                  • Product ID: {p.product} | Qte: {p.qte} | Taken: {p.qte_taken}
-                </div>
-              ))
-            ) : (
-              <p className="text-sm ml-3">No products</p>
-            )}
-          </div>
-
-          {/* ACTIONS */}
-          {order.state === "pending" && (
-            <div className="flex gap-4 mt-4">
-              <button
-                onClick={handleValidate}
-                className="bg-green-700 px-4 py-1 rounded hover:bg-green-800"
-              >
-                Validate
-              </button>
-
-              <button
-                onClick={handleReject}
-                className="bg-red-700 px-4 py-1 rounded hover:bg-red-800"
-              >
-                Reject
-              </button>
+              <p>
+                <strong>contract:</strong>{" "}
+                {order.contract}
+              </p>
             </div>
-          )}
+
+            <div className="md:flex items-center justify-between">
+              <div>
+                {order.productsclient?.length > 0
+                  ? order.productsclient.map((p, i) => (
+                    <div key={i} className="text-md">
+                      Product: {p.product} | Qte: {p.qte}
+                    </div>
+                  ))
+                  : "No products"}
+
+              </div>
+
+
+              <p
+                className={
+                  order.state === "validated"
+                    ? "text-green-500"
+                    : order.state === "rejected"
+                      ? "text-red-500"
+                      : "text-yellow-500"
+                }
+              >
+                <strong className="text-white">State:</strong>{" "}
+                {order.state}
+              </p>
+
+
+            </div>
+          </div>
         </div>
       </div>
+      {/* MODAL */}
+      {selectedBill && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-black border border-white text-white p-6 rounded-xl w-[350px] relative">
+
+            <button
+              onClick={() => setSelectedBill(null)}
+              className="absolute top-2 right-3 text-white cursor-pointer hover:text-red-500"
+            >
+              ✕
+            </button>
+
+            <div className="space-y-2 text-sm">
+
+              <p>
+                <strong>client:</strong>{" "}
+                {selectedBill.client}
+              </p>
+
+              <p>
+                <strong>contract:</strong>{" "}
+                {selectedBill.contract}
+              </p>
+
+              {selectedBill.productsclient?.length > 0
+                ? selectedBill.productsclient.map((p, i) => (
+                  <div key={i} className="text-xs">
+                    Product: {p.product} | Qte: {p.qte}
+                  </div>
+                ))
+                : "No products"}
+
+              <p
+                className={
+                  selectedBill.state === "validated"
+                    ? "text-green-500"
+                    : selectedBill.state === "rejected"
+                      ? "text-red-500"
+                      : "text-yellow-500"
+                }
+              >
+                <strong className="text-white">State:</strong>{" "}
+                {selectedBill.state}
+
+              </p>
+
+              <p>
+                <strong>Product type:</strong>{" "}
+                {selectedBill.product_type}
+              </p>
+              {/* Actions */}
+              <div className="flex justify-between gap-4 mt-3">
+                <p><strong>Validated by:</strong> {selectedBill.validated_by || "—"}</p>
+                <div className="flex gap-4">
+                  {selectedBill.state === "pending" && (
+                    <>
+                      <button
+                        onClick={() => handleValidate(selectedBill.id)}
+                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                           bg-green-700 hover:bg-green-800 
+                           text-white transition"
+                      >
+                        <i className="fa-solid fa-check text-sm"></i>
+                      </button>
+
+                      <button
+                        onClick={() => handleReject(selectedBill.id)}
+                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                           bg-red-700 hover:bg-red-800 
+                           text-white transition"
+                      >
+                        <i className="fa-solid fa-xmark text-sm"></i>
+                      </button>
+                    </>
+                  )}
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+
   );
 }

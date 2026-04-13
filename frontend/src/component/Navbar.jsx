@@ -39,7 +39,7 @@ export default function Navbar() {
         </NavLink>
         )}
         {["client"].includes(user?.role) && (
-        <NavLink to="/Orders" className={linkStyle}>
+        <NavLink to="/order" className={linkStyle}>
           Orders
         </NavLink>
         )}

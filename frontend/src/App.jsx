@@ -15,7 +15,7 @@ import SuperAdminRoute from "./component/SuperAdminRoute";
 import AddProductType from "./component/AddProductType";
 import RequestContract from "./component/RequestContract";
 import RequestPayment from "./component/RequestPayment";
-import RequestOrder from "./component/requestOrder";
+import RequestOrder from "./component/RequestOrder";
 import PaymentsList from "./pages/payment";
 import PaymentDetails from "./pages/paymentDetails";
 import AddProduct from "./component/AddProduct";
@@ -97,11 +97,6 @@ function App() {
               <BillsList />
             </SuperAdminRoute>} />
 
-          <Route path="/Bills/:id" element={
-            <SuperAdminRoute>
-              <BillDetails />
-            </SuperAdminRoute>} />  
-
 
           <Route path="/Home" element={<Home />} />
           <Route path="/contracts" element={<ContractsList />} />
@@ -109,7 +104,8 @@ function App() {
           <Route path="/Balance" element={<BalanceList />} />
           <Route path="/product" element={<ProductsList />} />
           <Route path="/Invoices" element={<Invoice />} />
-          <Route path="/Orders" element={<Orders />} />
+          <Route path="/order" element={<Orders />} />
+          <Route path="/order/:id" element={<BillDetails />} />
           <Route path="/Notifications" element={<Notifications />} />
           <Route path="/RequestContract" element={<RequestContract />} />
           <Route path="/RequestOrder" element={<RequestOrder />} />

@@ -148,7 +148,7 @@ export default function PaymentsList() {
             <div className="space-y-2 text-sm">
 
               <p className="text-lg font-semibold">
-                <strong>Product type:</strong> {p.product_type}
+                <strong>Product type:</strong> {p.productType}
               </p>
               <div className="md:flex justify-between">
                 <p>
