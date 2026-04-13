@@ -35,7 +35,7 @@ export default function Sign() {
       }
     } catch (error) {
       const msg =
-        error.response?.data?.error ||
+        error.response?.data?.message ||
         "Error Sign up";
 
       toast.error(msg);
@@ -138,7 +138,7 @@ export default function Sign() {
             <div>
               <label className="text-sm font-medium">Password</label>
               <input
-                type="text"
+                type="password"
                 placeholder="Enter your Password"
                 className="w-full mt-2 p-3 bg-gray-100 rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
                 {...register("password", {

@@ -59,19 +59,23 @@ export default function AuthProvider({ children }) {
     }
   }
 
-  //  SIGNUP
-  async function signUp(data) {
-    try {
-      await api.post("/client/signUp/", data);
-      return { success: true };
-    } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error sign up ";
+ async function signUp(data) {
+  try {
+    await api.post("/client/signUp/", data);
+    return { success: true };
+  } catch (error) {
+    const msg =
+      error.response?.data?.message ||
+      "Error Sign up";
 
       toast.error(msg);
-    }
+
+    return {
+      success: false,
+      error: msg,
+    };
   }
+}
 
   //  LOGOUT
   function logout() {

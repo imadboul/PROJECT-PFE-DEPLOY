@@ -121,14 +121,14 @@ export default function ContractsList() {
         <div className="flex justify-between items-center gap-4">
           <button
             onClick={changeStatus}
-            className="border border-white text-md md:text-xl text-white px-3 py-2 rounded hover:bg-white/10 mb-4 cursor-pointer"
+            className="border border-white text-md  text-white px-3 py-2 rounded hover:bg-white/10 mb-4 cursor-pointer"
           >
             {showActive ? "Show No Valide" : "Show Valide"}
           </button>
 
           <NavLink
             to="/RequestContract"
-            className="border border-white text-md md:text-xl text-white px-3 py-2 rounded hover:bg-white/10 mb-4 cursor-pointer"
+            className="border border-white text-md  text-white px-3 py-2 rounded hover:bg-white/10 mb-4 cursor-pointer"
           >
             Request new contract
           </NavLink>
