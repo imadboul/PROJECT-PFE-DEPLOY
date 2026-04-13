@@ -161,8 +161,37 @@ def unitchange(orderProduct,unit):
                     return orderProduct.qte*orderProduct.product.density/1000      
         
 
+def convert_unit(orderProduct, target_unit):
+    source_unit = orderProduct.unit
+    qte = orderProduct.qte
+    density = orderProduct.product.density
+
+    if source_unit == target_unit:
+        return qte
 
     
+    if source_unit == 'L':
+        qte_l = qte
+    elif source_unit == 'HL':
+        qte_l = qte * 100
+    elif source_unit == 'KG':
+        qte_l = qte / density
+    elif source_unit == 'TM':
+        qte_l = (qte * 1000) / density
+    else:
+        raise Exception(f"unsupported source unit: {source_unit}")
+
+
+    if target_unit == 'L':
+        return qte_l
+    elif target_unit == 'HL':
+        return qte_l / 100
+    elif target_unit == 'KG':
+        return qte_l * density
+    elif target_unit == 'TM':
+        return (qte_l * density) / 1000
+    else:
+        raise Exception(f"unsupported target unit: {target_unit}")    
     
       
 
