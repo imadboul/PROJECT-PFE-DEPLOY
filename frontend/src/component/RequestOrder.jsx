@@ -1,154 +1,205 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import Select from "react-select";
+
 import { createOrder } from "../context/services/orderService";
+import { getContracts } from "../context/services/contractService";
+import { getProducts } from "../context/services/productService";
 
 function RequestOrder() {
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [contracts, setContracts] = useState([]);
+  const [productsList, setProductsList] = useState([]);
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm();
+  const navigate = useNavigate();
 
-    const [products, setProducts] = useState([{ product: "", qte: "" }]);
+  const { handleSubmit, control } = useForm();
 
-    const handleAdd = () => {
-        setProducts([...products, { product: "", qte: "" }]);
+  const [products, setProducts] = useState([
+    { product: null, qte: "" },
+  ]);
+
+  // ================= FETCH DATA =================
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const c = await getContracts();
+        const p = await getProducts();
+
+        setContracts(c.data.data.contracts || []);
+        setProductsList(p.data.data.products || []);
+      } catch {
+        toast.error("Error loading data");
+      }
     };
 
-    const handleChange = (i, field, value) => {
-        const newProducts = [...products];
-        newProducts[i][field] = value;
-        setProducts(newProducts);
-    };
+    fetchData();
+  }, []);
 
-    const onSubmit = async (data) => {
-        try {
-            setLoading(true);
+  // ================= OPTIONS =================
+  const contractOptions = contracts.map((c) => ({
+    value: c.id,
+    label: `Contract #${c.id}`,
+  }));
 
-            const payload = {
-                contract: Number(data.contract),
-                products: products.map((p) => ({
-                    product: Number(p.product),
-                    qte: Number(p.qte),
-                })),
-            };
+  const productOptions = productsList.map((p) => ({
+    value: p.id,
+    label: p.name,
+  }));
 
-            await createOrder(payload);
-            toast.success("Order created successfully");
-            navigate("/orders");
+  // ================= PRODUCTS HANDLING =================
+  const handleAdd = () => {
+    setProducts([...products, { product: null, qte: "" }]);
+  };
 
-        } catch (error) {
-            const msg =
-                error.response?.data?.message ||
-                "Error creating order";
+  const handleChange = (i, field, value) => {
+    const newProducts = [...products];
+    newProducts[i][field] = value;
+    setProducts(newProducts);
+  };
 
-            toast.error(msg);
-        } finally {
-            setLoading(false);
-        }
-    };
+  // ================= SUBMIT =================
+  const onSubmit = async (data) => {
+    try {
+      setLoading(true);
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-transparent px-4">
+      const payload = {
+        contract: data.contract,
+        products: products.map((p) => ({
+          product: p.product,
+          qte: Number(p.qte),
+        })),
+      };
 
-            <div className="w-full max-w-xl bg-black/60 rounded-2xl shadow-lg p-6 border border-black/60">
+      await createOrder(payload);
 
-                <button
-                    className="text-white text-2xl cursor-pointer font-bold hover:text-orange-500"
-                    onClick={() => window.history.back()}
-                >
-                    <i className="fa-solid fa-arrow-left"></i>
-                </button>
+      toast.success("Order created successfully");
+      navigate("/orders");
+    } catch (error) {
+      toast.error("Error creating order");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
-                    Request Order
-                </h2>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-transparent px-4">
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="w-full max-w-xl bg-black/60 rounded-2xl shadow-lg p-6 border border-black/60">
 
-                    {/* Contract ID */}
-                    <input
-                        type="number"
-                        placeholder="Contract ID"
-                        {...register("contract", {
-                            required: "Contract is required",
-                        })}
-                        className="w-full text-xl placeholder-white text-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
+        {/* BACK BUTTON */}
+        <button
+          className="text-white text-2xl cursor-pointer font-bold hover:text-orange-500"
+          onClick={() => window.history.back()}
+        >
+          <i className="fa-solid fa-arrow-left"></i>
+        </button>
 
-                    <div className="relative bottom-4">
-                        {errors.contract && (
-                            <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
-                                {errors.contract.message}
-                            </p>
-                        )}
-                    </div>
+        <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
+          Request Order
+        </h2>
 
-                    {/* Products */}
-                    {products.map((p, i) => (
-                        <div key={i} className="flex justify-between gap-2">
-                            <div>
-                                <input
-                                    type="number"
-                                    placeholder="Product ID"
-                                    value={p.product}
-                                    onChange={(e) => handleChange(i, "product", e.target.value)}
-                                    className="placeholder-white text-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                />
-                                <div className="relative bottom-1 mb-6">
-                                    {errors.contract && (
-                                        <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
-                                            {errors.contract.message}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                            <div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
-                                <input
-                                    type="number"
-                                    placeholder="Quantity"
-                                    value={p.qte}
-                                    onChange={(e) => handleChange(i, "qte", e.target.value)}
-                                    className="placeholder-white text-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                />
-                                <div className="relative bottom-1 mb-6">
-                                    {errors.contract && (
-                                        <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
-                                            {errors.contract.message}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+          {/* ================= CONTRACT SELECT ================= */}
+          <Controller
+            name="contract"
+            control={control}
+            rules={{ required: "Contract is required" }}
+            render={({ field }) => (
+              <Select
+                {...field}
+                options={contractOptions}
+                placeholder="Select Contract"
+                onChange={(val) => field.onChange(val.value)}
+                value={contractOptions.find(
+                  (c) => c.value === field.value
+                )}
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    backgroundColor: "transparent",
+                    borderColor: "#f97316",
+                    color: "white",
+                  }),
+                  singleValue: (base) => ({
+                    ...base,
+                    color: "white",
+                  }),
+                }}
+              />
+            )}
+          />
 
-                    <button
-                        type="button"
-                        onClick={handleAdd}
-                        className="text-orange-600 border border-orange-600 cursor-pointer px-3 py-2 rounded hover:bg-orange-700 hover:border-orange-700 hover:text-white transition"
-                    >
-                        Add Product
-                    </button>
+          {/* ================= PRODUCTS ================= */}
+          {products.map((p, i) => (
+            <div key={i} className="flex gap-2 items-center">
 
-                    {/* BUTTON */}
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full py-2 text-white font-bold bg-orange-600 cursor-pointer hover:bg-orange-700 rounded"
-                    >
-                        {loading ? "Loading..." : "Request Order"}
-                    </button>
+              {/* PRODUCT SELECT */}
+              <Select
+                className="w-1/2"
+                options={productOptions}
+                placeholder="Select Product"
+                value={productOptions.find(
+                  (op) => op.value === p.product
+                )}
+                onChange={(val) =>
+                  handleChange(i, "product", val.value)
+                }
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    backgroundColor: "transparent",
+                    borderColor: "#f97316",
+                  }),
+                  singleValue: (base) => ({
+                    ...base,
+                    color: "white",
+                  }),
+                  option: (base) => ({
+                    ...base,
+                    color: "black",
+                  }),
+                }}
+              />
 
-                </form>
+              {/* QUANTITY */}
+              <input
+                type="number"
+                placeholder="Qte"
+                value={p.qte}
+                onChange={(e) =>
+                  handleChange(i, "qte", e.target.value)
+                }
+                className="w-1/2 p-2 border border-orange-500 rounded text-white bg-transparent focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
             </div>
-        </div>
-    );
+          ))}
+
+          {/* ADD PRODUCT */}
+          <button
+            type="button"
+            onClick={handleAdd}
+            className="text-orange-400 border border-orange-500 px-3 py-2 rounded hover:bg-orange-600 hover:text-white transition"
+          >
+            + Add Product
+          </button>
+
+          {/* SUBMIT */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2 text-white font-bold bg-orange-600 hover:bg-orange-700 rounded"
+          >
+            {loading ? "Loading..." : "Request Order"}
+          </button>
+
+        </form>
+      </div>
+    </div>
+  );
 }
 
 export default RequestOrder;
