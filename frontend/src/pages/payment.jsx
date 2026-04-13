@@ -5,7 +5,6 @@ import {
   rejectPayment,
   validatePayment,
 } from "../context/services/BalanceService";
-import { getProductTypes } from "../context/services/productService";
 import toast from "react-hot-toast";
 import { useNotifications } from "../context/NotificationContext";
 
@@ -25,7 +24,7 @@ export default function PaymentsList() {
       setLoading(true);
 
       const resP = await getPayments();
-      const paymentsData = resP.data.data.results || resP.data;
+      const paymentsData = resP.data.data.results;
 
       setPayments(Array.isArray(paymentsData) ? paymentsData : []);
     } catch (error) {
@@ -93,7 +92,6 @@ export default function PaymentsList() {
   };
 
 
-
   // Filter payments
   const filteredPayments = payments.filter((p) => {
     const state = p.state?.toLowerCase();
@@ -101,10 +99,10 @@ export default function PaymentsList() {
     const matchState = showValidated
       ? state === "validated"
       : state !== "validated";
-    console.log(payments.map(p => p.state));
+    
 
     const matchProduct = selectedProductType
-      ? Number(p.productType) === Number(selectedProductType)
+      ? Number(p.product_type) === Number(selectedProductType)
       : true;
 
     return matchState && matchProduct;

@@ -153,13 +153,16 @@ export default function Navbar() {
           )}
 
           <NavLink
+
             onClick={() => setOpen(!open)}
             to="/AddProduct"
             className={linkStyle}>
-            <div className="flex items-center gap-2">
-              <i className="fa-solid fa-plus"></i>
-              Add Product
-            </div>
+            {["admin", "superAdmin"].includes(user?.role) && (
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-plus"></i>
+                Add Product
+              </div>
+            )}
           </NavLink>
 
 

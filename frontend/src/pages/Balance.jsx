@@ -50,8 +50,8 @@ export default function BalanceList() {
             <div
               key={b.id}
               onClick={() =>
-                navigate("/Payment", {
-                  state: { productType: b.productType },
+                navigate("/payment/", {
+                  state: { productType: b.product_Type },
                 })
               }
               className="cursor-pointer bg-black/50 text-white rounded-2xl p-5 border hover:bg-black/80 transition"
