@@ -37,6 +37,7 @@ def producttype(request):
         )
 
     if request.method == 'GET':
+        product_type_id = request.GET.get('product_type')
         types = producttypeserializer(ProductType.objects.all(), many=True)
 
         return success_response(
@@ -117,10 +118,15 @@ def product(request):
         )
 
     if request.method == 'GET':
-        products = productserializer(
-            Product.objects.filter(active=True),
-            many=True
-        )
+        product_type_id = request.data.get('product_type')
+        
+        if product_type_id:
+            products = productserializer(Product.objects.filter(active=True , product_type_id = product_type_id),many=True)
+        
+        else:
+            products = productserializer(Product.objects.filter(active=True),many=True)
+            
+
 
         return success_response(
             data={"products": products.data},
