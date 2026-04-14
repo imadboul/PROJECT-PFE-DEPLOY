@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { getContractPDF, getContracts, rejectContract, validateContract } from "../context/services/contractService";
 import toast from "react-hot-toast";
 import { NavLink, useLocation } from "react-router-dom";
 import { useNotifications } from "../context/NotificationContext";
+import { AuthContext } from "../context/AuthContext";
+
 
 
 export default function ContractsList() {
@@ -13,6 +15,7 @@ export default function ContractsList() {
   const { fetchNotifications } = useNotifications();
   const location = useLocation();
   const selectedclientID = location.state?.client_id || null;
+  const { user } = useContext(AuthContext);
 
   //  Validate
   const handleValidate = async (id) => {

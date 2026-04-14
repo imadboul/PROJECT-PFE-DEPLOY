@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
@@ -8,10 +8,12 @@ import {
   getContractPDF,
 } from "../context/services/contractService";
 import { useNotifications } from "../context/NotificationContext";
+import { AuthContext } from "../context/AuthContext";
 
 export default function ContractDetails() {
   const { id } = useParams();
   const { fetchNotifications } = useNotifications();
+  const { user } = useContext(AuthContext);
 
   const [contract, setContract] = useState(null);
   const [loading, setLoading] = useState(false);

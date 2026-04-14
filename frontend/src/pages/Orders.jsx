@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { getOrders, validateOrder, rejectOrder, getContractPDF } from "../context/services/orderService";
 import toast from "react-hot-toast";
 import { NavLink } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-
+import { AuthContext } from "../context/AuthContext";
 export default function OrderList() {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -11,6 +11,8 @@ export default function OrderList() {
   const [showValidated, setShowValidated] = useState(true);
   const location = useLocation();
   const selectedclientID = location.state?.client_id || null;
+    const { user } = useContext(AuthContext);
+  
 
   const fetchOrders = async () => {
     try {
@@ -152,7 +154,7 @@ export default function OrderList() {
 
             <button
               onClick={() => setSelectedOrder(null)}
-              className="absolute top-2 right-3 text-white hover:text-red-500"
+              className="absolute top-2 right-3 cursor-pointer text-white hover:text-red-500"
             >
               ✕
             </button>

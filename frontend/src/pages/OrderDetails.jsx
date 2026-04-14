@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
@@ -7,6 +7,7 @@ import {
   rejectOrder,
 } from "../context/services/orderService";
 import { useNotifications } from "../context/NotificationContext";
+import { AuthContext } from "../context/AuthContext";
 
 export default function OrderDetails() {
   const { id } = useParams();
@@ -14,6 +15,7 @@ export default function OrderDetails() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
+  const { user } = useContext(AuthContext);
 
 
   const fetchOrder = async () => {

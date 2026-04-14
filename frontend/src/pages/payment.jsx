@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   getPayments,
@@ -7,7 +7,7 @@ import {
 } from "../context/services/BalanceService";
 import toast from "react-hot-toast";
 import { useNotifications } from "../context/NotificationContext";
-
+import { AuthContext } from "../context/AuthContext";
 
 export default function PaymentsList() {
   const [payments, setPayments] = useState([]);
@@ -17,6 +17,7 @@ export default function PaymentsList() {
   const { fetchNotifications } = useNotifications();
   const location = useLocation();
   const selectedProductType = location.state?.productType;
+  const { user } = useContext(AuthContext);
 
   //  Fetch data
   const fetchPayments = async () => {
