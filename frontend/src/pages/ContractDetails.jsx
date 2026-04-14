@@ -1,34 +1,57 @@
-import { useEffect, useState } from "react";
-import { useParams, NavLink } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   getContractById,
   validateContract,
   rejectContract,
+  getContractPDF,
 } from "../context/services/contractService";
 import { useNotifications } from "../context/NotificationContext";
+import { AuthContext } from "../context/AuthContext";
 
 export default function ContractDetails() {
   const { id } = useParams();
   const { fetchNotifications } = useNotifications();
+  const { user } = useContext(AuthContext);
 
   const [contract, setContract] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedContract, setSelectedContract] = useState(null);
 
+
+  const viewContract = async (id) => {
+    try {
+      const res = await getContractPDF(id);
+
+      const file = new Blob([res.data], { type: "application/pdf" });
+      const url = URL.createObjectURL(file);
+
+      window.open(url, "_blank");
+
+    } catch (error) {
+      const msg =
+        error.response?.data?.error ||
+        "Error view";
+
+      toast.error(msg);
+    }
+  };
+
   const fetchContract = async () => {
     try {
       setLoading(true);
       const res = await getContractById(id);
-      setContract(res.data.contract);
-      setSelectedContract(null); // مباشرة modal مفتوح
-    }catch (error) {
-        const msg =
+      await fetchNotifications();
+      setContract(res.data.data);
+      setSelectedContract(null);
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error fatching data";
 
       toast.error(msg);
-      } finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -43,27 +66,28 @@ export default function ContractDetails() {
       await fetchNotifications();
       toast.success("Validated");
       fetchContract();
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error validation";
 
       toast.error(msg);
-      }
+    }
   };
 
   const handleReject = async (contractId) => {
     try {
       await rejectContract(contractId);
+      await fetchNotifications();
       toast.success("Rejected");
       fetchContract();
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error rejection";
 
       toast.error(msg);
-      }
+    }
   };
 
   const formatDate = (date) => {
@@ -111,11 +135,11 @@ export default function ContractDetails() {
         >
           <div className="space-y-2 text-sm">
 
-            <p className="text-lg font-bold">
+            <p className="text-lg font-semibold">
               <strong>Product type:</strong> {contract.product_type}
             </p>
 
-            <div className="flex items-center justify-between">
+            <div className="md:flex items-center justify-between">
               <p>
                 <strong>Start date:</strong>{" "}
                 {formatDate(contract.start_date)}
@@ -127,7 +151,7 @@ export default function ContractDetails() {
               </p>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="md:flex items-center justify-between">
               <p>
                 <strong>Validated at:</strong>{" "}
                 {formatDate(contract.validated_at)}
@@ -209,24 +233,33 @@ export default function ContractDetails() {
                 <div className="flex gap-4">
                   {selectedContract.state === "pending" && (
                     <>
-                      <button
-                        onClick={() =>
-                          handleValidate(selectedContract.id)
-                        }
-                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full bg-green-700 hover:bg-green-800 text-white"
-                      >
-                        <i className="fa-solid fa-check text-sm"></i>
-                      </button>
+                      {["admin", "superAdmin"].includes(user?.role) && (
+                        <>
+                          <button
+                            onClick={() => handleValidate(selectedContract.id)}
+                            className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                           bg-green-700 hover:bg-green-800 text-white transition"
+                          >
+                            <i className="fa-solid fa-check text-sm"></i>
+                          </button>
 
-                      <button
-                        onClick={() =>
-                          handleReject(selectedContract.id)
-                        }
-                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full bg-red-700 hover:bg-red-800 text-white"
-                      >
-                        <i className="fa-solid fa-xmark text-sm"></i>
-                      </button>
+                          <button
+                            onClick={() => handleReject(selectedContract.id)}
+                            className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                          bg-red-700 hover:bg-red-800 text-white transition"
+                          >
+                            <i className="fa-solid fa-xmark text-sm"></i>
+                          </button>
+                        </>
+                      )}
                     </>
+                  )}
+                  {selectedContract.state === "validated" && (
+
+                    <button className="text-orange-400 cursor-pointer text-3xl hover:text-orange-600 transition"
+                      onClick={() => viewContract(selectedContract.id)}>
+                      <i class="fa-solid fa-file-pdf"></i>
+                    </button>
                   )}
                 </div>
               </div>

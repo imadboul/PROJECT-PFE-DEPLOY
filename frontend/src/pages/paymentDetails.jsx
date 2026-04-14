@@ -1,21 +1,21 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   getPaymentById,
   rejectPayment,
   validatePayment,
 } from "../context/services/BalanceService";
-import { getProductTypes } from "../context/services/productService";
 import toast from "react-hot-toast";
 import { useNotifications } from "../context/NotificationContext";
-
+import { AuthContext } from "../context/AuthContext";
 
 export default function PaymentDetails() {
   const [payment, setPayment] = useState(null);
-  const [productTypes, setProductTypes] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [loading, setLoading] = useState(false);
   const { fetchNotifications } = useNotifications();
+  const { user } = useContext(AuthContext);
+
 
   const { id } = useParams();
 
@@ -25,20 +25,18 @@ export default function PaymentDetails() {
       setLoading(true);
 
       const resP = await getPaymentById(id);
-      const resT = await getProductTypes();
+      await fetchNotifications();
 
-      const paymentData = resP.data.payment || resP.data;
-      const typesData = resT.data.types || resT.data;
+      const paymentData = resP.data.data || resP.data;
 
       setPayment(paymentData);
-      setProductTypes(Array.isArray(typesData) ? typesData : []);
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error fatching data";
 
       toast.error(msg);
-      }finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -55,13 +53,13 @@ export default function PaymentDetails() {
       toast.success("Payment validated");
       setSelectedPayment(null);
       fetchPayment();
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error validation";
 
       toast.error(msg);
-      }
+    }
   };
 
   // Reject
@@ -71,20 +69,15 @@ export default function PaymentDetails() {
       toast.success("Payment rejected");
       setSelectedPayment(null);
       fetchPayment();
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error rejection";
 
       toast.error(msg);
-      }
+    }
   };
 
-  // Toggle (optional if you still need it)
-  const [showValidated, setShowValidated] = useState(true);
-  const changeStatus = () => {
-    setShowValidated((prev) => !prev);
-  };
 
   // Format date
   const formatDate = (date) => {
@@ -98,11 +91,7 @@ export default function PaymentDetails() {
     });
   };
 
-  // Get product name
-  const getProductName = (id) => {
-    const type = productTypes.find((p) => p.id === id);
-    return type ? type.name : id;
-  };
+
 
   if (loading) {
     return <div className="text-white text-center mt-10">Loading...</div>;
@@ -126,13 +115,6 @@ export default function PaymentDetails() {
           >
             <i className="fa-solid fa-arrow-left"></i>
           </button>
-
-          <button
-            onClick={changeStatus}
-            className="border border-white cursor-pointer text-white px-4 py-2 rounded hover:bg-white/10"
-          >
-            {showValidated ? "Show Pending" : "Show Validated"}
-          </button>
         </div>
 
         {/* Payment Card */}
@@ -142,12 +124,11 @@ export default function PaymentDetails() {
         >
           <div className="space-y-2 text-sm">
 
-            <p>
-              <strong>Product:</strong>{" "}
-              {getProductName(payment.productType)}
+            <p className="text-lg font-semibold">
+              <strong>Product type:</strong> {payment.product_type}
             </p>
 
-            <div className="flex justify-between">
+            <div className="md:flex justify-between">
               <p>
                 <strong>Transfer:</strong>{" "}
                 {formatDate(payment.transferDate)}
@@ -159,7 +140,7 @@ export default function PaymentDetails() {
               </p>
             </div>
 
-            <div className="flex justify-between">
+            <div className="md:flex justify-between">
               <p>
                 <strong>Bank:</strong> {payment.bankName}
               </p>
@@ -204,7 +185,7 @@ export default function PaymentDetails() {
 
               <p>
                 <strong>Product:</strong>{" "}
-                {getProductName(selectedPayment.productType)}
+                {selectedPayment.productType}
               </p>
 
               <p>
@@ -226,13 +207,13 @@ export default function PaymentDetails() {
               </p>
 
               <p
-                 className={
-                        selectedPayment.state === "validated"
-                          ? "text-green-500"
-                          : selectedPayment.state === "rejected"
-                            ? "text-red-500"
-                            : "text-yellow-500"
-                      }
+                className={
+                  selectedPayment.state === "validated"
+                    ? "text-green-500"
+                    : selectedPayment.state === "rejected"
+                      ? "text-red-500"
+                      : "text-yellow-500"
+                }
               >
                 <strong className="text-white">State:</strong>{" "}
                 {selectedPayment.state}
@@ -252,23 +233,27 @@ export default function PaymentDetails() {
                 <div className="flex gap-4">
                   {selectedPayment.state === "pending" && (
                     <>
-                      <button
-                        onClick={() =>
-                          handleValidate(selectedPayment.id)
-                        }
-                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full bg-green-700 hover:bg-green-800 text-white transition"
-                      >
-                        <i className="fa-solid fa-check text-sm"></i>
-                      </button>
+                      {["admin", "superAdmin"].includes(user?.role) && (
+                        <>
+                          <button
+                            onClick={() =>
+                              handleValidate(selectedPayment.id)
+                            }
+                            className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full bg-green-700 hover:bg-green-800 text-white transition"
+                          >
+                            <i className="fa-solid fa-check text-sm"></i>
+                          </button>
 
-                      <button
-                        onClick={() =>
-                          handleReject(selectedPayment.id)
-                        }
-                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full bg-red-700 hover:bg-red-800 text-white transition"
-                      >
-                        <i className="fa-solid fa-xmark text-sm"></i>
-                      </button>
+                          <button
+                            onClick={() =>
+                              handleReject(selectedPayment.id)
+                            }
+                            className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full bg-red-700 hover:bg-red-800 text-white transition"
+                          >
+                            <i className="fa-solid fa-xmark text-sm"></i>
+                          </button>
+                        </>
+                      )}
                     </>
                   )}
                 </div>

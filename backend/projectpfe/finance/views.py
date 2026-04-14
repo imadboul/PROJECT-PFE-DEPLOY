@@ -25,7 +25,7 @@ def payments(request):
             queryset = Payment.objects.all().order_by('-created_at')
 
         result_page = paginator.paginate_queryset(queryset, request)
-        serializer = paymentcreateserializer(result_page, many=True)
+        serializer = paymentreadserializer(result_page, many=True)
 
         return success_response(data=paginated_response(paginator, serializer),message="Payments retrieved successfully",status_code=200)
             
@@ -46,11 +46,11 @@ def payments(request):
 @jwt_must
 def getbalance(request):
         paginator = MyPagination()
-
+        print(request.role) 
         if request.role == 'client':
             queryset = Balance.objects.filter(client_id=request.user_id)
         else:
-            queryset = Balance.objects.all().order_by('-created_at')
+            queryset = Balance.objects.all()
 
         result_page = paginator.paginate_queryset(queryset, request)
         serializer = balanceserializer(result_page, many=True)
@@ -95,6 +95,9 @@ def validatePayment(request):
         return success_response(message=f"payment {payment.state}",status_code=200) 
     else:
         return error_response(message="failed",errors=serializer.errors)
+    
+    
+    
     
 def check_if_enough(amount, client_id, type_id):
     

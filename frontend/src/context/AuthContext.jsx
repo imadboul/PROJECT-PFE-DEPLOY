@@ -16,13 +16,13 @@ export default function AuthProvider({ children }) {
       try {
         const decoded = jwtDecode(token);
         setUser(decoded);
-      }catch (error) {
+      } catch (error) {
         const msg =
-        error.response?.data?.error ||
-        "Error fatching data";
+          error.response?.data?.error ||
+          "Error fatching data";
 
-       toast.error(msg);
-      
+        toast.error(msg);
+
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
       }
@@ -31,7 +31,6 @@ export default function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  // LOGIN
   async function login(email, password) {
     try {
       const res = await api.post("/client/login/", {
@@ -50,27 +49,33 @@ export default function AuthProvider({ children }) {
 
       return { success: true };
     } catch (error) {
-        const msg =
+      const msg =
         error.response?.data?.error ||
         "Error login";
 
       toast.error(msg);
-      }
+
+      return { success: false, error: msg };
+    }
   }
 
-  //  SIGNUP
-  async function signUp(data) {
-    try {
-      await api.post("/client/signUp/", data);
-      return { success: true };
-    }catch (error) {
-        const msg =
-        error.response?.data?.error ||
-        "Error sign up ";
+ async function signUp(data) {
+  try {
+    await api.post("/client/signUp/", data);
+    return { success: true };
+  } catch (error) {
+    const msg =
+      error.response?.data?.message ||
+      "Error Sign up";
 
       toast.error(msg);
-      }
+
+    return {
+      success: false,
+      error: msg,
+    };
   }
+}
 
   //  LOGOUT
   function logout() {

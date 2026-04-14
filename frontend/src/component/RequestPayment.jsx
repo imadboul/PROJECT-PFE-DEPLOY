@@ -8,7 +8,7 @@ import Select from "react-select";
 
 function RequestPayment() {
   const [productTypes, setProductTypes] = useState([]);
-  const [loding, setLoding] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const {
@@ -22,14 +22,14 @@ function RequestPayment() {
     const fetchProductTypes = async () => {
       try {
         const res = await getProductTypes()
-        const data = res.data.types || res.data
+        const data = res.data.data.types
         setProductTypes(Array.isArray(data) ? data : [])
-      }catch (error) {
+      } catch (error) {
         const msg =
-        error.response?.data?.error ||
-        "Error fatching product type";
+          error.response?.data?.error ||
+          "Error fatching product type";
 
-      toast.error(msg);
+        toast.error(msg);
       }
     }
     fetchProductTypes()
@@ -42,11 +42,8 @@ function RequestPayment() {
   }));
 
   const onSubmit = async (data) => {
-    console.log("Form data:", data); // ← شوف شنو يرجع
-    console.log("productType:", data.productType);
-
     try {
-      setLoding(true)
+      setLoading(true)
 
       const payload = {
         amount: Number(data.amount),
@@ -61,24 +58,32 @@ function RequestPayment() {
       navigate("/Balance")
 
     } catch (error) {
-        const msg =
+      const msg =
         error.response?.data?.error ||
         "Error creating payment";
 
       toast.error(msg);
-      } finally {
-      setLoding(false)
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent">
+    <div className="min-h-screen flex items-center justify-center bg-transparent px-4">
       <div className="w-full max-w-xl bg-black/60 rounded-2xl shadow-lg p-6 border border-black/60">
 
-        <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
-          Request Payment
-        </h2>
+        <div>
+          <button
+            className="text-white text-2xl cursor-pointer font-bold hover:text-orange-500"
+            onClick={() => window.history.back()}
+          >
+            <i className="fa-solid fa-arrow-left"></i>
+          </button>
 
+          <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
+            Request Payment
+          </h2>
+        </div>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
 
           {/* Product Type */}
@@ -140,7 +145,7 @@ function RequestPayment() {
             )}
           />
 
-          <div className="relative bottom-0 mb-4">
+         <div className="relative bottom-4 mb-8">
             {errors.productType && (
               <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
                 {errors.productType.message}
@@ -155,8 +160,13 @@ function RequestPayment() {
             {...register("amount", { required: "amount is required" })}
             className="w-full text-xl placeholder-white text-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
-          {errors.amount && <p className="text-red-500 text-center">{errors.amount.message}</p>}
-
+          <div className="relative bottom-4 mb-4">
+            {errors.amount && (
+              <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
+                {errors.amount.message}
+              </p>
+            )}
+          </div>
           {/* Bank Name */}
           <input
             type="text"
@@ -164,23 +174,33 @@ function RequestPayment() {
             {...register("bankName", { required: "bankName is required" })}
             className="w-full text-xl placeholder-white text-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
-          {errors.bankName && <p className="text-red-500 text-center">{errors.bankName.message}</p>}
-
+          <div className="relative bottom-4 mb-4">
+            {errors.bankName && (
+              <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
+                {errors.bankName.message}
+              </p>
+            )}
+          </div>
           {/* Transfer Date */}
           <input
             type="date"
             {...register("transferDate", { required: "Date is required" })}
             className="w-full text-xl placeholder-white text-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
-          {errors.transferDate && <p className="text-red-500 text-center">{errors.transferDate.message}</p>}
-
+          <div className="relative bottom-4 mb-4">
+            {errors.transferDate && (
+              <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
+                {errors.transferDate.message}
+              </p>
+            )}
+          </div>
           {/* Submit */}
           <button
             type="submit"
-            disabled={loding}
-            className="w-full mt-4 py-2 rounded-lg text-white transition cursor-pointer"
+            disabled={loading}
+            className="w-full py-2 text-white font-bold bg-orange-600 cursor-pointer hover:bg-orange-700 rounded placeholder-white"
           >
-            {loding ? "Loading..." : "Request Payment"}
+            {loading ? "Loading..." : "Request Payment"}
           </button>
 
         </form>

@@ -1,44 +1,41 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   getPayments,
   rejectPayment,
   validatePayment,
 } from "../context/services/BalanceService";
-import { getProductTypes } from "../context/services/productService";
 import toast from "react-hot-toast";
 import { useNotifications } from "../context/NotificationContext";
-
+import { AuthContext } from "../context/AuthContext";
 
 export default function PaymentsList() {
   const [payments, setPayments] = useState([]);
-  const [productTypes, setProductTypes] = useState([]);
   const [showValidated, setShowValidated] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [loading, setLoading] = useState(false);
   const { fetchNotifications } = useNotifications();
   const location = useLocation();
   const selectedProductType = location.state?.productType;
+  const { user } = useContext(AuthContext);
+
   //  Fetch data
   const fetchPayments = async () => {
     try {
       setLoading(true);
 
       const resP = await getPayments();
-      const resT = await getProductTypes();
-
-      const paymentsData = resP.data.payments || resP.data;
-      const typesData = resT.data.types || resT.data;
+      await fetchNotifications();
+      const paymentsData = resP.data.data.results;
 
       setPayments(Array.isArray(paymentsData) ? paymentsData : []);
-      setProductTypes(Array.isArray(typesData) ? typesData : []);
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error fatching data";
 
       toast.error(msg);
-      }finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -55,29 +52,28 @@ export default function PaymentsList() {
       toast.success("Payment validated");
       setSelectedPayment(null);
       fetchPayments();
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error validation";
-
       toast.error(msg);
-      }
+    }
   };
 
   //  Reject
   const handleReject = async (id) => {
     try {
       await rejectPayment(id);
+      await fetchNotifications();
       toast.success("Payment rejected");
       setSelectedPayment(null);
       fetchPayments();
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error rejection";
-
       toast.error(msg);
-      }
+    }
   };
 
   //  Toggle filter
@@ -97,11 +93,6 @@ export default function PaymentsList() {
     });
   };
 
-  // Get product name
-  const getProductName = (id) => {
-    const type = productTypes.find((p) => p.id === id);
-    return type ? type.name : id;
-  };
 
   // Filter payments
   const filteredPayments = payments.filter((p) => {
@@ -110,10 +101,10 @@ export default function PaymentsList() {
     const matchState = showValidated
       ? state === "validated"
       : state !== "validated";
-    console.log(payments.map(p => p.state));
+    
 
     const matchProduct = selectedProductType
-      ? Number(p.productType) === Number(selectedProductType)
+      ? Number(p.product_type) === Number(selectedProductType)
       : true;
 
     return matchState && matchProduct;
@@ -157,12 +148,10 @@ export default function PaymentsList() {
           >
             <div className="space-y-2 text-sm">
 
-              <p>
-                <strong>Product:</strong>{" "}
-                {getProductName(p.productType)}
+              <p className="text-lg font-semibold">
+                <strong>Product type:</strong> {p.productType}
               </p>
-
-              <div className="flex justify-between">
+              <div className="md:flex justify-between">
                 <p>
                   <strong>Transfer:</strong>{" "}
                   {formatDate(p.transferDate)}
@@ -174,7 +163,7 @@ export default function PaymentsList() {
                 </p>
               </div>
 
-              <div className="flex justify-between">
+              <div className="md:flex justify-between">
                 <p>
                   <strong>Bank:</strong> {p.bankName}
                 </p>
@@ -217,7 +206,7 @@ export default function PaymentsList() {
 
             <div className="space-y-2 text-sm">
 
-              <p><strong>Product:</strong> {getProductName(selectedPayment.productType)}</p>
+              <p><strong>Product:</strong> {selectedPayment.productType}</p>
               <p><strong>Transfer:</strong> {formatDate(selectedPayment.transferDate)}</p>
               <p><strong>Created:</strong> {formatDate(selectedPayment.created_at)}</p>
               <p><strong>Bank:</strong> {selectedPayment.bankName}</p>
@@ -244,6 +233,8 @@ export default function PaymentsList() {
                 <div className="flex gap-4">
                   {selectedPayment.state === "pending" && (
                     <>
+                     {["admin", "superAdmin"].includes(user?.role) && (
+                        <>
                       <button
                         onClick={() => handleValidate(selectedPayment.id)}
                         className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
@@ -261,6 +252,8 @@ export default function PaymentsList() {
                       >
                         <i className="fa-solid fa-xmark text-sm"></i>
                       </button>
+                        </>
+                      )}
                     </>
                   )}
 

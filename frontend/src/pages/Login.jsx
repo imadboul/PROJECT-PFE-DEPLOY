@@ -23,22 +23,21 @@ export default function Login() {
     formState: { errors },
   } = useForm();
 
-  async function onSubmit(data) {
-    setLoading(true);
+ async function onSubmit(data) {
+  setLoading(true);
 
-    const result = await login(data.email, data.password);
+  const result = await login(data.email, data.password);
 
-    if (result.success) {
-      toast.success("Login successful");
-      navigate("/Home");
-    } else {
-      setAuthError(result.error);
-      toast.error("Login failed");
-      navigate("/");
-    }
+  setLoading(false);
 
-    setLoading(false);
+  if (result?.success) {
+    toast.success("Login successful");
+    navigate("/Home");
+  } else {
+    setAuthError(result?.error || "Login failed");
+    toast.error("Login failed");
   }
+}
 
 
 

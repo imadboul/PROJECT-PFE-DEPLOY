@@ -9,19 +9,23 @@ import ContractDetails from "./pages/ContractDetails"
 import BalanceList from "./pages/Balance";
 import Invoice from "./pages/Invoice";
 import Navbar from "./component/Navbar";
-import Bills from "./pages/Bills";
 import Notifications from "./pages/Notifications";
 import ProtectedRoute from "./component/ProtectedRoute";
 import SuperAdminRoute from "./component/SuperAdminRoute";
 import AddProductType from "./component/AddProductType";
 import RequestContract from "./component/RequestContract";
 import RequestPayment from "./component/RequestPayment";
+import RequestOrder from "./component/RequestOrder";
 import PaymentsList from "./pages/payment";
 import PaymentDetails from "./pages/paymentDetails";
 import AddProduct from "./component/AddProduct";
 import EditProductType from "./component/EditProductType";
 import ProductsList from "./pages/Product";
 import EditProduct from "./component/EditProduct";
+import Orders from "./pages/Orders";
+import OrderDetails from "./pages/OrderDetails";
+import BillsList from "./pages/Bills";
+import ContractClient from "./pages/ContractClient";
 
 /* Layout */
 function Layout() {
@@ -84,22 +88,31 @@ function App() {
             <SuperAdminRoute>
               <EditProductType />
             </SuperAdminRoute>} />
-            
+
           <Route path="/EditProduct/:id" element={
             <SuperAdminRoute>
               <EditProduct />
             </SuperAdminRoute>} />
+            
+          <Route path="/Bills" element={
+            <SuperAdminRoute>
+              <BillsList />
+            </SuperAdminRoute>} />
+
 
 
           <Route path="/Home" element={<Home />} />
-          <Route path="/contracts" element={<ContractsList />} />
-          <Route path="/contracts/:id" element={<ContractDetails />} />
+          <Route path="/ContractClient" element={<ContractClient />} />
+          <Route path="/Contracts" element={<ContractsList />} />
+          <Route path="/Contracts/:id" element={<ContractDetails />} />
           <Route path="/Balance" element={<BalanceList />} />
           <Route path="/product" element={<ProductsList />} />
           <Route path="/Invoices" element={<Invoice />} />
-          <Route path="/Bills" element={<Bills />} />
+          <Route path="/order" element={<Orders />} />
+          <Route path="/order/:id" element={<OrderDetails />} />
           <Route path="/Notifications" element={<Notifications />} />
           <Route path="/RequestContract" element={<RequestContract />} />
+          <Route path="/RequestOrder" element={<RequestOrder />} />
           <Route path="/RequestPayment" element={<RequestPayment />} />
           <Route path="/Payment" element={<PaymentsList />} />
           <Route path="/Payment/:id" element={<PaymentDetails />} />

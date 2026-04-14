@@ -9,11 +9,12 @@ function AddProduct() {
   const [productTypes, setProductTypes] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const unitOptions = [
-    { value: "litre", label: "Litre" },
-    { value: "kilogram", label: "Kilogram" },
-  ];
-
+const unitOptions = [
+  { value: "KG", label: "Kilogram" },
+  { value: "L", label: "Liter" },
+  { value: "HL", label: "Hectoliter" },
+  { value: "TM", label: "Tonne" },
+];
   const {
     register,
     handleSubmit,
@@ -32,14 +33,14 @@ function AddProduct() {
     const fetchProductTypes = async () => {
       try {
         const res = await getProductTypes();
-        const data = res.data.types || res.data;
+        const data = res.data.data.types || res.data;
         setProductTypes(Array.isArray(data) ? data : []);
       } catch (error) {
         const msg =
-        error.response?.data?.error ||
-        "Error creating product";
+          error.response?.data?.error ||
+          "Error creating product";
 
-      toast.error(msg);
+        toast.error(msg);
       }
     };
 
@@ -56,7 +57,7 @@ function AddProduct() {
         description: data.description,
         unit_price: Number(data.unitPrice),
         unit: data.unit.value,
-        qte_left: Number(data.qteLeft),
+        density: Number(data.density ?? 0),
         product_type: Number(data.productType),
       };
 
@@ -69,6 +70,7 @@ function AddProduct() {
       const msg =
         error.response?.data?.error ||
         "Error creating product";
+        console.log(error.response?.data);
 
       toast.error(msg);
     } finally {
@@ -77,7 +79,7 @@ function AddProduct() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent text-white">
+    <div className="min-h-screen flex items-center justify-center bg-transparent text-white px-4">
       <div className="w-full max-w-xl bg-black/60 rounded-2xl shadow-lg p-6 border border-black/60">
 
         {/* Header */}
@@ -98,7 +100,7 @@ function AddProduct() {
           {/* Product Type */}
           <div className="flex items-center gap-6">
 
-            <div className="w-2/3">
+            <div className="w-3/4">
               <Controller
                 name="productType"
                 control={control}
@@ -114,7 +116,7 @@ function AddProduct() {
                         backgroundColor: "rgba(7, 7, 7, 0.11)",
                         borderColor: state.isFocused ? "#f97316" : "#000",
                         boxShadow: "none",
-                        fontSize: "20px",
+                        fontSize: "18px",
                       }),
                       menu: (base) => ({
                         ...base,
@@ -147,13 +149,13 @@ function AddProduct() {
             </div>
 
             {/* Add Type */}
-            <NavLink to="/AddProductType" className="text-orange-400 text-xl hover:text-orange-600 transition">
+            <NavLink to="/AddProductType" className="text-orange-400 text-md md:text-xl hover:text-orange-600 transition">
               <i className="fa-solid fa-plus"></i>
             </NavLink>
           </div>
           <div className="relative bottom-5 mb-7">
             {errors.productType && (
-              <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
+              <p className="absolute top-0 left-0 right-0 text-red-500 text-lg text-center mt-1">
                 {errors.productType.message}
               </p>
             )}
@@ -164,11 +166,11 @@ function AddProduct() {
             type="text"
             placeholder="Name"
             {...register("name", { required: "Name is required" })}
-            className="w-full text-xl placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full text-lg placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
           <div className="relative bottom-4 mb-4">
             {errors.name && (
-              <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
+              <p className="absolute top-0 left-0 right-0 text-red-500 text-lg text-center mt-1">
                 {errors.name.message}
               </p>
             )}
@@ -178,14 +180,14 @@ function AddProduct() {
           <textarea
             placeholder="Description"
             {...register("description")}
-            className="w-full text-xl placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full text-lg placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
 
           {/* Price + Unit */}
           <div className="flex items-center justify-between gap-6">
 
             {/* Price */}
-            <div className="flex">
+            <div className="flex-1">
               <input
                 type="number"
                 placeholder="Unit Price"
@@ -199,7 +201,7 @@ function AddProduct() {
             </div>
 
             {/* Unit */}
-            <div className="flex">
+            <div className="flex-1">
               <Controller
                 className="focus:outline-none focus:ring-2 focus:ring-orange-500"
                 name="unit"
@@ -216,7 +218,7 @@ function AddProduct() {
                         backgroundColor: "rgba(7, 7, 7, 0.11)",
                         borderColor: state.isFocused ? "#f97316" : "#000",
                         boxShadow: "none",
-                        fontSize: "20px",
+                        fontSize: "18px",
                       }),
                       menu: (base) => ({
                         ...base,
@@ -256,20 +258,28 @@ function AddProduct() {
             )}
           </div>
 
-          {/* Quantity */}
+          {/* density */}
           <input
             type="number"
-            placeholder="Quantity Left"
-            {...register("qteLeft", {
-              required: "Quantity is required",
-              min: { value: 1, message: "Must be > 0" },
+            placeholder="density"
+            {...register("density", {
+              required: "density is required",
+              min: {
+                value: 0,
+                message: "density must be >= 0",
+              },
+              max: {
+                value: 1,
+                message: "density must be <= 1",
+              },
             })}
+            step="0.001"
             className="w-full text-xl placeholder-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
-          <div className="relative bottom-3 mb-6">
-            {errors.qteLeft && (
+          <div className="relative bottom-5 mb-6">
+            {errors.density && (
               <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
-                {errors.qteLeft.message}
+                {errors.density.message}
               </p>
             )}
           </div>

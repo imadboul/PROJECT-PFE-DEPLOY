@@ -21,7 +21,14 @@ class producttypeserializer(serializers.ModelSerializer):
             raise serializers.ValidationError("does not exist")
         
         return data
+class productreadserializer(serializers.ModelSerializer):
+    product_type = serializers.CharField(source="product_type.name")
     
+    class Meta:
+        model = Product
+        fields = '__all__'
+        
+
     
 class productserializer(serializers.ModelSerializer):
     
@@ -73,10 +80,44 @@ class productcreateserializer(serializers.ModelSerializer):
 class contractreadserializer(serializers.ModelSerializer):
     product_type = serializers.CharField(source="product_type.name")
     client = serializers.CharField(source ="client.lastName")
+    client_id = serializers.CharField(source ="client.id")
+    product_type_id = serializers.CharField(source ="product_type.id")
 
     class Meta:
         model = Contract
-        fields = '__all__'
+        fields = [
+            'id',
+            'client_id',
+            'start_date',
+            'end_date',
+            'qte_global',
+            'qte_used',
+            'created_at',
+            'validated_at',
+            'state',
+            'validated_by',
+            'client',
+            'product_type',
+             'product_type_id'
+        ]
+
+class ClientreadSerializer(serializers.ModelSerializer):
+    numberContracts = serializers.SerializerMethodField()
+    client_id = serializers.IntegerField(source='id')
+    
+    
+
+    class Meta:
+        model = Client
+        fields = ['client_id', 'firstName', 'lastName','numberContracts']
+        extra_kwargs = {
+         "FirstName": {"read_only": True},
+         "lastName": {"read_only": True},
+         "numberOrders": {"read_only": True}
+}
+        
+    def get_numberContracts(self, obj):
+        return obj.client_contracts.count()
      
 class contractcreateserializer(serializers.ModelSerializer):
     
