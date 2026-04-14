@@ -1,7 +1,7 @@
 import api from "../../api/axios";
 
 export const getBill = () =>
-  api.get("/orderclient/bill/");
+  api.get("/orderclient/clients/");
 
 export const createOrder = (data) =>
      api.post("/orderclient/order/", data);

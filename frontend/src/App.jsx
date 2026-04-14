@@ -23,7 +23,7 @@ import EditProductType from "./component/EditProductType";
 import ProductsList from "./pages/Product";
 import EditProduct from "./component/EditProduct";
 import Orders from "./pages/Orders";
-import BillDetails from "./pages/BillDetails";
+import OrderDetails from "./pages/OrderDetails";
 import BillsList from "./pages/Bills";
 
 /* Layout */
@@ -92,10 +92,12 @@ function App() {
             <SuperAdminRoute>
               <EditProduct />
             </SuperAdminRoute>} />
+            
           <Route path="/Bills" element={
             <SuperAdminRoute>
               <BillsList />
             </SuperAdminRoute>} />
+
 
 
           <Route path="/Home" element={<Home />} />
@@ -105,7 +107,7 @@ function App() {
           <Route path="/product" element={<ProductsList />} />
           <Route path="/Invoices" element={<Invoice />} />
           <Route path="/order" element={<Orders />} />
-          <Route path="/order/:id" element={<BillDetails />} />
+          <Route path="/order/:id" element={<OrderDetails />} />
           <Route path="/Notifications" element={<Notifications />} />
           <Route path="/RequestContract" element={<RequestContract />} />
           <Route path="/RequestOrder" element={<RequestOrder />} />

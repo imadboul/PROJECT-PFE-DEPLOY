@@ -2,29 +2,40 @@ import { useEffect, useState } from "react";
 import { getOrders, validateOrder, rejectOrder, getContractPDF } from "../context/services/orderService";
 import toast from "react-hot-toast";
 import { NavLink } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 export default function OrderList() {
   const [orders, setOrders] = useState([]);
-  const [showActive, setShowActive] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showValidated, setShowValidated] = useState(true);
+  const location = useLocation();
+  const selectedclientID = location.state?.client_id || null;
 
+  //  Fetch data
   const fetchOrders = async () => {
     try {
       setLoading(true);
+
       const res = await getOrders();
       const data = res.data.data.results;
+
       setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error fetching data");
+      const msg =
+        error.response?.data?.error ||
+        "Error fatching data";
+
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
 
+
   useEffect(() => {
-    fetchOrders();
-  }, []);
+  fetchOrders();
+}, [selectedclientID]);
 
   const handleValidate = async (id) => {
     try {
@@ -59,7 +70,24 @@ export default function OrderList() {
     }
   };
 
-  const changeStatus = () => setShowActive((prev) => !prev);
+  const filteredOrder = orders.filter((o) => {
+  const state = o.state?.toLowerCase();
+
+  const matchState = showValidated
+    ? state === "validated"
+    : state !== "validated";
+
+  const matchClient = selectedclientID
+  ? String(o.client_id) === String(selectedclientID)
+  : true;
+
+  return matchState && matchClient;
+});
+
+
+  const changeStatus = () => {
+    setShowValidated((prev) => !prev);
+  };
 
   if (loading) return <div className="text-white text-center mt-10">Loading...</div>;
 
@@ -76,7 +104,7 @@ export default function OrderList() {
             onClick={changeStatus}
             className="border border-white cursor-pointer text-white px-3 py-2 rounded hover:bg-white/10 mb-4"
           >
-            {showActive ? "Show No Valide" : "Show Valide"}
+            {showValidated ? "Show No Valide" : "Show Valide"}
           </button>
 
           <NavLink
@@ -87,10 +115,7 @@ export default function OrderList() {
           </NavLink>
         </div>
 
-        {orders
-          .filter((o) =>
-            showActive ? o.state === "validated" : o.state !== "validated"
-          )
+        {filteredOrder
           .map((o) => (
             <div
               key={o.id}
@@ -111,8 +136,8 @@ export default function OrderList() {
                     o.state === "validated"
                       ? "text-green-500"
                       : o.state === "rejected"
-                      ? "text-red-500"
-                      : "text-yellow-500"
+                        ? "text-red-500"
+                        : "text-yellow-500"
                   }
                 >
                   <strong className="text-white">State:</strong> {o.state}
@@ -142,8 +167,8 @@ export default function OrderList() {
                   selectedOrder.state === "validated"
                     ? "text-green-500"
                     : selectedOrder.state === "rejected"
-                    ? "text-red-500"
-                    : "text-yellow-500"
+                      ? "text-red-500"
+                      : "text-yellow-500"
                 }
               >
                 <strong className="text-white">State:</strong> {selectedOrder.state}

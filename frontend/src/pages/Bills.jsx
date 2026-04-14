@@ -36,16 +36,20 @@ export default function BillsList() {
               <div
                 key={b.id}
                 onClick={() =>
-                  navigate("/order/", {
-                    state: { client: b.client },
-                  })
+                  navigate("/order", { state: { client_id: b.id } })
                 }
                 className="cursor-pointer bg-black/50 text-white rounded-2xl p-5 border hover:bg-black/80 transition"
               >
-                <div className="flex justify-between items-center mb-2">
+                <div >
                   <h2 className="text-lg font-bold">
-                    client: {b.client}
+                    Client ID : {b.id}
                   </h2>
+                  <div className="">
+                  <p className="text-md font-semibold"><span>First Name:</span> {b.firstName}</p>
+                  <p className="text-md font-semibold"><span>Last Name:</span> {b.lastName}</p>
+                  </div>
+                  <p className="text-md font-semibold text-green-500"><span className="text-white">Number of Orders:</span> {b.numberOrders}</p>
+
                 </div>
 
               </div>
