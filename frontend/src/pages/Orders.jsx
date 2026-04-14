@@ -12,7 +12,6 @@ export default function OrderList() {
   const location = useLocation();
   const selectedclientID = location.state?.client_id || null;
 
-  //  Fetch data
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -178,8 +177,12 @@ export default function OrderList() {
                 <div className="flex gap-4">
                   {selectedOrder.state === "pending" && (
                     <>
+                     {["admin", "superAdmin"].includes(user?.role) && (
+                        <>
                       <button onClick={() => handleValidate(selectedOrder.id)} className="bg-green-700 w-7 h-7 rounded-full">✔</button>
                       <button onClick={() => handleReject(selectedOrder.id)} className="bg-red-700 w-7 h-7 rounded-full">✖</button>
+                      </>
+                      )}
                     </>
                   )}
                   {selectedOrder.state === "validated" && (

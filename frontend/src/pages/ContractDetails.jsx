@@ -18,7 +18,7 @@ export default function ContractDetails() {
   const [selectedContract, setSelectedContract] = useState(null);
 
 
-    const viewContract = async (id) => {
+  const viewContract = async (id) => {
     try {
       const res = await getContractPDF(id);
 
@@ -27,13 +27,13 @@ export default function ContractDetails() {
 
       window.open(url, "_blank");
 
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error view";
 
       toast.error(msg);
-      }
+    }
   };
 
   const fetchContract = async () => {
@@ -42,14 +42,14 @@ export default function ContractDetails() {
       const res = await getContractById(id);
       await fetchNotifications();
       setContract(res.data.data);
-      setSelectedContract(null); 
-    }catch (error) {
-        const msg =
+      setSelectedContract(null);
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error fatching data";
 
       toast.error(msg);
-      } finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -64,13 +64,13 @@ export default function ContractDetails() {
       await fetchNotifications();
       toast.success("Validated");
       fetchContract();
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error validation";
 
       toast.error(msg);
-      }
+    }
   };
 
   const handleReject = async (contractId) => {
@@ -79,13 +79,13 @@ export default function ContractDetails() {
       await fetchNotifications();
       toast.success("Rejected");
       fetchContract();
-    }catch (error) {
-        const msg =
+    } catch (error) {
+      const msg =
         error.response?.data?.error ||
         "Error rejection";
 
       toast.error(msg);
-      }
+    }
   };
 
   const formatDate = (date) => {
@@ -229,25 +229,27 @@ export default function ContractDetails() {
                 </p>
 
                 <div className="flex gap-4">
-                 {selectedContract.state === "pending" && (
+                  {selectedContract.state === "pending" && (
                     <>
-                      <button
-                        onClick={() => handleValidate(selectedContract.id)}
-                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
-                           bg-green-700 hover:bg-green-800 
-                           text-white transition"
-                      >
-                        <i className="fa-solid fa-check text-sm"></i>
-                      </button>
+                      {["admin", "superAdmin"].includes(user?.role) && (
+                        <>
+                          <button
+                            onClick={() => handleValidate(selectedContract.id)}
+                            className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                           bg-green-700 hover:bg-green-800 text-white transition"
+                          >
+                            <i className="fa-solid fa-check text-sm"></i>
+                          </button>
 
-                      <button
-                        onClick={() => handleReject(selectedContract.id)}
-                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
-                           bg-red-700 hover:bg-red-800 
-                           text-white transition"
-                      >
-                        <i className="fa-solid fa-xmark text-sm"></i>
-                      </button>
+                          <button
+                            onClick={() => handleReject(selectedContract.id)}
+                            className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                          bg-red-700 hover:bg-red-800 text-white transition"
+                          >
+                            <i className="fa-solid fa-xmark text-sm"></i>
+                          </button>
+                        </>
+                      )}
                     </>
                   )}
                   {selectedContract.state === "validated" && (

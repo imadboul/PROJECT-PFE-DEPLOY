@@ -184,6 +184,8 @@ export default function OrderDetails() {
                 <div className="flex gap-4">
                   {selectedBill.state === "pending" && (
                     <>
+                     {["admin", "superAdmin"].includes(user?.role) && (
+                        <>
                       <button
                         onClick={() => handleValidate(selectedBill.id)}
                         className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
@@ -201,6 +203,8 @@ export default function OrderDetails() {
                       >
                         <i className="fa-solid fa-xmark text-sm"></i>
                       </button>
+                      </>
+                      )}
                     </>
                   )}
 

@@ -231,6 +231,8 @@ export default function PaymentDetails() {
                 <div className="flex gap-4">
                   {selectedPayment.state === "pending" && (
                     <>
+                     {["admin", "superAdmin"].includes(user?.role) && (
+                        <>
                       <button
                         onClick={() =>
                           handleValidate(selectedPayment.id)
@@ -248,6 +250,8 @@ export default function PaymentDetails() {
                       >
                         <i className="fa-solid fa-xmark text-sm"></i>
                       </button>
+                      </>
+                     )}
                     </>
                   )}
                 </div>

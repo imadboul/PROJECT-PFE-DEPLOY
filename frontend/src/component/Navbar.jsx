@@ -27,9 +27,16 @@ export default function Navbar() {
 
       {/* Desktop Links */}
       <div className="hidden md:flex items-center gap-4">
-        <NavLink to="/Contracts" className={linkStyle}>
+        {["admin", "superAdmin"].includes(user?.role) && (
+        <NavLink to="/ContractClient" className={linkStyle}>
           Contracts
         </NavLink>
+        )}
+        {["client"].includes(user?.role) && (
+        <NavLink to="/Contracts" className={linkStyle}>
+          Contract
+        </NavLink>
+        )}
         <NavLink to="/Balance" className={linkStyle}>
           Balance
         </NavLink>

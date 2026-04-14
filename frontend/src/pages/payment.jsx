@@ -232,6 +232,8 @@ export default function PaymentsList() {
                 <div className="flex gap-4">
                   {selectedPayment.state === "pending" && (
                     <>
+                     {["admin", "superAdmin"].includes(user?.role) && (
+                        <>
                       <button
                         onClick={() => handleValidate(selectedPayment.id)}
                         className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
@@ -249,6 +251,8 @@ export default function PaymentsList() {
                       >
                         <i className="fa-solid fa-xmark text-sm"></i>
                       </button>
+                        </>
+                      )}
                     </>
                   )}
 

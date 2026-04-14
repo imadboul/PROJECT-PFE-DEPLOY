@@ -25,6 +25,7 @@ import EditProduct from "./component/EditProduct";
 import Orders from "./pages/Orders";
 import OrderDetails from "./pages/OrderDetails";
 import BillsList from "./pages/Bills";
+import ContractClient from "./pages/ContractClient";
 
 /* Layout */
 function Layout() {
@@ -101,8 +102,9 @@ function App() {
 
 
           <Route path="/Home" element={<Home />} />
-          <Route path="/contracts" element={<ContractsList />} />
-          <Route path="/contracts/:id" element={<ContractDetails />} />
+          <Route path="/ContractClient" element={<ContractClient />} />
+          <Route path="/Contracts" element={<ContractsList />} />
+          <Route path="/Contracts/:id" element={<ContractDetails />} />
           <Route path="/Balance" element={<BalanceList />} />
           <Route path="/product" element={<ProductsList />} />
           <Route path="/Invoices" element={<Invoice />} />
