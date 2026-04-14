@@ -8,7 +8,7 @@ import {
 } from "../context/services/orderService";
 import { useNotifications } from "../context/NotificationContext";
 
-export default function BillDetails() {
+export default function OrderDetails() {
   const { id } = useParams();
   const { fetchNotifications } = useNotifications();
   const [order, setOrder] = useState(null);
