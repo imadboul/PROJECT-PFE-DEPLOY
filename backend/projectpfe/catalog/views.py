@@ -223,23 +223,24 @@ def contract(request):
         )
 
     if request.method == 'GET':
-        client_id = request.user_id
-        role = request.role
+        paginator = MyPagination()
 
-        if role == 'client':
-            contracts = contractreadserializer(
-                Contract.objects.filter(client_id=client_id),
-                many=True
-            )
+
+        if request.role == 'client':
+             queryset =Contract.objects.filter(client_id=request.user_id)
 
         else:
-            contracts = contractreadserializer(
-                Contract.objects.all(),
-                many=True
-            )
+            client_id = request.data.get('client_id')
+            if client_id:
+                queryset = Contract.objects.filter(client_id = client_id)
+            else:
+                queryset = Contract.objects.all()
+
+        result_page = paginator.paginate_queryset(queryset, request)
+        contracts = contractreadserializer(result_page, many=True)
 
         return success_response(
-            data={"contracts": contracts.data},
+            data={"contracts": paginated_response(paginator, contracts),},
             message="Contracts retrieved successfully",
             status_code=status.HTTP_200_OK
         )
@@ -314,7 +315,25 @@ def get_contract(request, id):
         )
         
         
-        
+@api_view(['GET'])
+@jwt_must
+@role_required(['Admin', 'superAdmin'])
+def getclients(request):
+
+    paginator = MyPagination()
+
+    
+    queryset = Client.objects.filter(client_contracts__isnull=False).distinct()
+
+    result_page = paginator.paginate_queryset(queryset, request)
+
+    clients = ClientreadSerializer(result_page, many=True)
+
+    return success_response(
+        data=paginated_response(paginator, clients),
+        message="Clients retrieved successfully",
+        status_code=status.HTTP_200_OK
+    )  
         
     
 @api_view(['GET'])
