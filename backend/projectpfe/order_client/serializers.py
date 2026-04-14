@@ -171,21 +171,24 @@ class OrderProductreadSerializer(serializers.ModelSerializer):
         
 class OrderreadSerializer(serializers.ModelSerializer):
     client = serializers.CharField(source ="client.lastName")
+    client_id = serializers.CharField(source ="client.id")
     productsclient= OrderProductreadSerializer(many=True)
 
     class Meta:
         model=Orderclient
-        fields='__all__'
+        fields = ['id', 'client_id','date_created', 'contract', 'client','productsclient', 'state', 'validated_by']
 
 
-
+''
 class ClientreadSerializer(serializers.ModelSerializer):
     numberOrders = serializers.SerializerMethodField()
+    client_id = serializers.IntegerField(source='id')
+    
     
 
     class Meta:
         model = Client
-        fields = ['id', 'firstName', 'lastName','numberOrders']
+        fields = ['client_id', 'firstName', 'lastName','numberOrders']
         extra_kwargs = {
          "FirstName": {"read_only": True},
          "lastName": {"read_only": True},
