@@ -34,15 +34,15 @@ export default function BillsList() {
           {bill.map((b) => {
             return (
               <div
-                key={b.id}
+                key={b.client_id}
                 onClick={() =>
-                  navigate("/order", { state: { client_id: b.id } })
+                  navigate("/order", { state: { client_id: b.client_id } })
                 }
                 className="cursor-pointer bg-black/50 text-white rounded-2xl p-5 border hover:bg-black/80 transition"
               >
                 <div >
                   <h2 className="text-lg font-bold">
-                    Client ID : {b.id}
+                    Client ID : {b.client_id}
                   </h2>
                   <div className="">
                   <p className="text-md font-semibold"><span>First Name:</span> {b.firstName}</p>

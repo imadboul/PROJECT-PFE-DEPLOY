@@ -12,57 +12,68 @@ function RequestOrder() {
     const [contracts, setContracts] = useState([]);
     const [allProducts, setAllProducts] = useState([]);
     const [productsList, setProductsList] = useState([]);
-    const [products, setProducts] = useState([{ product: null, qte: "" }]);
+    const [products, setProducts] = useState([
+        { product: null, qte: "" },
+    ]);
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
     const { handleSubmit, control } = useForm();
 
-    //  fetch data
+    // ✅ FETCH DATA
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const c = await getContracts();
                 const p = await getProducts();
 
-                setContracts(Array.isArray(c.data.data.contracts) ? c.data.data.contracts : []);
-                setAllProducts(Array.isArray(p.data.data.products) ? p.data.data.products : []);
-                setProductsList(Array.isArray(p.data.data.products) ? p.data.data.products : []);
+                setContracts(c.data?.data?.contracts || []);
+                setAllProducts(p.data?.data?.products || []);
+                setProductsList(p.data?.data?.products || []);
             } catch (error) {
-                const msg =
-                    error.response?.data?.error ||
-                    "Error creating product";
-
-                toast.error(msg);
+                toast.error("Error fetching data");
             }
         };
 
         fetchData();
     }, []);
 
-    // add product input
+    // ADD PRODUCT
     const handleAdd = () => {
         setProducts([...products, { product: null, qte: "" }]);
     };
 
-    //  change value
+    // CHANGE VALUE
     const handleChange = (i, field, value) => {
         const newProducts = [...products];
         newProducts[i][field] = value;
         setProducts(newProducts);
     };
-    const contractOptions = contracts.map(c => ({
-        value: c.id,
-        label: `contract ${c.id}`
-    }))
 
-    const productOptions = productsList.map(p => ({
+    // OPTIONS
+    const contractOptions = contracts.map((c) => ({
+        value: c.id,
+        label: `Contract ${c.id}`,
+    }));
+
+    const productOptions = productsList.map((p) => ({
         value: p.id,
-        label: p.name
-    }))
-    //  submit
+        label: p.name,
+    }));
+
+    // SUBMIT
     const onSubmit = async (data) => {
         try {
+            // 🔥 VALIDATION
+            const invalid = products.some(
+                (p) => !p.product || !p.qte || Number(p.qte) <= 0
+            );
+
+            if (invalid) {
+                toast.error("Select product and valid quantity");
+                return;
+            }
+
             setLoading(true);
 
             const payload = {
@@ -72,17 +83,19 @@ function RequestOrder() {
                     qte: Number(p.qte),
                 })),
             };
-
             await createOrder(payload);
+
             toast.success("Order created");
-            navigate("/orders");
-        } catch {
-            toast.error("Error creating order");
+            navigate("/order");
+        } catch (error) {
+
+            const message = error.response?.data?.errors?.[0]
+             || "Error creating order";
+            toast.error(message);
         } finally {
             setLoading(false);
         }
     };
-
 
     return (
         <div className="min-h-screen flex items-center justify-center px-4">
