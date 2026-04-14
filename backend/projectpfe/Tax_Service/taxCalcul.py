@@ -5,29 +5,93 @@ from finance.models import Balance
 from django.db.models import Case, When, F, Value, DecimalField
 from collections import defaultdict
 import logging
+from django.db import connection
+from decimal import Decimal
+from django.db.models import Prefetch
+from Orders_Manage.models import OrderProduct
+from .models import TaxProduct
 logging=logging.getLogger(__name__)
 
+
+
+from django.db import transaction
+from django.db.models import Case, When, F, Value, DecimalField
+from collections import defaultdict
+
+
+
+
+    
+    
 def mains_balances(ordersValidated):
-        
-        
-        
-        
-        
+    
         invoices=[]
         invoicesLins=[]
-        
-        for order in ordersValidated:
+        orders =orders = ordersValidated.prefetch_related(
+    'order_orderProduct_items__product__product_taxProduct_items__tax',
+    
+
+    Prefetch(
+        'client__client_balances',
+        to_attr='pref_balances'
+    ),
+     Prefetch(
+        'contract__product_type__balances',
+        to_attr='pref_type'
+    ),
+    
+
+    Prefetch(
+        'invoice__invoice_InvoiceLine_items',
+        to_attr='pref_lines'
+    ),
+
+).select_related(
+    'invoice',
+    'contract',
+    'contract__client',
+    'contract__product_type'
+    
+)      
+        product_type_map = {}
+        client_balance_map = {}
+        invoiceLins_map={}
+        for order in orders:
+            
+            
+            invoiceLins_map[order.invoice_id] = list ( order.invoice.pref_lines  )
+            
+            client_balance_map[order.client_id]=list( order.client.pref_balances)
+            
+            product_type_map[order.contract.product_type_id]=list(order.contract.product_type.pref_type)
+            
+            
+            items1=client_balance_map.get(order.client.id,[])
+            items2=product_type_map.get(order.contract.product_type.id,[])
+            
+            for item1 in items1:
+              for item2 in items2:
+                  if (item1.id==item2.id):
+                      blc_id=item1.id 
+                
+              
+            
+               
             HT, TVA, TTC = total_price( order.order_orderProduct_items.all() ,invoicesLins )
-        
+            
             invoices.append({
-                "invoice": order.invoice,
+                "invoice_id": order.invoice.id,
+                "blc_id":blc_id,
                 "HT": HT,
                 "TVA": TVA,
                 "TTC": TTC
             })
-        
+            
+            
+            
+            
+        update_or_save_invoiceLins(invoicesLins,invoiceLins_map )
         update_invoices_bulk(invoices)
-        
         
         
         
@@ -46,13 +110,13 @@ def total_price(ordersProduct, invoicesLins):
             taxActiv=[]
             
             for tax in orderProduct.product.product_taxProduct_items.all():
-                
+            
                 if tax.is_active==True and tax.tax.name!="TVA":
                     taxActiv.append({  "name":tax.tax.name , "unit":tax.unit , "par_unit":tax.par_unit })
                     
                 elif tax.is_active==True and tax.tax.name=="TVA":
                      Tva=tax.par_unit
-            
+        
             
             X,Y,Z=tax_price(taxActiv,orderProduct,Tva,invoicesLins)
     
@@ -68,32 +132,32 @@ def tax_price(taxActiv,orderProduct,Tva,invoicesLins):
         
         total_tax=0 
         
+        type=orderProduct.order.type
+        
         
         for tax in taxActiv:
             
-            match tax['unit']:
-              
-                case 'L':
+            unit_l=unitchange(orderProduct,tax['unit'])
                     
-                    unit_l=unitchange(orderProduct,'L')
+            tax_price=unit_l*tax['par_unit']
+            
+            total_tax+=tax_price 
+               
+            if(type=='mains'):
+                 additional_taxPrice_qte(orderProduct.order.invoice,invoicesLins,orderProduct.product.name,orderProduct.qte*-1,orderProduct.unit,tax_price*-1,tax['name'])
+            else:
+                  additional_taxPrice_qte(orderProduct.order.invoice,invoicesLins,orderProduct.product.name,orderProduct.qte,orderProduct.unit,tax_price,tax['name'])        
                     
-                    tax_price=unit_l*tax['par_unit']
-                    
-                    total_tax+=tax_price    
-                    if(orderProduct.order.type=='mains'):
-                         additional_taxPrice_qte(orderProduct.order.invoice,invoicesLins,orderProduct.product.name,orderProduct.qte*-1,orderProduct.unit,tax_price*-1,tax['name'])
-                    else:
-                          additional_taxPrice_qte(orderProduct.order.invoice,invoicesLins,orderProduct.product.name,orderProduct.qte,orderProduct.unit,tax_price,tax['name'])
        
         qte_unit=unitchange(orderProduct,orderProduct.product.unit) 
         
         HT=(qte_unit*orderProduct.product.unit_price)
-        
         TTC=(HT+total_tax)*(1+Tva/100)
         TVA=(HT+total_tax)*Tva/100
-        if(orderProduct.order.type== 'mains'):
-            HT*=-1
-            TVA*=-1
+        
+        if(type == 'mains'):  
+            HT*=-1 
+            TVA*=-1 
             TTC*=-1
         
         
@@ -103,10 +167,10 @@ def tax_price(taxActiv,orderProduct,Tva,invoicesLins):
   
      
 
-def additional_taxPrice_qte(invoice,invoicesLine,product_name,qte,unit,tax_price,tax_name):
+def additional_taxPrice_qte(invoice,invoicesLines,product_name,qte,unit,tax_price,tax_name):
     
-    invoicesLine.append({
-        "invoice":invoice,
+    invoicesLines.append({
+        "invoice":invoice.id,
         "product_name":product_name,
         "qte":qte,
         "unit":unit,
@@ -121,44 +185,47 @@ def additional_taxPrice_qte(invoice,invoicesLine,product_name,qte,unit,tax_price
 
 def unitchange(orderProduct,unit):
     
-    
-    
     if (unit==orderProduct.unit):
         return orderProduct.qte
-  
+    
+    
+    product_unit  =  orderProduct.unit
+    qte  =  orderProduct.qte
+    density  =  orderProduct.product.density
+    
     match unit:
         case 'L':
             match orderProduct.unit:
                 case 'HL':
-                    return orderProduct.qte*100
+                    return qte*100
                 case 'KG':
-                    return orderProduct.qte/orderProduct.product.density
+                    return qte/density
                 case 'TM':
-                    return orderProduct.qte*1000/orderProduct.product.density
+                    return qte*1000/density
         case 'HL':
-            match orderProduct.unit:
+            match product_unit:
                 case 'L':
-                    return orderProduct.qte/100
+                    return qte/100
                 case 'KG':
-                    return orderProduct.qte/100*orderProduct.product.density
+                    return qte/100*density
                 case 'TM':
-                    return orderProduct.qte*10/orderProduct.product.density
+                    return qte*10/density
         case 'KG':
-            match orderProduct.unit:
+            match product_unit:
                 case 'L':
-                    return orderProduct.qte*orderProduct.product.density
+                    return qte*density
                 case 'HL':
-                    return orderProduct.qte*100*orderProduct.product.density
+                    return qte*100*density
                 case 'TM':
-                    return orderProduct.qte*1000 
+                    return qte*1000 
         case 'TM':
-            match orderProduct.unit:
+            match product_unit:
                 case 'KG':
-                    return orderProduct.qte/1000
+                    return qte/1000
                 case 'HL':
-                    return orderProduct.qte*orderProduct.product.density/10
+                    return qte*density/10
                 case 'L':
-                    return orderProduct.qte*orderProduct.product.density/1000      
+                    return qte*density/1000      
         
 
 
@@ -169,6 +236,170 @@ def unitchange(orderProduct,unit):
 
 def update_invoices_bulk(invoicesFinal):
     
+  
+    grouped = defaultdict(lambda: {"HT": 0, "TVA": 0, "TTC": 0})
+    
+   
+        
+       
+        
+        
+    
+    
+    for item in invoicesFinal:
+        
+       
+        grouped[item["invoice_id"]]["HT"] += item["HT"]
+        grouped[item["invoice_id"]]["TVA"] += item["TVA"]
+        grouped[item["invoice_id"]]["TTC"] += item["TTC"]
+
+
+    ids_invoices = list(grouped.keys())
+    
+    
+    
+    balance_grouped = defaultdict(lambda: {'TTC':0})
+
+    for item in invoicesFinal:
+        
+        balance_grouped[item['blc_id']]['TTC']+=item['TTC']
+    
+    ids_balance=list(grouped.keys())
+    
+    
+    
+    blc_case = Case(
+        *[
+            When(id=blc_id, then=F("amount") - Value(data['TTC']))
+            for blc_id, data in balance_grouped.items()
+        ],
+        output_field=DecimalField()
+    )
+    
+    ht_case = Case(
+        *[
+            When(id=inv_id, then=F("HT") + Value(data["HT"]))
+            for inv_id, data in grouped.items()
+        ],
+        output_field=DecimalField()
+    )
+
+    tva_case = Case(
+        *[
+            When(id=inv_id, then=F("TVA") + Value(data["TVA"]))
+            for inv_id, data in grouped.items()
+        ],
+        output_field=DecimalField()
+    )
+
+    ttc_case = Case(
+        *[
+            When(id=inv_id, then=F("TTC") + Value(data["TTC"]))
+            for inv_id, data in grouped.items()
+        ],
+        output_field=DecimalField()
+    )
+    
+    
+    Invoice.objects.filter(id__in=ids_invoices).update( HT=ht_case , TVA=tva_case , TTC=ttc_case )
+    Balance.objects.filter(id__in=ids_balance).update( amount=blc_case )
+    print(len(connection.queries))
+    
+    
+def update_or_save_invoiceLins(invoicesLins, invoice_map ):
+     
+     grouped_update = defaultdict(lambda: {"qte":0,"tax_price":0})
+     grouped_save= defaultdict(lambda: {"qte":0,"unit":None,"tax_price":0})
+     
+     for item in invoicesLins:
+       
+        inv_id = item["invoice"]   
+
+        lines = invoice_map.get(inv_id, [])
+
+        found = None
+
+        for line in lines:
+            if line.tax_name == item["tax_name"] and line.product_name == item["product_name"]:
+                found = line
+                break
+
+        if found:
+            grouped_update[found.id]["qte"] += item["qte"]
+            grouped_update[found.id]["tax_price"] += item["tax_price"]
+
+        else:
+            key = (inv_id, item["product_name"], item["tax_name"])
+
+            grouped_save[key]["qte"] += item["qte"]
+            grouped_save[key]["tax_price"] += item["tax_price"]
+            grouped_save[key]["unit"] = item["unit"]
+      
+        
+     if grouped_update:
+
+        to_update_ids = list(grouped_update.keys())
+    
+        qte_case = Case(
+            *[
+                When(id=cle, then=F("qte")+Value(data["qte"]))
+                for cle, data in grouped_update.items()
+            ],
+            output_field=DecimalField()
+        )
+    
+        tax_price_case = Case(
+            *[
+                When(id=cle, then=F("tax_price")+Value(data["tax_price"]))
+                for cle, data in grouped_update.items()
+            ],
+            output_field=DecimalField()
+        )
+    
+        InvoiceLine.objects.filter(id__in=to_update_ids).update(
+            qte=qte_case,
+            tax_price=tax_price_case
+        )
+    
+     if grouped_save:
+         to_save=[]
+         for (invoice, product_name, tax_name), data in grouped_save.items():
+    
+            to_save.append(InvoiceLine(
+                invoice=invoice,
+                product_name=product_name,
+                tax_name=tax_name,
+                qte=data["qte"],
+                tax_price=data["tax_price"],
+                unit=data["unit"]
+            ))             
+         InvoiceLine.objects.bulk_create(to_save)
+    
+     print(len(connection.queries))         
+            
+            
+            
+
+
+       
+
+
+    
+    
+
+             
+                 
+                 
+                   
+               
+    
+    
+      
+
+
+"""def update_invoices_bulk(invoicesFinal):
+    print("update_invoices_bulk")
+    print(len(connection.queries))
     grouped = defaultdict(lambda: {"blc_id":None,"HT": 0, "TVA": 0, "TTC": 0})
     
     
@@ -243,9 +474,115 @@ def update_invoices_bulk(invoicesFinal):
         ],
         output_field=DecimalField()
     )
-    
+   
     Invoice.objects.filter(id__in=ids).update( HT=ht_case , TVA=tva_case , TTC=ttc_case )
     Balance.objects.filter(id__in=balance_grouped.keys()).update( amount=blc_case )
+    print("after update_invoices_bulk")
+    print(len(connection.queries))
     
+    
+def update_or_save_invoiceLins(invoicesLins):
+     print("update_or_save_invoiceLins")
+     print(len(connection.queries))
+     grouped_update = defaultdict(lambda: {"qte":0,"tax_price":0})
+     grouped_save= defaultdict(lambda: {"qte":0,"unit":None,"tax_price":0})
+    
+     for item in invoicesLins:
+        
+         liens=item['invoice'].invoice_InvoiceLine_items.all()
+         exist=False
+         
+         if liens.exists() :
+            for lin in liens:
+                if lin.tax_name==item['tax_name'] and lin.product_name==item['product_name']:
+                    cle=lin.id
+                    key=cle
+           
+                    grouped_update[key]["qte"]+=item["qte"]
+                    grouped_update[key]["tax_price"]+=item["tax_price"]
+                
+                    exist=True
+                    break
+            if not exist:
+                 
+               key=(item['invoice'],item['product_name'],item['tax_name'])
+           
+               grouped_save[key]["qte"]+=item['qte']
+               grouped_save[key]["tax_price"]+=item['tax_price']
+               grouped_save[key]["unit"]=item['unit']
+            
+                       
+         else:
+            
+            key=(item['invoice'],item['product_name'],item['tax_name'])
+            grouped_save[key]["qte"]+=item['qte']
+            grouped_save[key]["tax_price"]+=item['tax_price']
+            grouped_save[key]["unit"]=item['unit'] 
+                  
+     
+        
+    
+    
+      
+     
+        
+        
+     if grouped_update:
+
+        to_update_ids = list(grouped_update.keys())
+    
+        qte_case = Case(
+            *[
+                When(id=cle, then=F("qte")+Value(data["qte"]))
+                for cle, data in grouped_update.items()
+            ],
+            output_field=DecimalField()
+        )
+    
+        tax_price_case = Case(
+            *[
+                When(id=cle, then=F("tax_price")+Value(data["tax_price"]))
+                for cle, data in grouped_update.items()
+            ],
+            output_field=DecimalField()
+        )
+    
+        InvoiceLine.objects.filter(id__in=to_update_ids).update(
+            qte=qte_case,
+            tax_price=tax_price_case
+        )
+    
+     if grouped_save:
+         to_save=[]
+         for (invoice, product_name, tax_name), data in grouped_save.items():
+    
+            to_save.append(InvoiceLine(
+                invoice=invoice,
+                product_name=product_name,
+                tax_name=tax_name,
+                qte=data["qte"],
+                tax_price=data["tax_price"],
+                unit=data["unit"]
+            ))             
+         InvoiceLine.objects.bulk_create(to_save)
+     print("after update_or_save_invoiceLins")
+     print(len(connection.queries))"""
+             
+            
+            
+            
+
+
+       
+
+
+    
+    
+
+             
+                 
+                 
+                   
+               
     
     

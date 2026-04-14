@@ -8,6 +8,7 @@ from finance.views import check_if_enough
 from order_client.models import OrderProductclient
 from django.db import models
 from Invoices.models import Invoice , States
+from order_client.models import *
 from user.views import notify_a_client
 
 #serializer for client contract order productType filter
@@ -92,13 +93,25 @@ class OrderSerializer(serializers.ModelSerializer):
         
         
         if data['contract'].client.id != data['client'].id or data['contract'].state!="validated" :
-            raise serializers.ValidationError('This client does not have this contract.')
+            raise 
         
         product_type_id=data['contract'].product_type.id
     
         for product in data['order_orderProduct_items']:
             if product['product'].product_type.id != product_type_id:
-                raise serializers.ValidationError('This contract does not include this type of product.') 
+                raise
+            
+        order_client=Orderclient.objects.filter(id=self.validated_data['client_order']).first   
+        
+        if not order_client.exists():
+            raise 
+        for item_client in order_client.orderclient_Orderproductclient_items:
+            test=False
+            for item_order in self.validated_data['order_orderProduct_items']:
+                if item_client.product == item_order.product:
+                    test=True
+            if not test:
+                raise  
            
         return super().validate(data)   
     
@@ -109,6 +122,7 @@ class OrderSerializer(serializers.ModelSerializer):
              invoice, created = Invoice.objects.get_or_create( contract=validated_data['contract'], states=States.NO_VALID )  
                  
              order_items=validated_data.pop( 'order_orderProduct_items' )
+            
              order=Order.objects.create(**validated_data,invoice=invoice)
              
              
@@ -134,6 +148,28 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
             model=Order
             fields=['id_parent','type_choise','order_orderProduct_items']
         
+        def validate(self, data):
+            
+            order= Order.objects.filter(id=data['id_parent']).first()
+            if not order:
+                
+                raise serializers.ValidationError("The parent order does not exist")
+            orderProducts=order.order_orderProduct_items.all()
+            print(orderProducts)
+            name="None"
+            for item1 in orderProducts:
+                print(item1.product)
+                test=False
+                for item2 in data['order_orderProduct_items']:
+                    name=item2['product']
+                    if item1.product==item2['product']:
+                        test=True
+                        
+                        break
+                if not test:
+                    raise serializers.ValidationError( f"The product '{name}' does not exist in the parent order.")
+                
+            return super().validate(data)
             
         def create(self,validated_data):
             order=get_object_or_404(Order,id=validated_data['id_parent'])

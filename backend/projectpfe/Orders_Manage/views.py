@@ -7,12 +7,12 @@ from .serializers import *
 from rest_framework import generics
 from django.db import transaction
 from .filters import *
-from Tax_Service.taxCalcul import mains_balances,unitchange
+from Tax_Service.taxCalcul import unitchange,mains_balances
 from rest_framework.exceptions import ValidationError
 from user.wraps import *
 from projectpfe.utils.response import success_response,paginated_response,MyPagination
 from django.utils.decorators import method_decorator
-
+from django.db import connection
 
 
 #@method_decorator(jwt_must, name='dispatch')
@@ -123,9 +123,14 @@ def inValid(request):
                      'order_orderProduct_items__product__product_taxProduct_items',
                      'client__client_balances',
                      'contract__product_type',
+                     'contract__contract_invoice_items__invoice_InvoiceLine_items'
                      
                     ).select_related('invoice').all()
+    
     mains_balances(order)
+    
+
+    
     return Response({'data':'bouklia'})
             
 
