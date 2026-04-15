@@ -17,6 +17,7 @@ class Orderclient(models.Model):
     client=models.ForeignKey(Client,related_name='client_Ordersclient_items',null=False,blank=False,on_delete=models.PROTECT)
     state=models.CharField(choices=States.choices,max_length=20,default=States.PENDING)
     validated_by = models.ForeignKey(Client,null=True,on_delete=models.PROTECT)
+    pickup_date = models.DateField(null=True)
     
  
 class OrderProductclient(models.Model):

@@ -91,7 +91,7 @@ def getclients(request):
     paginator = MyPagination()
 
     
-    queryset = Client.objects.filter(ordersclient__isnull=False).distinct()
+    queryset = Client.objects.filter(client_Ordersclient_items__isnull=False).distinct()
 
     result_page = paginator.paginate_queryset(queryset, request)
 
@@ -131,9 +131,10 @@ def validateorder(request):
                 )
 
             order.state = serializer.validated_data['state']  # type: ignore
+            order.pickup_date = serializer.validated_data['pickup_date'] # type: ignore
             order.validated_by_id = request.user_id  # type: ignore
             order.save()
-            notify_a_client(order.client_id,'ORDER UPDATE',f'your order {order.id} has been validated by an admin do not forget the order notice',f'http://localhost:5173/order/{order.id}') # type: ignore
+            notify_a_client(order.client_id,'ORDER UPDATE',f'your order {order.id} has been validated by an admin do not forget the order notice pick up is on {order.pickup_date}',f'http://localhost:5173/order/{order.id}') # type: ignore
 
             return success_response(
                 message="Order validated successfully",

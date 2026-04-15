@@ -5,7 +5,8 @@ from catalog.models import Client,Contract,ProductType,Product
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from finance.views import check_if_enough
-from decimal import Decimal
+
+from datetime import date
 
 
 #serializer for client contract order productType filter
@@ -172,14 +173,13 @@ class OrderProductreadSerializer(serializers.ModelSerializer):
 class OrderreadSerializer(serializers.ModelSerializer):
     client = serializers.CharField(source ="client.lastName")
     client_id = serializers.CharField(source ="client.id")
-    productsclient= OrderProductreadSerializer(many=True)
+    orderclient_Orderproductclient_items = OrderProductreadSerializer(many=True)
 
     class Meta:
         model=Orderclient
-        fields = ['id', 'client_id','date_created', 'contract', 'client','productsclient', 'state', 'validated_by']
+        fields = ['id', 'client_id','date_created', 'contract', 'client','orderclient_Orderproductclient_items', 'state','pickup_date', 'validated_by']
 
 
-''
 class ClientreadSerializer(serializers.ModelSerializer):
     numberOrders = serializers.SerializerMethodField()
     client_id = serializers.IntegerField(source='id')
@@ -196,11 +196,17 @@ class ClientreadSerializer(serializers.ModelSerializer):
 }
         
     def get_numberOrders(self, obj):
-        return obj.ordersclient.count()
+        return obj.client_Ordersclient_items.count()
 #=============================================================================================================     
 class ValidateOrdersSerializer(serializers.Serializer):
     id=serializers.IntegerField()  
     state = serializers.CharField()
+    pickup_date = serializers.DateField()
+    
+    def validate_pickup_date(self, value):
+        if value < date.today():
+            raise serializers.ValidationError("Pickup date cannot be in the past.")
+        return value
     
     def validate_state(self, value):
           
