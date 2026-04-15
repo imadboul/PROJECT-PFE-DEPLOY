@@ -90,13 +90,13 @@ class OrderProductSerializer(serializers.ModelSerializer):
 }
         
 class OrderSerializer(serializers.ModelSerializer):
-    products=OrderProductSerializer(many=True)
+    orderclient_Orderproductclient_items=OrderProductSerializer(many=True)
     class Meta:
         model=Orderclient
-        fields=['contract','products']
+        fields=['contract','orderclient_Orderproductclient_items']
         
         
-    def validate_products(self, value):
+    def validate_orderclient_Orderproductclient_items(self, value):
        total_qte = 0
        total_price = 0
        
@@ -127,6 +127,10 @@ class OrderSerializer(serializers.ModelSerializer):
 
         if contract.state != 'validated':
             raise serializers.ValidationError("contract is not validated")
+        for item in data.get('orderclient_Orderproductclient_items'):
+           product = item.get('product')
+           if product.product_type != contract.product_type:
+               raise serializers.ValidationError(f"product {product.id } is not included in the contract")
     
 
         print(  total_qte)
