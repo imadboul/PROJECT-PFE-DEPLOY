@@ -137,7 +137,7 @@ def tax_price(taxActiv,orderProduct,Tva,invoicesLins):
         
         for tax in taxActiv:
             
-            unit_l=unitchange(orderProduct,tax['unit'])
+            unit_l=convert_unit(orderProduct.qte,orderProduct.product.density,orderProduct.unit,tax['unit'])
                     
             tax_price=unit_l*tax['par_unit']
             
@@ -149,7 +149,7 @@ def tax_price(taxActiv,orderProduct,Tva,invoicesLins):
                   additional_taxPrice_qte(orderProduct.order.invoice,invoicesLins,orderProduct.product.name,orderProduct.qte,orderProduct.unit,tax_price,tax['name'])        
                     
        
-        qte_unit=unitchange(orderProduct,orderProduct.product.unit) 
+        qte_unit=convert_unit(orderProduct.qte,orderProduct.product.density,orderProduct.unit,orderProduct.product.unit) 
         
         HT=(qte_unit*orderProduct.product.unit_price)
         TTC=(HT+total_tax)*(1+Tva/100)
@@ -183,59 +183,17 @@ def additional_taxPrice_qte(invoice,invoicesLines,product_name,qte,unit,tax_pric
         
 
 
-def unitchange(orderProduct,unit):
-    
-    if (unit==orderProduct.unit):
-        return orderProduct.qte
-    
-    
-    product_unit  =  orderProduct.unit
-    qte  =  orderProduct.qte
-    density  =  orderProduct.product.density
-    
-    match unit:
-        case 'L':
-            match orderProduct.unit:
-                case 'HL':
-                    return qte*100
-                case 'KG':
-                    return qte/density
-                case 'TM':
-                    return qte*1000/density
-        case 'HL':
-            match product_unit:
-                case 'L':
-                    return qte/100
-                case 'KG':
-                    return qte/100*density
-                case 'TM':
-                    return qte*10/density
-        case 'KG':
-            match product_unit:
-                case 'L':
-                    return qte*density
-                case 'HL':
-                    return qte*100*density
-                case 'TM':
-                    return qte*1000 
-        case 'TM':
-            match product_unit:
-                case 'KG':
-                    return qte/1000
-                case 'HL':
-                    return qte*density/10
-                case 'L':
-                    return qte*density/1000      
-        
 
-def convert_unit(orderProduct, target_unit):
-    source_unit = orderProduct.unit
-    qte = orderProduct.qte
-    density = orderProduct.product.density
 
+def convert_unit( qte,density,source_unit ,target_unit):
+    
+    
+    
+    
     if source_unit == target_unit:
         return qte
-
+    
+   
     
     if source_unit == 'L':
         qte_l = qte
@@ -293,9 +251,10 @@ def update_invoices_bulk(invoicesFinal):
         
         balance_grouped[item['blc_id']]['TTC']+=item['TTC']
     
-    ids_balance=list(grouped.keys())
+    ids_balance=list(balance_grouped.keys())
     
     
+    print(dict(balance_grouped))
     
     blc_case = Case(
         *[
@@ -404,6 +363,11 @@ def update_or_save_invoiceLins(invoicesLins, invoice_map ):
             ))             
          InvoiceLine.objects.bulk_create(to_save)
     
+    
+    
+     print(dict(grouped_save))
+     print("==========================================================================")
+     print(dict(grouped_update))
      print(len(connection.queries))         
             
             

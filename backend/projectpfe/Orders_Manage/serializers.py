@@ -9,6 +9,7 @@ from order_client.models import OrderProductclient
 from django.db import models
 from Invoices.models import Invoice , States
 from order_client.models import *
+from Tax_Service.taxCalcul import convert_unit
 from user.views import notify_a_client
 
 #serializer for client contract order productType filter
@@ -93,26 +94,39 @@ class OrderSerializer(serializers.ModelSerializer):
         
         
         if data['contract'].client.id != data['client'].id or data['contract'].state!="validated" :
-            raise 
+            raise serializers.ValidationError("contract no valide ou contract de notre client ")
+        
+        qte=0
+        for item_order in data['order_orderProduct_items']:
+            
+            qte+=convert_unit(item_order['qte'],item_order['product'].density,item_order['unit'],data['contract'].unit)
+         
+        
         
         product_type_id=data['contract'].product_type.id
-    
-        for product in data['order_orderProduct_items']:
-            if product['product'].product_type.id != product_type_id:
-                raise
-            
-        order_client=Orderclient.objects.filter(id=self.validated_data['client_order']).first   
         
-        if not order_client.exists():
-            raise 
-        for item_client in order_client.orderclient_Orderproductclient_items:
+        for product in data['order_orderProduct_items']:
+            
+            if product['product'].product_type.id != product_type_id:
+                raise serializers.ValidationError("c'est product n'appartie pas a type de product")
+        
+        order_client=Orderclient.objects.filter(id=data['client_order'].id).first()  
+        
+        if not order_client:
+            raise serializers.ValidationError("c'est order client n'exists pas ")
+        
+        for item_client in order_client.orderclient_Orderproductclient_items.all():
+            print('bouklila')
             test=False
-            for item_order in self.validated_data['order_orderProduct_items']:
-                if item_client.product == item_order.product:
+            for item_order in data['order_orderProduct_items']:
+                print(item_order['product'])
+                print()
+                
+                if item_client.product == item_order['product']:
                     test=True
             if not test:
-                raise  
-           
+                raise serializers.ValidationError("c'est product n'appratien pas a order client product ")
+        
         return super().validate(data)   
     
     def create(self, validated_data):
