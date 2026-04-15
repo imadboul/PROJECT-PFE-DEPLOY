@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import generics
-from .models import Invoice,States
+from .models import Invoice,StatesInv
 from .serializers import *
 from rest_framework.response import Response
 from django.db import transaction
@@ -16,7 +16,7 @@ class ValidateInvoice(generics.UpdateAPIView):
                  serializer.is_valid(raise_exception=True)
                  ids=serializer.validated_data['ids']
                  #validated_by=request.user_id
-                 nbi=Invoice.objects.filter(id__in=ids,states=States.NO_VALID).update(States=States.VALID,date_de_facteration=get_now())
+                 nbi=Invoice.objects.filter(id__in=ids,states=StatesInv.NO_VALID).update(States=StatesInv.VALID,date_de_facteration=get_now())
                  return Response({"data":"Invoices validated successfully","nbr invoice validated":nbi})
              
         except ValidationError:

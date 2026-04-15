@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from finance.views import check_if_enough
 from order_client.models import OrderProductclient
 from django.db import models
-from Invoices.models import Invoice , States
+from Invoices.models import Invoice , StatesInv
 from order_client.models import *
 from Tax_Service.taxCalcul import convert_unit
 from user.views import notify_a_client
@@ -116,11 +116,10 @@ class OrderSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("c'est order client n'exists pas ")
         
         for item_client in order_client.orderclient_Orderproductclient_items.all():
-            print('bouklila')
+            
             test=False
             for item_order in data['order_orderProduct_items']:
-                print(item_order['product'])
-                print()
+                
                 
                 if item_client.product == item_order['product']:
                     test=True
@@ -132,14 +131,15 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         
         with transaction.atomic():
+             
             
-             invoice, created = Invoice.objects.get_or_create( contract=validated_data['contract'], states=States.NO_VALID )  
+             invoice, created = Invoice.objects.get_or_create( contract=validated_data['contract'], states=StatesInv.NO_VALID)  
                  
              order_items=validated_data.pop( 'order_orderProduct_items' )
             
              order=Order.objects.create(**validated_data,invoice=invoice)
              
-             
+             print("bouklila")
              
              order_products = [
                        OrderProduct(
@@ -150,7 +150,7 @@ class OrderSerializer(serializers.ModelSerializer):
                        for item in order_items  ]
 
              OrderProduct.objects.bulk_create(order_products)
-             notify_a_client( order.client ,title="transport",content="***",link='')
+             notify_a_client( order.client.id ,title="transport",content="***",link='')
         return order
     
 class RectificativeOrderSerializer(serializers.ModelSerializer):
@@ -165,52 +165,63 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
         def validate(self, data):
             
             order= Order.objects.filter(id=data['id_parent']).first()
+            
             if not order:
-                
                 raise serializers.ValidationError("The parent order does not exist")
+            
             orderProducts=order.order_orderProduct_items.all()
-            print(orderProducts)
             name="None"
+            
             for item1 in orderProducts:
-                print(item1.product)
+                
                 test=False
                 for item2 in data['order_orderProduct_items']:
                     name=item2['product']
+                    
                     if item1.product==item2['product']:
                         test=True
-                        
                         break
+                    
                 if not test:
                     raise serializers.ValidationError( f"The product '{name}' does not exist in the parent order.")
                 
             return super().validate(data)
             
         def create(self,validated_data):
+            
+            
             order=get_object_or_404(Order,id=validated_data['id_parent'])
+            
+            
             with transaction.atomic():    
-                invoice=Invoice.objects.filter(id=order.invoice.id,states=States.NO_VALID).first()
+                invoice=Invoice.objects.filter(id=order.invoice.id,states=StatesInv.NO_VALID).first()
+                
                 if not invoice:
-                    invoice=Invoice.objects.create(
-                        contract=order.contract,
-                        type=validated_data['type_choise']
-                    )
+                    invoice=Invoice.objects.create( contract=order.contract, type=validated_data['type_choise'] )
+                    
                 order_items=validated_data.pop('order_orderProduct_items')
+                print("bouk")
                 newOrder=Order.objects.create(
                     contract=order.contract,
                     client=order.client,
+                    client_order=order.client_order,
                     parent_order=order,
                     type=validated_data['type_choise'],
                     invoice=invoice
                 )
                 
-                for order_item in order_items :
-                    orderProduct=OrderProduct(
+                
+                orderProduct=[OrderProduct(
+                    
                        product=order_item['product'],
                        qte=order_item['qte'],
                        unit=order_item['unit'],
                        order=newOrder,  
                     )
-                    orderProduct.save()
+                    for order_item in order_items ]
+                
+                OrderProduct.objects.bulk_create(orderProduct)
+                    
                 return newOrder   
    
             
