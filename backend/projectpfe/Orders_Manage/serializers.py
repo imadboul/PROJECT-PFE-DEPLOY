@@ -101,9 +101,9 @@ class OrderSerializer(serializers.ModelSerializer):
             if product['product'].product_type.id != product_type_id:
                 raise
             
-        order_client=Orderclient.objects.filter(id=self.validated_data['client_order']).first   
+        order_client=Orderclient.objects.filter(id=self.validated_data['client_order']).first()    # type: ignore
         
-        if not order_client.exists():
+        if not order_client:
             raise 
         for item_client in order_client.orderclient_Orderproductclient_items:
             test=False
