@@ -83,16 +83,16 @@ class OrderFilterSerializerTow(serializers.ModelSerializer):
 class OrderProductSerializer(serializers.ModelSerializer):
     class Meta:
         model=OrderProductclient
-        fields=['product','qte','qte_taken']
+        fields=['product','qte','qte_taken','unit']
         extra_kwargs = {
          "qte_taken": {"read_only": True},
 }
         
 class OrderSerializer(serializers.ModelSerializer):
-    products=OrderProductSerializer(many=True)
+    orderclient_Orderproductclient_items=OrderProductSerializer(many=True)
     class Meta:
         model=Orderclient
-        fields=['contract','products']
+        fields=['contract','orderclient_Orderproductclient_items']
         
         
     def validate_products(self, value):
@@ -113,6 +113,7 @@ class OrderSerializer(serializers.ModelSerializer):
         
     def validate(self, data):
         request_user_id = self.context.get('user_id') 
+        
         contract = data.get('contract')
         total_qte = getattr(self, 'total_qte', 0)
         total_price = getattr(self, 'total_price', 0)
@@ -121,7 +122,7 @@ class OrderSerializer(serializers.ModelSerializer):
         if not contract:
             raise serializers.ValidationError("contract must be provided")
         
-        if contract.client.id != request_user_id:
+        if contract.client.id != request_user_id :
             raise serializers.ValidationError("You cannot place an order for another client's contract")
 
         if contract.state != 'validated':
@@ -150,7 +151,7 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         
         with transaction.atomic():
-             order_items=validated_data.pop( 'products' )
+             order_items=validated_data.pop( 'orderclient_Orderproductclient_items' )
              order=Orderclient.objects.create(**validated_data)
              
              for order_item in order_items:
