@@ -61,6 +61,7 @@ function RequestContract() {
       const payload = {
         product_type: data.productType,
         qte_global: Number(data.qteGlobale),
+        unit:data.unit,
         start_date: start.toISOString(),
         end_date: end.toISOString(),
       };
