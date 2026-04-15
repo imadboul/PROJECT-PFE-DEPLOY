@@ -14,7 +14,7 @@ def generate_pdf(order_id):
 
     orderclient = Orderclient.objects.get(id = order_id)
     client = Client.objects.get(id = orderclient.client_id) # type: ignore
-    products = orderclient.productsclient.all() # type: ignore
+    products = orderclient.orderclient_Orderproductclient_items.all() # type: ignore
     
     
 
@@ -107,7 +107,8 @@ def generate_pdf(order_id):
         ['Last Name: ', client.lastName],
         ['ID: ', client.id],
         ['Phone Number: ', client.phoneNumber],
-        ["contract:", str(orderclient.contract_id)] # type: ignore
+        ["contract:", str(orderclient.contract_id)], # type: ignore
+        ["pick up date :", str(orderclient.pickup_date)] # type: ignore
     ]
     
     client_table = Table(data,colWidths=[120,250])

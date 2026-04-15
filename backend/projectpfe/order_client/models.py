@@ -17,12 +17,13 @@ class Orderclient(models.Model):
     client=models.ForeignKey(Client,related_name='client_Ordersclient_items',null=False,blank=False,on_delete=models.PROTECT)
     state=models.CharField(choices=States.choices,max_length=20,default=States.PENDING)
     validated_by = models.ForeignKey(Client,null=True,on_delete=models.PROTECT)
+    pickup_date = models.DateField(null=True)
     
  
 class OrderProductclient(models.Model):
     
     id=models.AutoField(primary_key=True)
-    order=models.ForeignKey(Orderclient,related_name='orderclient_Orderproductclient_items',null=False,blank=False,on_delete=models.PROTECT)
+    order=models.ForeignKey(Orderclient,related_name='products',null=False,blank=False,on_delete=models.PROTECT)
     product=models.ForeignKey(Product,related_name='product_OrderProductclient_items',null=False,blank=False,on_delete=models.PROTECT)
     qte=models.DecimalField(null=False,blank=False,max_digits=12,decimal_places=3)
     qte_taken = models.DecimalField(max_digits=12,decimal_places=3,default=Decimal('0'))

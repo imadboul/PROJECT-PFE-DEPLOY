@@ -14,6 +14,8 @@ from user.wraps import *
 from user.views import notify_all_admin , notify_a_client
 from .orderclientpdf import generate_pdf
 from projectpfe.utils.response import *
+from datetime import date
+from django.utils.dateparse import parse_date
 
 
 
@@ -89,9 +91,17 @@ def order(request):
 def getclients(request):
 
     paginator = MyPagination()
-
+    date = request.data.get('date')
     
-    queryset = Client.objects.filter(ordersclient__isnull=False).distinct()
+    if date:
+        valid_date = parse_date(date)
+
+        if valid_date is None:
+            return error_response( message="wrong date",errors="Invalid date format. Use YYYY-MM-DD" )
+        queryset = Client.objects.filter(client_Ordersclient_items__pickup_date__lte = date,client_Ordersclient_items__isnull=False).distinct()
+
+    else:
+        queryset = Client.objects.filter(client_Ordersclient_items__isnull=False).distinct()
 
     result_page = paginator.paginate_queryset(queryset, request)
 
@@ -102,6 +112,30 @@ def getclients(request):
         message="Clients retrieved successfully",
         status_code=status.HTTP_200_OK
     )
+    
+@api_view(['GET'])
+@jwt_must
+@role_required(['Admin', 'superAdmin'])
+def gettodaysorders(request):
+       
+    paginator = MyPagination()
+    date = request.data.get('date')
+    
+    if not date:
+        date = date.today()
+
+    
+    queryset = Client.objects.filter(client_Ordersclient_items__pickup_date__lte = date).distinct()
+    result_page = paginator.paginate_queryset(queryset, request)
+
+    clients = OrderreadSerializer(result_page, many=True)
+
+    return success_response(
+        data=paginated_response(paginator, clients),
+        message="Clients retrieved successfully",
+        status_code=status.HTTP_200_OK
+    )
+    
     
 
         
@@ -131,9 +165,10 @@ def validateorder(request):
                 )
 
             order.state = serializer.validated_data['state']  # type: ignore
+            order.pickup_date = serializer.validated_data['pickup_date'] # type: ignore
             order.validated_by_id = request.user_id  # type: ignore
             order.save()
-            notify_a_client(order.client_id,'ORDER UPDATE',f'your order {order.id} has been validated by an admin do not forget the order notice',f'http://localhost:5173/order/{order.id}') # type: ignore
+            notify_a_client(order.client_id,'ORDER UPDATE',f'your order {order.id} has been validated by an admin do not forget the order notice pick up is on {order.pickup_date}',f'http://localhost:5173/order/{order.id}') # type: ignore
 
             return success_response(
                 message="Order validated successfully",

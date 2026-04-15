@@ -11,6 +11,13 @@ function RequestContract() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const unitOptions = [
+    { value: "KG", label: "Kilogram" },
+    { value: "L", label: "Liter" },
+    { value: "HL", label: "Hectoliter" },
+    { value: "TM", label: "Tonne" },
+  ];
+
   const options = productTypes.map(type => ({
     value: type.id,
     label: type.name
@@ -59,8 +66,9 @@ function RequestContract() {
       }
 
       const payload = {
-        product_type: data.productType,
+        product_type: data.productType.value,
         qte_global: Number(data.qteGlobale),
+        unit: data.unit.value,
         start_date: start.toISOString(),
         end_date: end.toISOString(),
       };
@@ -151,7 +159,7 @@ function RequestContract() {
 
                   })
                 }}
-                onChange={(selected) => field.onChange(selected.value)}
+                onChange={(selected) => field.onChange(selected)}
                 value={options.find(opt => opt.value === field.value)}
               />
             )}
@@ -166,22 +174,74 @@ function RequestContract() {
 
           {/* Quantity */}
 
-          <input
-            type="number"
-            placeholder="Quantity"
-            {...register("qteGlobale", {
-              required: "Quantity is required",
-              min: { value: 1, message: "Quantity must be greater than 0" }
-            })}
-            className="w-full text-xl placeholder-white text-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
+          <div className="flex items-center justify-between gap-6">
+            <div className="flex-1">
 
-          <div className="relative bottom-4">
-            {errors.qteGlobale && (
-              <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
-                {errors.qteGlobale.message}
-              </p>
-            )}
+              <input
+                type="number"
+                placeholder="Quantity"
+                {...register("qteGlobale", {
+                  required: "Quantity is required",
+                  min: { value: 1, message: "Quantity must be greater than 0" }
+                })}
+                className="w-full text-xl placeholder-white text-white p-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            <div className="relative bottom-4">
+              {errors.qteGlobale && (
+                <p className="absolute top-0 left-0 right-0 text-red-500 text-md text-center mt-1">
+                  {errors.qteGlobale.message}
+                </p>
+              )}
+            </div>
+
+            {/* Unit */}
+            <div className="flex-1">
+              <Controller
+                className="focus:outline-none focus:ring-2 focus:ring-orange-500"
+                name="unit"
+                control={control}
+                defaultValue={unitOptions[0]}
+                rules={{ required: "Unit is required" }}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    options={unitOptions}
+                    styles={{
+                      control: (base, state) => ({
+                        ...base,
+                        backgroundColor: "rgba(7, 7, 7, 0.11)",
+                        borderColor: state.isFocused ? "#f97316" : "#000",
+                        boxShadow: "none",
+                        fontSize: "18px",
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        backgroundColor: "rgba(0, 0, 0, 0.66)",
+                      }),
+                      option: (base, state) => ({
+                        ...base,
+                        backgroundColor: state.isFocused
+                          ? "rgba(247, 77, 9, 0.96)"
+                          : "rgba(0, 0, 0, 0.66)",
+                        color: "#fff",
+                        cursor: "pointer",
+                      }),
+                      singleValue: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                      placeholder: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                    }}
+                    onChange={(selected) => field.onChange(selected)}
+                    value={field.value}
+                  />
+                )}
+              />
+            </div>
           </div>
 
 
