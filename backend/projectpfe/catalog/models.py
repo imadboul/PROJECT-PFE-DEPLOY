@@ -58,7 +58,7 @@ class Contract(models.Model):
     validated_by = models.ForeignKey(Client ,on_delete=models.SET_NULL,related_name="validated_contracts",null=True)
     client = models.ForeignKey(Client,on_delete=models.SET_NULL,related_name='client_contracts',null=True)
     product_type = models.ForeignKey(ProductType,on_delete=models.CASCADE,related_name='contracts')
-    
+    unit=models.CharField(null=False,blank=False,choices=ProductUnit,max_length=20)
     def __str__(self):
         return f'contract of {self.client} ({self.state})'
     def qte_rest(self):

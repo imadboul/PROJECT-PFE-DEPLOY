@@ -20,14 +20,13 @@ function RequestOrder() {
     const navigate = useNavigate();
     const { handleSubmit, control } = useForm();
 
-    // ✅ FETCH DATA
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const c = await getContracts();
                 const p = await getProducts();
 
-                setContracts(c.data?.data?.contracts || []);
+                setContracts(c.data?.data?.contracts?.results || []);
                 setAllProducts(p.data?.data?.products || []);
                 setProductsList(p.data?.data?.products || []);
             } catch (error) {
@@ -53,7 +52,7 @@ function RequestOrder() {
     // OPTIONS
     const contractOptions = contracts.map((c) => ({
         value: c.id,
-        label: `Contract ${c.id}`,
+        label: `Contract - ${c.product_type}`,
     }));
 
     const productOptions = productsList.map((p) => ({
@@ -61,10 +60,10 @@ function RequestOrder() {
         label: p.name,
     }));
 
-    // SUBMIT
     const onSubmit = async (data) => {
+        
+        
         try {
-            // 🔥 VALIDATION
             const invalid = products.some(
                 (p) => !p.product || !p.qte || Number(p.qte) <= 0
             );
@@ -77,9 +76,9 @@ function RequestOrder() {
             setLoading(true);
 
             const payload = {
-                contract: data.contract,
+                contract: data.contract.value,
                 products: products.map((p) => ({
-                    product: p.product,
+                    product: p.product.value,
                     qte: Number(p.qte),
                 })),
             };
@@ -89,9 +88,10 @@ function RequestOrder() {
             navigate("/order");
         } catch (error) {
 
-            const message = error.response?.data?.errors?.[0]
+            const message = data.errors
              || "Error creating order";
             toast.error(message);
+        
         } finally {
             setLoading(false);
         }
@@ -162,11 +162,11 @@ function RequestOrder() {
                                     })
                                 }}
                                 onChange={(val) => {
-                                    field.onChange(val.value);
+                                    field.onChange(val);
 
                                     const contract = contracts.find(c => c.id === val.value);
 
-                                    // filter products (string compare)
+                                    
                                     const filtered = allProducts.filter(
                                         (p) => p.product_type === contract.product_type
                                     );
@@ -234,7 +234,7 @@ function RequestOrder() {
                                     })
                                 }}
                                 onChange={(val) =>
-                                    handleChange(i, "product", val.value)
+                                    handleChange(i, "product", val)
                                 }
                                 value={productOptions.find(op => op.value === p.product)}
                             />
