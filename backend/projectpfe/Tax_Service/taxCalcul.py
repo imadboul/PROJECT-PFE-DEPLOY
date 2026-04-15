@@ -57,7 +57,6 @@ def mains_balances(ordersValidated):
         client_balance_map = {}
         invoiceLins_map={}
         for order in orders:
-            print()
             
             
             invoiceLins_map[order.invoice_id] = list ( order.invoice.pref_lines  )
