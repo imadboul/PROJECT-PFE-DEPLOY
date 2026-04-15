@@ -22,7 +22,7 @@ class Orderclient(models.Model):
 class OrderProductclient(models.Model):
     
     id=models.AutoField(primary_key=True)
-    order=models.ForeignKey(Orderclient,related_name='orderclient_Orderproductclient_items',null=False,blank=False,on_delete=models.PROTECT)
+    order=models.ForeignKey(Orderclient,related_name='products',null=False,blank=False,on_delete=models.PROTECT)
     product=models.ForeignKey(Product,related_name='product_OrderProductclient_items',null=False,blank=False,on_delete=models.PROTECT)
     qte=models.DecimalField(null=False,blank=False,max_digits=12,decimal_places=3)
     qte_taken = models.DecimalField(max_digits=12,decimal_places=3,default=Decimal('0'))
