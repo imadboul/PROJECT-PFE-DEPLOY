@@ -24,7 +24,7 @@ from collections import defaultdict
     
     
 def mains_balances(ordersValidated):
-    
+        
         invoices=[]
         invoicesLins=[]
         orders = ordersValidated.prefetch_related(
@@ -80,14 +80,14 @@ def mains_balances(ordersValidated):
             HT, TVA, TTC = total_price( order.order_orderProduct_items.all() ,invoicesLins )
             
             invoices.append({
-                "invoice_id": order.invoice.id,
+                "invoice": order.invoice,
                 "blc_id":blc_id,
                 "HT": HT,
                 "TVA": TVA,
                 "TTC": TTC
             })
             
-            
+        
             
             
         update_or_save_invoiceLins(invoicesLins,invoiceLins_map )
@@ -170,7 +170,7 @@ def tax_price(taxActiv,orderProduct,Tva,invoicesLins):
 def additional_taxPrice_qte(invoice,invoicesLines,product_name,qte,unit,tax_price,tax_name):
     
     invoicesLines.append({
-        "invoice":invoice.id,
+        "invoice":invoice,
         "product_name":product_name,
         "qte":qte,
         "unit":unit,
@@ -234,16 +234,14 @@ def update_invoices_bulk(invoicesFinal):
     
     
     for item in invoicesFinal:
-        
-       
-        grouped[item["invoice_id"]]["HT"] += item["HT"]
-        grouped[item["invoice_id"]]["TVA"] += item["TVA"]
-        grouped[item["invoice_id"]]["TTC"] += item["TTC"]
+        invoice_id=item['invoice'].id
+        grouped[invoice_id]["HT"] += item["HT"]
+        grouped[invoice_id]["TVA"] += item["TVA"]
+        grouped[invoice_id]["TTC"] += item["TTC"]
 
 
     ids_invoices = list(grouped.keys())
-    
-    
+
     
     balance_grouped = defaultdict(lambda: {'TTC':0})
 
@@ -298,12 +296,12 @@ def update_or_save_invoiceLins(invoicesLins, invoice_map ):
      
      grouped_update = defaultdict(lambda: {"qte":0,"tax_price":0})
      grouped_save= defaultdict(lambda: {"qte":0,"unit":None,"tax_price":0})
-     
+     print(len(connection.queries)) 
      for item in invoicesLins:
-       
-        inv_id = item["invoice"]   
+        print(len(connection.queries))   
+        inv_id = item["invoice"]  
 
-        lines = invoice_map.get(inv_id, [])
+        lines = invoice_map.get(inv_id.id, [])
 
         found = None
 
@@ -323,7 +321,8 @@ def update_or_save_invoiceLins(invoicesLins, invoice_map ):
             grouped_save[key]["tax_price"] += item["tax_price"]
             grouped_save[key]["unit"] = item["unit"]
       
-        
+     
+     
      if grouped_update:
 
         to_update_ids = list(grouped_update.keys())
@@ -348,11 +347,11 @@ def update_or_save_invoiceLins(invoicesLins, invoice_map ):
             qte=qte_case,
             tax_price=tax_price_case
         )
-    
+     
      if grouped_save:
          to_save=[]
          for (invoice, product_name, tax_name), data in grouped_save.items():
-    
+            print(invoice)
             to_save.append(InvoiceLine(
                 invoice=invoice,
                 product_name=product_name,
@@ -362,15 +361,9 @@ def update_or_save_invoiceLins(invoicesLins, invoice_map ):
                 unit=data["unit"]
             ))             
          InvoiceLine.objects.bulk_create(to_save)
+         
     
     
-    
-     print(dict(grouped_save))
-     print("==========================================================================")
-     print(dict(grouped_update))
-     print(len(connection.queries))         
-            
-            
             
 
 
