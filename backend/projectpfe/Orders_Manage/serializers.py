@@ -108,7 +108,7 @@ class OrderSerializer(serializers.ModelSerializer):
         for product in data['order_orderProduct_items']:
             
             if product['product'].product_type.id != product_type_id:
-                raise serializers.ValidationError("c'est product n'appartie pas a type de product")
+                raise serializers.ValidationError(f"c'est product {product['product'].id} n'appartie pas a type de product")
         
         order_client=Orderclient.objects.filter(id=data['client_order'].id).first()  
         
@@ -150,6 +150,15 @@ class OrderSerializer(serializers.ModelSerializer):
                        for item in order_items  ]
 
              OrderProduct.objects.bulk_create(order_products)
+             for unit in order_items:
+                 
+                    productorder = OrderProductclient.objects.get(product=unit['product'],order=validated_data['client_order'])
+
+                    productorder.qte_taken += unit['qte']
+                    productorder.save()
+                 
+                 
+                 
              notify_a_client( order.client.id ,title="transport",content="***",link='')
         return order
     
