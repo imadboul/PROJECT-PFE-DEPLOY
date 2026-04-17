@@ -10,7 +10,7 @@ import {
   deleteProductType,
 } from "../context/services/productService";
 import Select from "react-select";
-import { handleApiErrors } from "../utils/errorHandler";
+import { handleApiErrors} from "../utils/handleApiErrors"
 
 
 function EditProduct() {

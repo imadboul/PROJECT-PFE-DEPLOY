@@ -5,7 +5,7 @@ import { createPayment } from '../context/services/BalanceService'
 import toast from 'react-hot-toast'
 import { getProductTypes } from '../context/services/productService'
 import Select from "react-select";
-import { handleApiErrors } from "../utils/errorHandler";
+import { handleApiErrors} from "../utils/handleApiErrors"
 
 
 function RequestPayment() {

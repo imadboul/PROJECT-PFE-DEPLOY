@@ -7,7 +7,7 @@ import Select from "react-select";
 import { createOrder } from "../context/services/orderService";
 import { getContracts } from "../context/services/contractService";
 import { getProducts } from "../context/services/productService";
-import { handleApiErrors } from "../utils/errorHandler";
+import { handleApiErrors} from "../utils/handleApiErrors"
 
 
 function RequestOrder() {

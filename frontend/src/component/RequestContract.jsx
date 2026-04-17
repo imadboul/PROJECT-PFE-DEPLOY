@@ -5,7 +5,7 @@ import { createContract } from "../context/services/contractService";
 import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import Select from "react-select";
-import { handleApiErrors } from "../utils/errorHandler";
+import { handleApiErrors} from "../utils/handleApiErrors"
 
 
 function RequestContract() {

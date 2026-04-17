@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { NavLink, useLocation } from "react-router-dom";
 import { useNotifications } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
-import { handleApiErrors } from "../utils/errorHandler";
+import { handleApiErrors} from "../utils/handleApiErrors"
 
 
 

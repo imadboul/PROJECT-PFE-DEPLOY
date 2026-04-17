@@ -4,7 +4,7 @@ import { getProductTypes, createProduct } from "../context/services/productServi
 import { Controller, useForm } from "react-hook-form";
 import Select from "react-select";
 import { NavLink } from "react-router-dom";
-import { handleApiErrors } from "../utils/errorHandler";
+import { handleApiErrors} from "../utils/handleApiErrors"
 
 
 function AddProduct() {

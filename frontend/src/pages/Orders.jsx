@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { NavLink } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { handleApiErrors } from "../utils/errorHandler";
+import { handleApiErrors} from "../utils/handleApiErrors"
 
 export default function OrderList() {
   const [orders, setOrders] = useState([]);

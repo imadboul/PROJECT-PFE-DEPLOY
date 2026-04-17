@@ -1,9 +1,8 @@
 import { useContext, useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { getBalances } from "../context/services/BalanceService";
-import toast from "react-hot-toast";
 import { AuthContext } from "../context/AuthContext";
-import { handleApiErrors } from "../utils/errorHandler";
+import { handleApiErrors} from "../utils/handleApiErrors"
 
 
 export default function BalanceList() {

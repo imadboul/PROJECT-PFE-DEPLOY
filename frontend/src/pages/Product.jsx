@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getProducts, deleteProduct } from "../context/services/productService";
 import { NavLink } from "react-router-dom";
 import toast from "react-hot-toast";
-import { handleApiErrors } from "../utils/errorHandler";
+import { handleApiErrors} from "../utils/handleApiErrors"
 
 export default function ProductsList() {
   const [products, setProducts] = useState([]);

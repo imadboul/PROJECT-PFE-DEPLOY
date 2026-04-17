@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { useParams, useNavigate } from "react-router-dom";
 import { getProductTypes, updateProductType, createProductType } from "../context/services/productService";
-import { handleApiErrors } from "../utils/errorHandler";
+import { handleApiErrors} from "../utils/handleApiErrors"
 
 function EditProductType() {
   const { id } = useParams();

@@ -2,7 +2,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AuthContext } from "../context/AuthContext";
+import { handleApiErrors} from "../utils/handleApiErrors"
 import toast from "react-hot-toast";
+
 
 export default function Sign() {
   const { signUp } = useContext(AuthContext);

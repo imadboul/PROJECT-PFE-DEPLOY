@@ -9,7 +9,7 @@ import {
 } from "../context/services/contractService";
 import { useNotifications } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
-import { handleApiErrors } from "../utils/errorHandler";
+import { handleApiErrors} from "../utils/handleApiErrors"
 
 
 export default function ContractDetails() {
