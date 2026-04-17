@@ -11,7 +11,7 @@ export default function OrderList() {
   const [loading, setLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const [showValidated, setShowValidated] = useState(true);
+  const [showAccepted, setShowAccepted] = useState(true);
   const location = useLocation();
   const selectedclientID = location.state?.client_id || null;
   const [pickupDate, setPickupDate] = useState("");
@@ -87,9 +87,9 @@ export default function OrderList() {
   const filteredOrder = orders.filter((o) => {
     const state = o.state?.toLowerCase();
 
-    const matchState = showValidated
-      ? state === "validated"
-      : state !== "validated";
+    const matchState = showAccepted
+      ? state === "accepted"
+      : state !== "accepted";
 
     const matchClient = selectedclientID
       ? String(o.client_id) === String(selectedclientID)
@@ -100,7 +100,7 @@ export default function OrderList() {
 
 
   const changeStatus = () => {
-    setShowValidated((prev) => !prev);
+    setShowAccepted((prev) => !prev);
   };
 
   if (loading) return <div className="text-white text-center mt-10">Loading...</div>;
@@ -126,7 +126,7 @@ export default function OrderList() {
               onClick={changeStatus}
               className="border border-white text-white cursor-pointer px-4 py-2 rounded hover:bg-white/10"
             >
-              {showValidated ? "Show Pending" : "Show Validated"}
+              {showAccepted ? "Show Pending" : "Show Accepted"}
             </button>
           </div>
         )}
@@ -138,7 +138,7 @@ export default function OrderList() {
               onClick={changeStatus}
               className="border border-white text-white cursor-pointer px-4 py-2 rounded hover:bg-white/10"
             >
-              {showValidated ? "Show Pending" : "Show Validated"}
+              {showAccepted ? "Show Pending" : "Show Accepted"}
             </button>
             <NavLink
               to="/RequestOrder"
@@ -175,13 +175,15 @@ export default function OrderList() {
               </div>
 
               <p
-                className={
-                  o.state === "validated"
-                    ? "text-green-500"
-                    : o.state === "rejected"
-                      ? "text-red-500"
-                      : "text-yellow-500"
-                }
+                 className={
+                    o.state === "validated"
+                      ? "text-green-500"
+                      : o.state === "rejected"
+                        ? "text-red-500"
+                        : o.state === "accepted"
+                          ? "text-orange-500"
+                          : "text-gray-500"
+                  }
               >
                 <strong className="text-white">State:</strong>{" "}
                 {o.state}
@@ -220,12 +222,14 @@ export default function OrderList() {
 
               <p
                 className={
-                  selectedOrder.state === "validated"
-                    ? "text-green-500"
-                    : selectedOrder.state === "rejected"
-                      ? "text-red-500"
-                      : "text-yellow-500"
-                }
+                    selectedOrder.state === "validated"
+                      ? "text-green-500"
+                      : selectedOrder.state === "rejected"
+                        ? "text-red-500"
+                        : selectedOrder.state === "accepted"
+                          ? "text-orange-500"
+                          : "text-gray-500"
+                  }
               >
                 <strong className="text-white">State:</strong> {selectedOrder.state}
               </p>
