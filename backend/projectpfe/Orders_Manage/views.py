@@ -137,10 +137,7 @@ def inValid(request):
                      
                     ).select_related('invoice').all()
     
-    mains_balances(order)
-    
-
-    
+    mains_balances(order)   
     return Response({'data':'bouklia'})
             
 

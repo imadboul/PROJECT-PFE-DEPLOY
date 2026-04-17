@@ -27,6 +27,7 @@ import OrderDetails from "./pages/OrderDetails";
 import BillsList from "./pages/Bills";
 import ContractClient from "./pages/ContractClient";
 import OrderToday from "./pages/orderToday";
+import ChargmentOrder from "./component/chargmentOrder";
 
 /* Layout */
 function Layout() {
@@ -103,6 +104,11 @@ function App() {
           <Route path="/Bills" element={
             <SuperAdminRoute>
               <BillsList />
+            </SuperAdminRoute>} />
+
+            <Route path="/chargmentOrder/:id" element={
+            <SuperAdminRoute>
+              <ChargmentOrder />
             </SuperAdminRoute>} />
 
 
