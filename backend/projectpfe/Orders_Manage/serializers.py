@@ -108,14 +108,14 @@ class OrderSerializer(serializers.ModelSerializer):
         for product in data['order_orderProduct_items']:
             
             if product['product'].product_type.id != product_type_id:
-                raise serializers.ValidationError(f"c'est product {product['product'].id} n'appartie pas a type de product")
+                raise serializers.ValidationError(f"c'est product {product['product'].name} n'appartie pas a type de product")
         
         order_client=Orderclient.objects.filter(id=data['client_order'].id).first()  
         
         if not order_client:
             raise serializers.ValidationError("c'est order client n'exists pas ")
         
-        for item_client in order_client.clientOrder_order_items.all():
+        for item_client in order_client.orderclient_Orderproductclient_items.all():
             
             test=False
             for item_order in data['order_orderProduct_items']:
@@ -124,7 +124,9 @@ class OrderSerializer(serializers.ModelSerializer):
                 if item_client.product == item_order['product']:
                     test=True
             if not test:
-                raise serializers.ValidationError("c'est product n'appratien pas a order client product ")
+                raise serializers.ValidationError(f"c'est product {item_order['product'].name}n'appratien pas a order client product ")
+        order_items=data['order_orderProduct_items']
+
         
         return super().validate(data)   
     

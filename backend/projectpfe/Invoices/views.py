@@ -6,28 +6,24 @@ from rest_framework.response import Response
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 from .filters import*
+from rest_framework.decorators import api_view
 from Tax_Service.serilazers import get_now
+from user.wraps import *
+from .invoicepdf import generate_pdf
 
 class ValidateInvoice(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         
             with transaction.atomic():
                  type_validation=kwargs['invoice_type']
-                 
+                 serializer= vlaidatedInvoiceSerializerOne(data=request.data)
+                 serializer.is_valid(raise_exception=True)
+                 ids=serializer.validated_data['ids']
+                 #validated_by=request.user_id
        
-                 if type_validation=="v_product_type":
-                      serializer=vlaidatedInvoiceSerializerTow(data=request.data)
-                      serializer.is_valid(raise_exception=True)
-                      products_type=serializer.validated_data['product_type']
-                      #validated_by=request.user_id
-                      nbi=Invoice.objects.filter(contract__product_type__name__in=products_type,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now()) 
                 
-                 elif type_validation in ("v_contract","v_client","v_id"):
-                      serializer= vlaidatedInvoiceSerializerOne(data=request.data)
-                      serializer.is_valid(raise_exception=True)
-                      ids=serializer.validated_data['ids']
-                      #validated_by=request.user_id
-                      match type_validation:
+                     
+                 match type_validation:
                            case "v_contract": 
                                 nbi=Invoice.objects.filter(contract__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
                
@@ -36,7 +32,10 @@ class ValidateInvoice(generics.UpdateAPIView):
                             
                            case "v_id" :
                                 nbi=Invoice.objects.filter(id__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
-                                         
+                                
+                           case "v_product_type":
+                                nbi=Invoice.objects.filter(contract__product_type__id__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
+                                              
                  return Response({"data":"Invoices validated successfully","nbr invoice validated":nbi})
              
 
@@ -51,3 +50,27 @@ class InvoiceList(generics.ListAPIView):
             self.serializer_class=InvoiceFilterSerializerTow
             self.filterset_class=InvoiceFilter 
         return super().get(request, *args, **kwargs)
+   
+@api_view(['GET'])
+def invoicepdf(request, id):
+     try:
+     
+     
+
+          try:
+               invoice = Invoice.objects.get(id=id)
+
+               ##if request.role == 'client' and invoice.contract.client_id != request.user_id:  # type: ignore
+                   ## return error_response(
+                     ##    message="Order does not exist or you do not have permission", status_code=400
+                    ##)
+
+               return generate_pdf(id)
+
+          except Invoice.DoesNotExist:
+               return error_response(
+                    message="invoice does not exist or you do not have permission" ,status_code=400
+               )
+     except Exception as e:
+          
+          return error_response(message="Unexpected error",errors=str(e),status_code=400)
