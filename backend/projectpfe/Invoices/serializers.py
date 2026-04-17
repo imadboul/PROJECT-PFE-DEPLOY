@@ -16,6 +16,9 @@ class InvoiceFilterSerializerOne(serializers.ModelSerializer):
         fields='__all__'
 
 
-class vlaidatedInvoiceSerializer(serializers.Serializer):
+class vlaidatedInvoiceSerializerOne(serializers.Serializer):
     ids=serializers.ListField(child=serializers.IntegerField(),allow_empty=False) 
+
+class vlaidatedInvoiceSerializerTow(serializers.Serializer):
+    product_type=serializers.ListField(child=serializers.CharField(),allow_empty=False)
     

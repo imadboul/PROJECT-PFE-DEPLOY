@@ -3,7 +3,7 @@ from Orders_Manage.models import Types,OrderProduct
 from catalog.models import Contract
 from Tax_Service.models import TaxProduct
 from user.models import Client
-class States(models.TextChoices):
+class StatesInv(models.TextChoices):
     VALID='valid','Valid'
     NO_VALID='no_valid','No_Valid'
 
@@ -13,7 +13,7 @@ class Invoice(models.Model):
     date_de_facteration=models.DateTimeField(null=True)
     contract=models.ForeignKey(Contract,related_name='contract_invoice_items',null=False,blank=False,on_delete=models.PROTECT)
     type=models.CharField(choices=Types.choices,max_length=20,default=Types.NORMAL)
-    states=models.CharField(choices=States.choices, default=States.NO_VALID,max_length=20)
+    states=models.CharField(choices=StatesInv.choices, default=StatesInv.NO_VALID,max_length=20)
     HT=models.DecimalField(decimal_places=2,max_digits=12,null=False,blank=False,default=0)
     TVA=models.DecimalField(decimal_places=2,max_digits=12,null=False,blank=False,default=0)
     TTC=models.DecimalField(decimal_places=2,max_digits=12,null=False,blank=False,default=0)

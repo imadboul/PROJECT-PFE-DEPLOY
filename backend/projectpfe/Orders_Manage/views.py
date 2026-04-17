@@ -49,11 +49,12 @@ class OrderValidateView(generics.UpdateAPIView):
                  nbOrdes=Order.objects.filter(id__in=ids, states=States.PENDING).update(states=States.VALID)                 
                  if nbOrdes!=0:
                     mains_balances(Order.objects.filter(id__in=ids).prefetch_related(
-                     'order_orderProduct_items__product__product_taxProduct_items',
+                       'order_orderProduct_items__product__product_taxProduct_items',
                      'client__client_balances',
                      'contract__product_type',
+                     'contract__contract_invoice_items__invoice_InvoiceLine_items'
                      
-                    ).select_related('invoice'))
+                    ).select_related('invoice').all())
                     
                  
                  return success_response(data=nbOrdes,message='number Order validated successfully',status_code=200)
