@@ -129,9 +129,9 @@ class OrderSerializer(serializers.ModelSerializer):
         order_items=data['order_orderProduct_items']
 
 
-        order_client.update(state=States.LOADING)
+        Orderclient.objects.filter(id=order_client.id).update(state=States.LOADING)
 
-        
+        print(order_client)
         return super().validate(data)   
     
     def create(self, validated_data):
