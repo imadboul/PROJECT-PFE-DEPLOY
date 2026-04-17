@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
+
 import { getContracts } from "../context/services/contractService";
 import { getOrders } from "../context/services/orderService";
 import { getProducts } from "../context/services/productService";
@@ -11,12 +12,16 @@ import { chargmentOrderAdmin } from "../context/services/orderAdmin";
 export default function ChargmentOrder() {
 
   const { id } = useParams();
+
   const [contracts, setContracts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
+
   const [selectedContract, setSelectedContract] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
+
   const [products, setProducts] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -40,6 +45,7 @@ export default function ChargmentOrder() {
         setContracts(c.data?.data?.contracts?.results || []);
         setOrders(o.data?.data?.results || []);
         setAllProducts(p.data?.data?.products || []);
+
       } catch (error) {
         handleApiErrors(error);
       }
@@ -49,21 +55,23 @@ export default function ChargmentOrder() {
   }, []);
 
   // ===============================
-  // AUTO LOAD FROM URL (ORDER ID)
+  // AUTO LOAD ORDER
   // ===============================
   useEffect(() => {
-    if (!id || !orders.length) return;
+
+    if (!id || !orders.length || !contracts.length || !allProducts.length) return;
 
     const order = orders.find(o => o.id == id);
     if (!order) return;
 
-    setSelectedOrder(order);
-
     const contract = contracts.find(c => c.id == order.contract);
+    if (!contract) return;
+
+    setSelectedOrder(order);
     setSelectedContract(contract);
 
     const filteredProducts = allProducts.filter(
-      p => p.product_type === contract?.product_type
+      p => p.product_type === contract.product_type
     );
 
     setProducts(
@@ -77,35 +85,49 @@ export default function ChargmentOrder() {
 
   }, [id, orders, contracts, allProducts]);
 
+  // ===============================
+  // HANDLE CHANGE
+  // ===============================
   const handleChange = (i, field, value) => {
     const updated = [...products];
     updated[i][field] = value;
     setProducts(updated);
   };
 
+  // ===============================
+  // SUBMIT FIXED
+  // ===============================
   const onSubmit = async () => {
+
+    if (!selectedContract || !selectedOrder) {
+      toast.error("Data not loaded yet");
+      return;
+    }
+
+    const invalid = products.some(
+      p => !p.qte || !p.unit || Number(p.qte) <= 0
+    );
+
+    if (invalid) {
+      toast.error("Fill all quantities and units");
+      return;
+    }
+
     try {
-
-      const invalid = products.some(
-        p => !p.qte || !p.unit || Number(p.qte) <= 0
-      );
-
-      if (invalid) {
-        toast.error("Fill all quantities and units");
-        return;
-      }
-
       setLoading(true);
 
       const payload = {
-        contract: selectedContract?.id,
-        client_order: selectedOrder?.id,
+        contract: selectedContract.id,
+        client_order: selectedOrder.id,
+        client: selectedOrder.client,
         order_orderProduct_items: products.map(p => ({
           product: p.product,
           qte: Number(p.qte),
           unit: p.unit
         }))
       };
+
+      console.log("PAYLOAD:", payload);
 
       await chargmentOrderAdmin(payload);
 
@@ -121,21 +143,33 @@ export default function ChargmentOrder() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-xl bg-black/60 p-6 rounded-xl">
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit();
+        }}
+        className="w-full max-w-xl bg-black/60 p-6 rounded-xl"
+      >
 
         {/* TITLE */}
         <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
           Chargment Order
         </h2>
 
-        {/* CONTRACT DISPLAY */}
+        {/* CONTRACT */}
         <div className="p-2 mb-3 bg-black/30 text-white rounded border">
           Contract: {selectedContract ? `#${selectedContract.id}` : "-"}
         </div>
 
-        {/* ORDER DISPLAY */}
+        {/* ORDER */}
         <div className="p-2 mb-4 bg-black/30 text-white rounded border">
           Client Order: {selectedOrder ? `#${selectedOrder.id}` : "-"}
+        </div>
+
+        {/* CLIENT */}
+        <div className="p-2 mb-4 bg-black/30 text-white rounded border">
+          Client: {selectedOrder ? selectedOrder.client : "-"}
         </div>
 
         {/* PRODUCTS */}
@@ -174,14 +208,14 @@ export default function ChargmentOrder() {
 
         {/* SUBMIT */}
         <button
-          onClick={onSubmit}
+          type="submit"
           disabled={loading}
           className="w-full mt-5 bg-orange-600 py-2 rounded hover:bg-orange-700"
         >
           {loading ? "Loading..." : "Create Order"}
         </button>
 
-      </div>
+      </form>
     </div>
   );
 }

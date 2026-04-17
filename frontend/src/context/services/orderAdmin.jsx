@@ -1,19 +1,13 @@
 import api from "../../api/axios";
 
 export const chargmentOrderAdmin = (data) =>
-     api.post("/orders/create/", data,{
-        id,
-        state: "loading",
-     });
+     api.post("/orders/create/", data);
 
 export const getChargmentOrderAdmin = () =>
      api.get("/orders/create/");
 
 export const rechargmentOrderAdmin = (data) =>
-     api.post(`/orders/rectificative/`,data,{
-        id,
-        state: "validated",
-     });
+     api.post(`/orders/rectificative/`,data);
 
 export const getRechargmentOrderAdmin = (id) =>
      api.get(`/orders/rectificative/`);
