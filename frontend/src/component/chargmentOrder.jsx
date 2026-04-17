@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
-
 import { getContracts } from "../context/services/contractService";
 import { getOrders } from "../context/services/orderService";
 import { getProducts } from "../context/services/productService";
@@ -12,16 +11,12 @@ import { chargmentOrderAdmin } from "../context/services/orderAdmin";
 export default function ChargmentOrder() {
 
   const { id } = useParams();
-
   const [contracts, setContracts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
-
   const [selectedContract, setSelectedContract] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
-
   const [products, setProducts] = useState([]);
-
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
