@@ -4,15 +4,17 @@ import toast from "react-hot-toast";
 import { NavLink } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { handleApiErrors} from "../utils/handleApiErrors"
+import { handleApiErrors } from "../utils/handleApiErrors"
 
 export default function OrderList() {
   const [orders, setOrders] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
   const [showValidated, setShowValidated] = useState(true);
   const location = useLocation();
   const selectedclientID = location.state?.client_id || null;
+  const [pickupDate, setPickupDate] = useState("");
   const { user } = useContext(AuthContext);
 
   const fetchOrders = async () => {
@@ -35,10 +37,24 @@ export default function OrderList() {
     fetchOrders();
   }, [selectedclientID]);
 
+  const formatDate = (date) => {
+    return new Date(date).toISOString().split("T")[0];
+  };
+
   const handleValidate = async (id) => {
     try {
-      await validateOrder(id);
+      if (!pickupDate) {
+        toast.error("Select pickup date");
+        return;
+      }
+
+      const formattedDate = formatDate(pickupDate);
+
+      await validateOrder(id, formattedDate);
+
       toast.success("Order validated");
+
+      setPickupDate("");
       setSelectedOrder(null);
       fetchOrders();
     } catch (error) {
@@ -134,36 +150,45 @@ export default function OrderList() {
         )}
 
 
-        {filteredOrder
-          .map((o) => (
-            <div
-              key={o.id}
-              onClick={() => setSelectedOrder(o)}
-              className="cursor-pointer bg-black/50 text-white rounded-2xl p-5 border hover:bg-black/80 transition"
-            >
-              <div className="space-y-2 text-sm">
-                <p className="text-lg font-semibold">
-                  <strong>Client:</strong> {o.client}
+        {filteredOrder.map((o) => (
+          <div
+            key={o.id}
+            onClick={() => setSelectedOrder(o)}
+            className="cursor-pointer bg-black/50 text-white rounded-2xl p-5 border hover:bg-black/80 transition"
+          >
+            <div className="space-y-2 text-sm">
+              <p className="text-lg font-semibold">
+                <strong>Order:</strong>{" "}
+                {o.id}
+              </p>
+
+              <div className="md:flex items-center justify-between">
+                <p>
+                  <strong>client:</strong>{" "}
+                  {o.client}
                 </p>
 
                 <p>
-                  <strong>Date:</strong> {new Date(o.date_created).toLocaleString()}
-                </p>
-
-                <p
-                  className={
-                    o.state === "validated"
-                      ? "text-green-500"
-                      : o.state === "rejected"
-                        ? "text-red-500"
-                        : "text-yellow-500"
-                  }
-                >
-                  <strong className="text-white">State:</strong> {o.state}
+                  <strong>contract:</strong>{" "}
+                  {o.contract}
                 </p>
               </div>
+
+              <p
+                className={
+                  o.state === "validated"
+                    ? "text-green-500"
+                    : o.state === "rejected"
+                      ? "text-red-500"
+                      : "text-yellow-500"
+                }
+              >
+                <strong className="text-white">State:</strong>{" "}
+                {o.state}
+              </p>
             </div>
-          ))}
+          </div>
+        ))}
       </div>
 
       {selectedOrder && (
@@ -179,7 +204,19 @@ export default function OrderList() {
 
             <div className="space-y-2 text-sm">
               <p><strong>Client:</strong> {selectedOrder.client}</p>
-              <p><strong>Date:</strong> {new Date(selectedOrder.date_created).toLocaleString()}</p>
+              <div>
+                {selectedOrder.orderclient_Orderproductclient_items?.length > 0
+                  ? selectedOrder.orderclient_Orderproductclient_items.map((p, i) => (
+                    <div key={i} className="text-md">
+                      Product: {p.product} | Qte: {p.qte}{p.unit}
+                    </div>
+                  ))
+                  : "No products"}
+              </div>
+              <p>
+                <strong>Pick Up Date:</strong>{" "}
+                {selectedOrder.pickup_date}
+              </p>
 
               <p
                 className={
@@ -192,6 +229,18 @@ export default function OrderList() {
               >
                 <strong className="text-white">State:</strong> {selectedOrder.state}
               </p>
+              {selectedOrder.state === "pending" && (
+                <div className="mb-4">
+                  <label className="text-sm">Pickup Date</label>
+                  <input
+                    type="date"
+                    value={pickupDate}
+                    onChange={(e) => setPickupDate(e.target.value)}
+                    className="w-full p-2 mt-1 rounded bg-white/20 text-white"
+                  />
+                </div>
+              )}
+
 
               <div className="flex justify-between mt-3">
                 <div className="flex gap-4">
@@ -199,8 +248,14 @@ export default function OrderList() {
                     <>
                       {["admin", "superAdmin"].includes(user?.role) && (
                         <>
-                          <button onClick={() => handleValidate(selectedOrder.id)} className="bg-green-700 w-7 h-7 rounded-full">✔</button>
-                          <button onClick={() => handleReject(selectedOrder.id)} className="bg-red-700 w-7 h-7 rounded-full">✖</button>
+                          <button onClick={() => handleValidate(selectedOrder.id)}
+                            className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                           bg-green-700 hover:bg-green-800 text-white transition"
+                          ><i className="fa-solid fa-check text-sm"></i></button>
+                          <button onClick={() => handleReject(selectedOrder.id)}
+                            className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                          bg-red-700 hover:bg-red-800 text-white transition">
+                            <i className="fa-solid fa-xmark text-sm"></i></button>
                         </>
                       )}
                     </>

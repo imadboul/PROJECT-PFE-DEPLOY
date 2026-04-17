@@ -8,7 +8,7 @@ import {
 } from "../context/services/orderService";
 import { useNotifications } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
-import { handleApiErrors} from "../utils/handleApiErrors"
+import { handleApiErrors } from "../utils/handleApiErrors"
 
 
 export default function OrderDetails() {
@@ -17,6 +17,7 @@ export default function OrderDetails() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
+  const [pickupDate, setPickupDate] = useState("");
   const { user } = useContext(AuthContext);
 
 
@@ -39,11 +40,25 @@ export default function OrderDetails() {
     fetchOrder();
   }, [id]);
 
+  const formatDate = (date) => {
+    return new Date(date).toISOString().split("T")[0];
+  };
+
   const handleValidate = async () => {
     try {
-      await validateOrder(id);
-      await fetchNotifications();
+      if (!pickupDate) {
+        toast.error("Select pickup date");
+        return;
+      }
+
+      const formattedDate = formatDate(pickupDate);
+
+      await validateOrder(id, formattedDate);
+
       toast.success("Order validated");
+
+      setPickupDate("");
+      setSelectedBill(null);
       fetchOrder();
     } catch (error) {
       handleApiErrors(error);
@@ -82,7 +97,7 @@ export default function OrderDetails() {
 
         {/* CARD */}
         <div onClick={() => setSelectedBill(order)}
-         className="cursor-pointer bg-black/50 text-white rounded-2xl p-5 border hover:bg-black/80 transition">
+          className="cursor-pointer bg-black/50 text-white rounded-2xl p-5 border hover:bg-black/80 transition">
 
           <div className="space-y-2 text-sm">
             <p className="text-lg font-semibold">
@@ -101,20 +116,6 @@ export default function OrderDetails() {
                 {order.contract}
               </p>
             </div>
-
-            <div className="md:flex items-center justify-between">
-              <div>
-                {order.productsclient?.length > 0
-                  ? order.productsclient.map((p, i) => (
-                    <div key={i} className="text-md">
-                      Product: {p.product} | Qte: {p.qte}
-                    </div>
-                  ))
-                  : "No products"}
-
-              </div>
-
-
               <p
                 className={
                   order.state === "validated"
@@ -132,7 +133,6 @@ export default function OrderDetails() {
             </div>
           </div>
         </div>
-      </div>
       {/* MODAL */}
       {selectedBill && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
@@ -156,11 +156,15 @@ export default function OrderDetails() {
                 <strong>contract:</strong>{" "}
                 {selectedBill.contract}
               </p>
+              <p>
+                <strong>Pick Up Date:</strong>{" "}
+                {selectedBill.pickup_date}
+              </p>
 
-              {selectedBill.productsclient?.length > 0
-                ? selectedBill.productsclient.map((p, i) => (
+              {selectedBill.orderclient_Orderproductclient_items?.length > 0
+                ? selectedBill.orderclient_Orderproductclient_items.map((p, i) => (
                   <div key={i} className="text-xs">
-                    Product: {p.product} | Qte: {p.qte}
+                    Product: {p.product} | Qte: {p.qte}{p.unit}
                   </div>
                 ))
                 : "No products"}
@@ -179,36 +183,42 @@ export default function OrderDetails() {
 
               </p>
 
-              <p>
-                <strong>Product type:</strong>{" "}
-                {selectedBill.product_type}
-              </p>
               {/* Actions */}
-              <div className="flex justify-between gap-4 mt-3">
-                <p><strong>Validated by:</strong> {selectedBill.validated_by || "—"}</p>
+                {selectedBill.state === "pending" && (
+                <div className="mb-4">
+                  <label className="text-sm">Pickup Date</label>
+                  <input
+                    type="date"
+                    value={pickupDate}
+                    onChange={(e) => setPickupDate(e.target.value)}
+                    className="w-full p-2 mt-1 rounded bg-white/20 text-white"
+                  />
+                </div>
+              )}
+
                 <div className="flex gap-4">
                   {selectedBill.state === "pending" && (
                     <>
-                     {["admin", "superAdmin"].includes(user?.role) && (
+                      {["admin", "superAdmin"].includes(user?.role) && (
                         <>
-                      <button
-                        onClick={() => handleValidate(selectedBill.id)}
-                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                          <button
+                            onClick={() => handleValidate(selectedBill.id)}
+                            className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
                            bg-green-700 hover:bg-green-800 
                            text-white transition"
-                      >
-                        <i className="fa-solid fa-check text-sm"></i>
-                      </button>
+                          >
+                            <i className="fa-solid fa-check text-sm"></i>
+                          </button>
 
-                      <button
-                        onClick={() => handleReject(selectedBill.id)}
-                        className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                          <button
+                            onClick={() => handleReject(selectedBill.id)}
+                            className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
                            bg-red-700 hover:bg-red-800 
                            text-white transition"
-                      >
-                        <i className="fa-solid fa-xmark text-sm"></i>
-                      </button>
-                      </>
+                          >
+                            <i className="fa-solid fa-xmark text-sm"></i>
+                          </button>
+                        </>
                       )}
                     </>
                   )}
@@ -218,7 +228,6 @@ export default function OrderDetails() {
 
             </div>
           </div>
-        </div>
       )}
     </div>
 

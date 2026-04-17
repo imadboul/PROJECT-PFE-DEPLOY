@@ -79,6 +79,14 @@ export default function Navbar() {
             )}
           </NavLink>
 
+          <NavLink
+            to="/orderToday"
+            className={linkStyle}>
+            {["admin", "superAdmin"].includes(user?.role) && (
+              <i className="fa-solid fa-cart-shopping"></i>
+            )}
+          </NavLink>
+
           <NavLink to="/notifications" className={linkStyle}>
             <i className="fa-regular fa-message"></i>
 

@@ -12,10 +12,11 @@ export const getOrders = () =>
 export const getOrderById = (id) =>
      api.get(`/orderclient/order/${id}`);
 
-export const validateOrder = (id) =>
+export const validateOrder = (id, pickup_date) =>
   api.post("/orderclient/validateorder/", {
     id,
     state: "validated",
+    pickup_date,
   });
 
 export const rejectOrder = (id) =>
