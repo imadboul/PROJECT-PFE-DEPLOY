@@ -15,7 +15,7 @@ export const getOrderById = (id) =>
 export const validateOrder = (id, pickup_date) =>
   api.post("/orderclient/validateorder/", {
     id,
-    state: "validated",
+    state: "accepted",
     pickup_date,
   });
 

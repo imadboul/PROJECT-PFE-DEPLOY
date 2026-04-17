@@ -6,7 +6,7 @@ class States(models.TextChoices):
        
        PENDING='pending','Pending'
        ACCEPTED='accepted','Accepted'
-       LOADIN='loadin','Loadin'
+       LOADING='loading','Loading'
        VALID='validated','Validated'
        REJECT='rejected','Rejected'    
 

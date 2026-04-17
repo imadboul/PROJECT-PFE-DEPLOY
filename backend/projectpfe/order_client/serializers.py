@@ -217,7 +217,7 @@ class ValidateOrdersSerializer(serializers.Serializer):
     def validate_state(self, value):
           
           
-          STATES = ["pending","validated","rejected"]
+          STATES = 'accepted','loading','validat','rejected'
           if not value in STATES:
               raise serializers.ValidationError("state does not exist ")
           return value
