@@ -15,7 +15,7 @@ def generate_pdf(invoice_id):
 
     invoice = Invoice.objects.get(id = invoice_id)
     client = invoice.contract.client
-    lines = invoice.invoice_InvoiceLine_items.all()
+    lines = invoice.invoice_InvoiceLine_items.all() # type: ignore
     
     
 
@@ -109,33 +109,50 @@ def generate_pdf(invoice_id):
     
 
     top_table.setStyle(TableStyle([
+   
+    ('BACKGROUND', (0,0), (-1,0), colors.Color(1, 0.6, 0.2)),
+
+    
+    ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+
+   
     ('ALIGN', (0,0), (0,0), 'LEFT'),
     ('ALIGN', (1,0), (1,0), 'RIGHT'),
-    ]))
+
+    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+    ('BOTTOMPADDING', (0,0), (-1,0), 8),]))
 
     elements.append(top_table)
     elements.append(Spacer(1,15))
     client = invoice.contract.client
 
-    client_data = [
-    ["Name:", client.firstName],
-    ["Last Name:", client.lastName],
-    ["Contract ID:", str(invoice.contract.id)],
+    data = [
+        ['Name: ', client.firstName],
+        ['Last Name: ', client.lastName],
+        ['ID: ', client.id],
+        ["contract:", str(invoice.contract_id)] # type: ignore
     ]
-
-    client_table = Table(client_data, colWidths=[120, 300])
-
+    
+    client_table = Table(data,colWidths=[120,250])
+    
     client_table.setStyle(TableStyle([
-    ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
-    ('LINEAFTER', (0,0), (0,-1), 0.5, colors.black),
-    ('BOTTOMPADDING',(0,0),(-1,-1),6),
+        ('FONTNAME', (0,0) , (0,-1),'Helvetica-Bold' ),
+        ('VALIGN',(0,0),(-1,-1), 'MIDDLE'),
+        ('BOTTOMPADDING',(0,0),(-1,-1),6), 
+        ('GRID', (0,0), (-1,-1), 0.2, colors.black),
+        ('LINEAFTER', (0,0) , (0,-1),0.4, colors.black),
+        ('BACKGROUND', (0,0), (0,-1), colors.Color(1, 0.6, 0.2)),
+       
     ]))
-
+    client_table.hAlign = 'LEFT'
     elements.append(client_table)
     elements.append(Spacer(1,20))
     table_data = [['ID', 'Product','Unit Price','Unit','qte','qte Unit','HT', 'TAX','Total']]
     
     for prod in lines:
+        qte = convert_unit(prod.qte,prod.product.density, prod.unit, prod.product.unit) 
+        HT = qte * prod.product.unit_price
+        
         table_data.append([
             prod.product.id,
             prod.product.name,
@@ -143,11 +160,58 @@ def generate_pdf(invoice_id):
             prod.product.unit,
             str(prod.qte),
             str(prod.unit),
-            ])
+            str(HT),
+            str(prod.tax_price),
+            str(HT+prod.tax_price)])
+        
+    product_table = Table(table_data,colWidths=[40,80, 60, 70, 40, 50,55,55,55])
+    
+    product_table.setStyle(TableStyle([
+    ('BACKGROUND', (0,0), (-1,0),colors.Color(1, 0.6, 0.2)),
+    ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+
+    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+    ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+
+    ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+
+    ('BOTTOMPADDING', (0,0), (-1,0), 8),
+
+    ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),]))
+    
+    elements.append(Spacer(1, 20))
+    elements.append(Spacer(1, 10))
+    
+    elements.append(product_table)
 
 
+    totals_data = [
+    ["HT:", f"{invoice.HT} DA"],
+    ["TVA:", f"{invoice.TVA} DA"],
+    ["TTC:", f"{invoice.TTC} DA"],
+]   
 
+    totals_table = Table(totals_data, colWidths=[80, 120])
+    totals_table.setStyle(TableStyle([
+    ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
 
+    ('ALIGN', (0,0), (-1,-1), 'RIGHT'),
+
+    ('TEXTCOLOR', (0,0), (-1,-1), colors.black),
+
+    ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+
+    ('LINEABOVE', (0,0), (-1,0), 1, colors.black),
+
+  
+    ('BOX', (0,0), (-1,-1), 1, colors.black),
+
+   
+    ('BACKGROUND', (0,0), (-1,-1), colors.whitesmoke),
+]))
+    totals_table.hAlign = 'RIGHT'
+    elements.append(Spacer(1,20))
+    elements.append(totals_table)
 
 
 
