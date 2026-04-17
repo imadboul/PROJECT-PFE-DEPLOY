@@ -13,21 +13,14 @@ class ValidateInvoice(generics.UpdateAPIView):
         
             with transaction.atomic():
                  type_validation=kwargs['invoice_type']
-                 
+                 serializer= vlaidatedInvoiceSerializerOne(data=request.data)
+                 serializer.is_valid(raise_exception=True)
+                 ids=serializer.validated_data['ids']
+                 #validated_by=request.user_id
        
-                 if type_validation=="v_product_type":
-                      serializer=vlaidatedInvoiceSerializerTow(data=request.data)
-                      serializer.is_valid(raise_exception=True)
-                      products_type=serializer.validated_data['product_type']
-                      #validated_by=request.user_id
-                      nbi=Invoice.objects.filter(contract__product_type__name__in=products_type,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now()) 
                 
-                 elif type_validation in ("v_contract","v_client","v_id"):
-                      serializer= vlaidatedInvoiceSerializerOne(data=request.data)
-                      serializer.is_valid(raise_exception=True)
-                      ids=serializer.validated_data['ids']
-                      #validated_by=request.user_id
-                      match type_validation:
+                     
+                 match type_validation:
                            case "v_contract": 
                                 nbi=Invoice.objects.filter(contract__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
                
@@ -36,7 +29,10 @@ class ValidateInvoice(generics.UpdateAPIView):
                             
                            case "v_id" :
                                 nbi=Invoice.objects.filter(id__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
-                                         
+                                
+                           case "v_product_type":
+                                nbi=Invoice.objects.filter(contract__product_type__id__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
+                                              
                  return Response({"data":"Invoices validated successfully","nbr invoice validated":nbi})
              
 
