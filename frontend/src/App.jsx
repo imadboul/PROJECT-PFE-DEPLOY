@@ -26,6 +26,7 @@ import Orders from "./pages/Orders";
 import OrderDetails from "./pages/OrderDetails";
 import BillsList from "./pages/Bills";
 import ContractClient from "./pages/ContractClient";
+import OrderToday from "./pages/orderToday";
 
 /* Layout */
 function Layout() {
@@ -78,6 +79,11 @@ function App() {
             <SuperAdminRoute>
               <AddProduct />
             </SuperAdminRoute>} />
+
+           <Route path="/orderToday" element={
+            <SuperAdminRoute>
+              <OrderToday />
+            </SuperAdminRoute>} /> 
 
           <Route path="/AddProductType" element={
             <SuperAdminRoute>
