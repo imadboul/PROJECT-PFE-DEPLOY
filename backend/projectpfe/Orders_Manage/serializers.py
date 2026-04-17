@@ -89,6 +89,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model=Order
         fields=['contract','client','client_order','order_orderProduct_items']
+        
     def validate(self, data):
         
         
@@ -125,14 +126,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     test=True
             if not test:
                 raise serializers.ValidationError(f"c'est product {item_order['product'].name}n'appratien pas a order client product ")
-        order_items=data['order_orderProduct_items']
-        for unit in order_items:
-                 
-            productorder = OrderProductclient.objects.get(product=unit['product'],order=data['client_order'])
-            
-            productorder.qte_taken += unit['qte']
-                
-            productorder.save()
+        
         
         return super().validate(data)   
     
