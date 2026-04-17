@@ -44,8 +44,9 @@ export default function OrderToday() {
     return <div className="text-white text-center mt-10">Loading...</div>;
 
   return (
-    <div className="p-6 text-white">
-      <h1 className="text-xl font-bold mb-4">Today Orders</h1>
+       <div className="p-6 flex justify-center relative z-10">
+      <div className="w-full max-w-3xl flex flex-col gap-4">
+      <h1 className="text-xl text-white font-bold mb-4">Today Orders</h1>
 
       {orders.length === 0 ? (
         <p>No orders for today</p>
@@ -90,6 +91,7 @@ export default function OrderToday() {
           </div>
         ))
       )}
+      </div>
       {selectedOrder && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
           <div className="bg-black border border-white text-white p-6 rounded-xl w-[350px] relative">
