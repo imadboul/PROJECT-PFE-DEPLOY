@@ -1,7 +1,8 @@
 import { createContext, useEffect, useState } from "react";
 import api from "../api/axios";
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
+
 export const AuthContext = createContext(null);
 
 export default function AuthProvider({ children }) {
@@ -17,11 +18,7 @@ export default function AuthProvider({ children }) {
         const decoded = jwtDecode(token);
         setUser(decoded);
       } catch (error) {
-        const msg =
-          error.response?.data?.error ||
-          "Error fatching data";
-
-        toast.error(msg);
+        toast.error("Invalid token");
 
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
@@ -31,6 +28,7 @@ export default function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
+  // LOGIN
   async function login(email, password) {
     try {
       const res = await api.post("/client/login/", {
@@ -49,35 +47,35 @@ export default function AuthProvider({ children }) {
 
       return { success: true };
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error login";
+      if (error.response?.data) {
+        return {
+          success: false,
+          error: error.response.data,
+        };
+      }
 
-      toast.error(msg);
-
-      return { success: false, error: msg };
+      return { success: false, error: null };
     }
   }
 
- async function signUp(data) {
-  try {
-    await api.post("/client/signUp/", data);
-    return { success: true };
-  } catch (error) {
-    const msg =
-      error.response?.data?.message ||
-      "Error Sign up";
+  // SIGNUP
+  async function signUp(data) {
+    try {
+      await api.post("/client/signUp/", data);
+      return { success: true };
+    } catch (error) {
+      if (error.response?.data) {
+        return {
+          success: false,
+          error: error.response.data,
+        };
+      }
 
-      toast.error(msg);
-
-    return {
-      success: false,
-      error: msg,
-    };
+      return { success: false, error: null };
+    }
   }
-}
 
-  //  LOGOUT
+  // LOGOUT
   function logout() {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");

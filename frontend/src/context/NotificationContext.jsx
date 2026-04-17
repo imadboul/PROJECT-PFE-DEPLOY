@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getNotifications } from "./services/notificationService";
+import { handleApiErrors } from "../utils/handleApiErrors";
 
 const NotificationContext = createContext();
 
@@ -17,11 +18,7 @@ export const NotificationProvider = ({ children }) => {
 
       setNotifications(Array.isArray(data) ? data : []);
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error fetching data";
-
-      toast.error(msg);
+      handleApiErrors(error);
     }
   };
   useEffect(() => {

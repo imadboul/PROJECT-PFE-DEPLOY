@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { getBill } from "../context/services/orderService";
+import { handleApiErrors} from "../utils/handleApiErrors"
+
 export default function BillsList() {
   const [bill, setBill] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -14,11 +15,7 @@ export default function BillsList() {
         const resB = await getBill();
         setBill(resB.data.data.results || []);
       } catch (error) {
-        const msg =
-          error.response?.data?.error ||
-          "Error fatching data";
-
-        toast.error(msg);
+        handleApiErrors(error);
       }
     };
 

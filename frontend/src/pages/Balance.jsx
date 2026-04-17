@@ -1,27 +1,25 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { getBalances } from "../context/services/BalanceService";
-import toast from "react-hot-toast";
+import { AuthContext } from "../context/AuthContext";
+import { handleApiErrors} from "../utils/handleApiErrors"
+
 
 export default function BalanceList() {
   const [balances, setBalances] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
-
+  const {user}= useContext(AuthContext);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const resB = await getBalances();
-        
+
 
         setBalances(resB.data.data.results || []);
-      }catch (error) {
-        const msg =
-        error.response?.data?.error ||
-        "Error fatching data";
-
-      toast.error(msg);
+      } catch (error) {
+        handleApiErrors(error);
       }
     };
 
@@ -34,14 +32,16 @@ export default function BalanceList() {
 
         <h1 className="text-white text-xl font-bold mb-4">Balance</h1>
         <div className="flex flex-col self-start">
-           <NavLink
-          to="/RequestPayment"
-          className="border border-white text-white px-4 py-2 rounded hover:bg-white/10 mb-4"
-        >
-          Request new Payment
-        </NavLink>
+          {["client"].includes(user?.role) && (
+            <NavLink
+              to="/RequestPayment"
+              className="border border-white text-white px-4 py-2 rounded hover:bg-white/10 mb-4"
+            >
+              Request new Payment
+            </NavLink>
+          )}
         </div>
-       
+
 
         {balances.map((b) => {
           const amount = Number(b.amount);

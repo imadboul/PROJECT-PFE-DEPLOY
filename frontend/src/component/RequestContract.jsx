@@ -5,6 +5,8 @@ import { createContract } from "../context/services/contractService";
 import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import Select from "react-select";
+import { handleApiErrors} from "../utils/handleApiErrors"
+
 
 function RequestContract() {
   const [productTypes, setProductTypes] = useState([]);
@@ -17,6 +19,7 @@ function RequestContract() {
     { value: "HL", label: "Hectoliter" },
     { value: "TM", label: "Tonne" },
   ];
+
 
   const options = productTypes.map(type => ({
     value: type.id,
@@ -38,11 +41,7 @@ function RequestContract() {
         const data = res.data.data.types;
         setProductTypes(Array.isArray(data) ? data : []);
       } catch (error) {
-        const msg =
-          error.response?.data?.error ||
-          "Error fatching product type";
-
-        toast.error(msg);
+        handleApiErrors(error);
       }
     };
 
@@ -78,11 +77,7 @@ function RequestContract() {
       navigate("/Contracts");
 
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error creating contract";
-
-      toast.error(msg);
+      handleApiErrors(error);
     }
     finally {
       setLoading(false);

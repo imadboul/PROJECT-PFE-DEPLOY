@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getProducts, deleteProduct } from "../context/services/productService";
 import { NavLink } from "react-router-dom";
 import toast from "react-hot-toast";
+import { handleApiErrors} from "../utils/handleApiErrors"
 
 export default function ProductsList() {
   const [products, setProducts] = useState([]);
@@ -19,13 +20,9 @@ export default function ProductsList() {
 
       setProducts(Array.isArray(data) ? data : []);
 
-    }catch (error) {
-        const msg =
-        error.response?.data?.error ||
-        "Error fatching data";
-
-      toast.error(msg);
-      }
+    } catch (error) {
+      handleApiErrors(error);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -34,13 +31,9 @@ export default function ProductsList() {
       toast.success("Deleted successfully");
       fetchProducts();
       setSelectedProduct(null);
-    }catch (error) {
-        const msg =
-        error.response?.data?.error ||
-        "Error deleting ";
-
-      toast.error(msg);
-      }
+    } catch (error) {
+      handleApiErrors(error);
+    }
   };
 
   return (
@@ -70,8 +63,8 @@ export default function ProductsList() {
               <div className="space-y-2 text-sm">
 
                 <div className="flex justify-between">
-                <p><strong>Name:</strong> {product.name}</p>
-                <p><strong>Product Type:</strong> {product.product_type}</p>
+                  <p><strong>Name:</strong> {product.name}</p>
+                  <p><strong>Product Type:</strong> {product.product_type}</p>
                 </div>
                 <p><strong>Description:</strong> {product.description}</p>
 

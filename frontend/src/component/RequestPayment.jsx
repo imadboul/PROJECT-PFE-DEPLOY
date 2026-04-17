@@ -5,6 +5,8 @@ import { createPayment } from '../context/services/BalanceService'
 import toast from 'react-hot-toast'
 import { getProductTypes } from '../context/services/productService'
 import Select from "react-select";
+import { handleApiErrors} from "../utils/handleApiErrors"
+
 
 function RequestPayment() {
   const [productTypes, setProductTypes] = useState([]);
@@ -18,6 +20,7 @@ function RequestPayment() {
     formState: { errors }
   } = useForm();
 
+
   useEffect(() => {
     const fetchProductTypes = async () => {
       try {
@@ -25,11 +28,7 @@ function RequestPayment() {
         const data = res.data.data.types
         setProductTypes(Array.isArray(data) ? data : [])
       } catch (error) {
-        const msg =
-          error.response?.data?.error ||
-          "Error fatching product type";
-
-        toast.error(msg);
+        handleApiErrors(error);
       }
     }
     fetchProductTypes()
@@ -58,11 +57,7 @@ function RequestPayment() {
       navigate("/Balance")
 
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error creating payment";
-
-      toast.error(msg);
+      handleApiErrors(error);
     } finally {
       setLoading(false)
     }

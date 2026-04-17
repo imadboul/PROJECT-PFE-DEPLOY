@@ -9,6 +9,8 @@ import {
 } from "../context/services/contractService";
 import { useNotifications } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
+import { handleApiErrors} from "../utils/handleApiErrors"
+
 
 export default function ContractDetails() {
   const { id } = useParams();
@@ -30,11 +32,7 @@ export default function ContractDetails() {
       window.open(url, "_blank");
 
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error view";
-
-      toast.error(msg);
+      handleApiErrors(error);
     }
   };
 
@@ -46,11 +44,7 @@ export default function ContractDetails() {
       setContract(res.data.data);
       setSelectedContract(null);
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error fatching data";
-
-      toast.error(msg);
+      handleApiErrors(error);
     } finally {
       setLoading(false);
     }
@@ -67,11 +61,7 @@ export default function ContractDetails() {
       toast.success("Validated");
       fetchContract();
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error validation";
-
-      toast.error(msg);
+      handleApiErrors(error);
     }
   };
 
@@ -82,11 +72,7 @@ export default function ContractDetails() {
       toast.success("Rejected");
       fetchContract();
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error rejection";
-
-      toast.error(msg);
+      handleApiErrors(error);
     }
   };
 
