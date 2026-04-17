@@ -37,7 +37,7 @@ class OrderProduct(models.Model):
     product=models.ForeignKey(Product,related_name='product_orderProduct_items',null=False,blank=False,on_delete=models.PROTECT)
     qte=models.DecimalField(null=False,blank=False,max_digits=12,decimal_places=3)
     unit=models.CharField(null=False,blank=False,choices=ProductUnit,max_length=20)
-    states=models.CharField(max_length=20)
+    
 
 
 
