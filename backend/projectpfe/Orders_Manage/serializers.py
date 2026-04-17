@@ -104,18 +104,6 @@ class OrderSerializer(serializers.ModelSerializer):
         
         
         product_type_id=data['contract'].product_type.id
-<<<<<<< HEAD
-    
-        for product in data['order_orderProduct_items']:
-            if product['product'].product_type.id != product_type_id:
-                raise
-            
-        order_client=Orderclient.objects.filter(id=self.validated_data['client_order']).first()    # type: ignore
-        
-        if not order_client:
-            raise 
-        for item_client in order_client.orderclient_Orderproductclient_items:
-=======
         
         for product in data['order_orderProduct_items']:
             
@@ -129,7 +117,6 @@ class OrderSerializer(serializers.ModelSerializer):
         
         for item_client in order_client.orderclient_Orderproductclient_items.all():
             print('bouklila')
->>>>>>> e15d952a34e07d1076192dcf6575410bd73f2ebb
             test=False
             for item_order in data['order_orderProduct_items']:
                 print(item_order['product'])

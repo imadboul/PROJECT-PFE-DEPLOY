@@ -90,10 +90,10 @@ class OrderProductSerializer(serializers.ModelSerializer):
 }
         
 class OrderSerializer(serializers.ModelSerializer):
-    products=OrderProductSerializer(many=True)
+    orderclient_Orderproductclient_items=OrderProductSerializer(many=True)
     class Meta:
         model=Orderclient
-        fields=['contract','products']
+        fields=['contract','orderclient_Orderproductclient_items']
         
         
     def validate_products(self, value):
@@ -151,7 +151,7 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         
         with transaction.atomic():
-             order_items=validated_data.pop( 'products' )
+             order_items=validated_data.pop( 'orderclient_Orderproductclient_items' )
              order=Orderclient.objects.create(**validated_data)
              
              for order_item in order_items:

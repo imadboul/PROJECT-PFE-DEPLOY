@@ -5,6 +5,17 @@ const NotificationContext = createContext();
 
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
+  const handleApiErrors = (error) => {
+      const errors = error.response?.data.errors;
+  
+      if (!errors) return;
+  
+      Object.values(errors).forEach((messages) => {
+        messages.forEach((msg) => {
+          toast.error(msg);
+        });
+      });
+    };
 
   const fetchNotifications = async () => {
     try {
@@ -17,11 +28,7 @@ export const NotificationProvider = ({ children }) => {
 
       setNotifications(Array.isArray(data) ? data : []);
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error fetching data";
-
-      toast.error(msg);
+      handleApiErrors(error);
     }
   };
   useEffect(() => {

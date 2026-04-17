@@ -19,6 +19,18 @@ export default function PaymentsList() {
   const selectedProductType = location.state?.productType;
   const { user } = useContext(AuthContext);
 
+  const handleApiErrors = (error) => {
+      const errors = error.response?.data.errors;
+  
+      if (!errors) return;
+  
+      Object.values(errors).forEach((messages) => {
+        messages.forEach((msg) => {
+          toast.error(msg);
+        });
+      });
+    };
+
   //  Fetch data
   const fetchPayments = async () => {
     try {
@@ -30,11 +42,7 @@ export default function PaymentsList() {
 
       setPayments(Array.isArray(paymentsData) ? paymentsData : []);
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error fatching data";
-
-      toast.error(msg);
+      handleApiErrors(error);
     } finally {
       setLoading(false);
     }
@@ -53,10 +61,7 @@ export default function PaymentsList() {
       setSelectedPayment(null);
       fetchPayments();
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error validation";
-      toast.error(msg);
+      handleApiErrors(error);
     }
   };
 
@@ -69,10 +74,7 @@ export default function PaymentsList() {
       setSelectedPayment(null);
       fetchPayments();
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error rejection";
-      toast.error(msg);
+      handleApiErrors(error);
     }
   };
 

@@ -7,6 +7,18 @@ export default function BillsList() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const handleApiErrors = (error) => {
+      const errors = error.response?.data.errors;
+  
+      if (!errors) return;
+  
+      Object.values(errors).forEach((messages) => {
+        messages.forEach((msg) => {
+          toast.error(msg);
+        });
+      });
+    };
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -14,11 +26,7 @@ export default function BillsList() {
         const resB = await getBill();
         setBill(resB.data.data.results || []);
       } catch (error) {
-        const msg =
-          error.response?.data?.error ||
-          "Error fatching data";
-
-        toast.error(msg);
+        handleApiErrors(error);
       }
     };
 

@@ -13,12 +13,30 @@ function RequestOrder() {
     const [allProducts, setAllProducts] = useState([]);
     const [productsList, setProductsList] = useState([]);
     const [products, setProducts] = useState([
-        { product: null, qte: "" },
+        { product: null, qte: "", unit: null },
     ]);
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
     const { handleSubmit, control } = useForm();
+
+    const unitOptions = [
+        { value: "KG", label: "Kilogram" },
+        { value: "L", label: "Liter" },
+        { value: "HL", label: "Hectoliter" },
+        { value: "TM", label: "Tonne" },
+    ];
+    const handleApiErrors = (error) => {
+        const errors = error.response?.data.errors;
+
+        if (!errors) return;
+
+        Object.values(errors).forEach((messages) => {
+            messages.forEach((msg) => {
+                toast.error(msg);
+            });
+        });
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -30,7 +48,7 @@ function RequestOrder() {
                 setAllProducts(p.data?.data?.products || []);
                 setProductsList(p.data?.data?.products || []);
             } catch (error) {
-                toast.error("Error fetching data");
+                handleApiErrors(error);
             }
         };
 
@@ -39,7 +57,7 @@ function RequestOrder() {
 
     // ADD PRODUCT
     const handleAdd = () => {
-        setProducts([...products, { product: null, qte: "" }]);
+        setProducts([...products, { product: null, qte: "", unit: null }]);
     };
 
     // CHANGE VALUE
@@ -61,15 +79,13 @@ function RequestOrder() {
     }));
 
     const onSubmit = async (data) => {
-        
-        
         try {
             const invalid = products.some(
-                (p) => !p.product || !p.qte || Number(p.qte) <= 0
+                (p) => !p.product || !p.qte || Number(p.qte) <= 0 || !p.unit
             );
 
             if (invalid) {
-                toast.error("Select product and valid quantity");
+                toast.error("Select product, unit and valid quantity");
                 return;
             }
 
@@ -77,21 +93,19 @@ function RequestOrder() {
 
             const payload = {
                 contract: data.contract.value,
-                products: products.map((p) => ({
+                orderclient_Orderproductclient_items: products.map((p) => ({
                     product: p.product.value,
                     qte: Number(p.qte),
+                    unit: p.unit,
                 })),
             };
+
             await createOrder(payload);
 
             toast.success("Order created");
             navigate("/order");
         } catch (error) {
-
-            const message = data.errors
-             || "Error creating order";
-            toast.error(message);
-        
+            handleApiErrors(error);
         } finally {
             setLoading(false);
         }
@@ -99,10 +113,15 @@ function RequestOrder() {
 
     return (
         <div className="min-h-screen flex items-center justify-center px-4">
-
             <div className="w-full max-w-xl bg-black/60 p-6 rounded-xl">
 
-                <h2 className="text-center text-orange-500 text-xl mb-5">
+                <button
+                    className="text-white text-2xl cursor-pointer text-white font-bold hover:text-orange-500"
+                    onClick={() => window.history.back()}
+                >
+                    <i className="fa-solid fa-arrow-left"></i>
+                </button>
+                <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
                     Request Order
                 </h2>
 
@@ -129,12 +148,10 @@ function RequestOrder() {
                                             border: "1px solid #f97316"
                                         }
                                     }),
-
                                     menu: (base) => ({
                                         ...base,
                                         backgroundColor: "rgba(0, 0, 0, 0.66)"
                                     }),
-
                                     option: (base, state) => ({
                                         ...base,
                                         backgroundColor: state.isFocused
@@ -149,16 +166,13 @@ function RequestOrder() {
                                             backgroundColor: "#f97316"
                                         }
                                     }),
-
                                     singleValue: (base) => ({
                                         ...base,
                                         color: "#fff",
                                     }),
-
                                     placeholder: (base) => ({
                                         ...base,
                                         color: "#fff",
-
                                     })
                                 }}
                                 onChange={(val) => {
@@ -166,18 +180,14 @@ function RequestOrder() {
 
                                     const contract = contracts.find(c => c.id === val.value);
 
-                                    
                                     const filtered = allProducts.filter(
                                         (p) => p.product_type === contract.product_type
                                     );
 
                                     setProductsList(filtered);
-                                    setProducts([{ product: null, qte: "" }]);
+                                    setProducts([{ product: null, qte: "", unit: null }]);
                                 }}
-                                value={contractOptions.find(
-                                    (opt) => opt.value === field.value
-                                )}
-
+                                value={field.value}
                             />
                         )}
                     />
@@ -201,12 +211,10 @@ function RequestOrder() {
                                             border: "1px solid #f97316"
                                         }
                                     }),
-
                                     menu: (base) => ({
                                         ...base,
                                         backgroundColor: "rgba(0, 0, 0, 0.66)"
                                     }),
-
                                     option: (base, state) => ({
                                         ...base,
                                         backgroundColor: state.isFocused
@@ -221,22 +229,19 @@ function RequestOrder() {
                                             backgroundColor: "#f97316"
                                         }
                                     }),
-
                                     singleValue: (base) => ({
                                         ...base,
                                         color: "#fff",
                                     }),
-
                                     placeholder: (base) => ({
                                         ...base,
                                         color: "#fff",
-
                                     })
                                 }}
                                 onChange={(val) =>
                                     handleChange(i, "product", val)
                                 }
-                                value={productOptions.find(op => op.value === p.product)}
+                                value={p.product}
                             />
 
                             <input
@@ -248,10 +253,49 @@ function RequestOrder() {
                                 }
                                 className="w-1/2 p-2 placeholder:text-white border border-black/80 bg-black/30 rounded text-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
+
+                            <Select
+                                className="w-1/3"
+                                options={unitOptions}
+                                placeholder="Unit"
+                                styles={{
+                                    control: (base, state) => ({
+                                        ...base,
+                                        backgroundColor: "rgba(7, 7, 7, 0.11)",
+                                        borderColor: state.isFocused ? "#f97316" : "#000",
+                                        boxShadow: "none",
+                                        fontSize: "18px",
+                                    }),
+                                    menu: (base) => ({
+                                        ...base,
+                                        backgroundColor: "rgba(0, 0, 0, 0.66)",
+                                    }),
+                                    option: (base, state) => ({
+                                        ...base,
+                                        backgroundColor: state.isFocused
+                                            ? "rgba(247, 77, 9, 0.96)"
+                                            : "rgba(0, 0, 0, 0.66)",
+                                        color: "#fff",
+                                        cursor: "pointer",
+                                    }),
+                                    singleValue: (base) => ({
+                                        ...base,
+                                        color: "#fff",
+                                    }),
+                                    placeholder: (base) => ({
+                                        ...base,
+                                        color: "#fff",
+                                    }),
+                                }}
+                                onChange={(val) =>
+                                    handleChange(i, "unit", val.value)
+                                }
+                                value={unitOptions.find(op => op.value === p.unit)}
+                            />
+
                         </div>
                     ))}
 
-                    {/* ADD */}
                     <button
                         type="button"
                         onClick={handleAdd}
@@ -260,7 +304,6 @@ function RequestOrder() {
                         Add Product
                     </button>
 
-                    {/* SUBMIT */}
                     <button
                         type="submit"
                         disabled={loading}

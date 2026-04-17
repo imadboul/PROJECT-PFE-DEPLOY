@@ -16,6 +16,17 @@ export default function ContractsList() {
   const location = useLocation();
   const selectedclientID = location.state?.client_id || null;
   const { user } = useContext(AuthContext);
+  const handleApiErrors = (error) => {
+    const errors = error.response?.data.errors;
+
+    if (!errors) return;
+
+    Object.values(errors).forEach((messages) => {
+      messages.forEach((msg) => {
+        toast.error(msg);
+      });
+    });
+  };
 
   //  Validate
   const handleValidate = async (id) => {
@@ -26,11 +37,7 @@ export default function ContractsList() {
       setSelectedContract(null);
       fetchContracts();
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error validation";
-
-      toast.error(msg);
+      handleApiErrors(error);
     }
   };
 
@@ -43,11 +50,7 @@ export default function ContractsList() {
       setSelectedContract(null);
       fetchContracts();
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error rejection";
-
-      toast.error(msg);
+      handleApiErrors(error);
     }
   };
 
@@ -61,11 +64,7 @@ export default function ContractsList() {
       window.open(url, "_blank");
 
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error view";
-
-      toast.error(msg);
+      handleApiErrors(error);
     }
   };
 
@@ -81,11 +80,7 @@ export default function ContractsList() {
       setContracts(data);
 
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error fetching data";
-
-      toast.error(msg);
+      handleApiErrors(error);
     } finally {
       setLoading(false);
     }
@@ -137,22 +132,40 @@ export default function ContractsList() {
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-between items-center gap-4">
-          <button
-            onClick={changeStatus}
-            className="border border-white text-md  text-white px-3 py-2 rounded hover:bg-white/10 mb-4 cursor-pointer"
-          >
-            {showValidated ? "Show No Valide" : "Show Valide"}
-          </button>
+          {["admin","superAdmin"].includes(user?.role) && (
+          <div className="flex justify-between items-center">
+            
+            <button
+              className="text-white text-2xl font-bold cursor-pointer hover:text-orange-500"
+              onClick={() => window.history.back()}
+            >
+              <i className="fa-solid fa-arrow-left"></i>
+            </button>
+            <button
+              onClick={changeStatus}
+              className="border border-white text-white cursor-pointer px-4 py-2 rounded hover:bg-white/10"
+            >
+              {showValidated ? "Show Pending" : "Show Validated"}
+            </button>
+          </div>
+          )}
 
-          <NavLink
-            to="/RequestContract"
-            className="border border-white text-md  text-white px-3 py-2 rounded hover:bg-white/10 mb-4 cursor-pointer"
-          >
-            Request new contract
-          </NavLink>
-        </div>
-
+          {["client"].includes(user?.role) && (
+            <div className="flex justify-between items-center gap-4">
+            <button
+              onClick={changeStatus}
+              className="border border-white text-white cursor-pointer px-4 py-2 rounded hover:bg-white/10"
+            >
+              {showValidated ? "Show Pending" : "Show Validated"}
+            </button>
+            <NavLink
+              to="/RequestContract"
+              className="border border-white text-md  text-white px-3 py-2 rounded hover:bg-white/10 mb-4 cursor-pointer"
+            >
+              Request new contract
+            </NavLink>
+            </div>
+          )}
         {/* LIST */}
         {filteredContracts
           .map((c) => {
@@ -296,9 +309,9 @@ export default function ContractsList() {
 
               </div>
             </div>
-            </div>
-            </div>
-      )}
+          </div>
         </div>
-      );
+      )}
+    </div>
+  );
 }

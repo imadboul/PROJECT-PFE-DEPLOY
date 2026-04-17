@@ -13,6 +13,18 @@ function AddTypeProduct() {
     formState: { errors },
   } = useForm();
 
+  const handleApiErrors = (error) => {
+      const errors = error.response?.data.errors;
+  
+      if (!errors) return;
+  
+      Object.values(errors).forEach((messages) => {
+        messages.forEach((msg) => {
+          toast.error(msg);
+        });
+      });
+    };
+
   const onSubmit = async (data) => {
     try {
       setLoading(true);
@@ -29,12 +41,7 @@ function AddTypeProduct() {
       reset();
 
     } catch (error) {
-      const msg =
-        error.response?.data?.detail ||
-        JSON.stringify(error.response?.data) ||
-        "Error creating product type";
-
-      toast.error(msg);
+      handleApiErrors(error);
     } finally {
       setLoading(false);
     }
@@ -44,9 +51,18 @@ function AddTypeProduct() {
     <div className="min-h-screen flex items-center justify-center bg-transparent text-white">
       <div className="w-full max-w-lg bg-black/60 rounded-2xl shadow-lg p-6 border border-black/60">
 
-        <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
-          Add Product Type
-        </h2>
+        <div>
+          <button
+            className="placeholder-white text-2xl cursor-pointer font-bold hover:text-orange-500"
+            onClick={() => window.history.back()}
+          >
+            <i className="fa-solid fa-arrow-left"></i>
+          </button>
+
+          <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
+            Add Product Type
+          </h2>
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 

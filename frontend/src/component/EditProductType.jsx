@@ -16,7 +16,17 @@ function EditProductType() {
     reset,
     formState: { errors },
   } = useForm();
+  const handleApiErrors = (error) => {
+    const errors = error.response?.data.errors;
 
+    if (!errors) return;
+
+    Object.values(errors).forEach((messages) => {
+      messages.forEach((msg) => {
+        toast.error(msg);
+      });
+    });
+  };
   // Load data if editing
   useEffect(() => {
     if (!id) return;
@@ -24,7 +34,7 @@ function EditProductType() {
     const fetchData = async () => {
       try {
         const res = await getProductTypes();
-        const data = res.data.data.types 
+        const data = res.data.data.types
 
         const current = data.find((t) => t.id === Number(id));
 
@@ -36,12 +46,8 @@ function EditProductType() {
         setValue("name", current.name);
         setValue("description", current.description);
 
-      }catch (error) {
-        const msg =
-        error.response?.data?.error ||
-        "Error fatching data";
-
-      toast.error(msg);
+      } catch (error) {
+        handleApiErrors(error);
       }
     };
 
@@ -68,13 +74,9 @@ function EditProductType() {
 
       navigate("/AddProduct");
 
-    }catch (error) {
-        const msg =
-        error.response?.data?.error ||
-        "Error creating product type";
-
-      toast.error(msg);
-      }finally {
+    } catch (error) {
+      handleApiErrors(error);
+    } finally {
       setLoading(false);
     }
   };

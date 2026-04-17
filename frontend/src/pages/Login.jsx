@@ -23,23 +23,40 @@ export default function Login() {
     formState: { errors },
   } = useForm();
 
- async function onSubmit(data) {
-  setLoading(true);
+  const handleApiErrors = (error) => {
+      const errors = error.response?.data.errors;
+  
+      if (!errors) return;
+  
+      Object.values(errors).forEach((messages) => {
+        messages.forEach((msg) => {
+          toast.error(msg);
+        });
+      });
+    };
 
-  const result = await login(data.email, data.password);
+  async function onSubmit(data) {
+    try {
+      setLoading(true);
 
-  setLoading(false);
+      const result = await login(data.email, data.password);
 
-  if (result?.success) {
-    toast.success("Login successful");
-    navigate("/Home");
-  } else {
-    setAuthError(result?.error || "Login failed");
-    toast.error("Login failed");
+      if (result?.success) {
+        toast.success("Login successful");
+        navigate("/Home");
+      } else {
+        const apiErrors = result?.error;
+
+        setAuthError(apiErrors?.non_field_errors?.[0] || "Login failed");
+
+        handleApiErrors(apiErrors);
+      }
+    } catch (error) {
+      handleApiErrors(error);
+    } finally {
+      setLoading(false);
+    }
   }
-}
-
-
 
   return (
     <div className="min-h-screen relative flex items-center justify-center z-10 p-4">

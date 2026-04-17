@@ -28,12 +28,23 @@ function EditProduct() {
     formState: { errors },
   } = useForm();
 
-const unitOptions = [
-  { value: "KG", label: "Kilogram" },
-  { value: "L", label: "Liter" },
-  { value: "HL", label: "Hectoliter" },
-  { value: "TM", label: "Tonne" },
-];
+  const unitOptions = [
+    { value: "KG", label: "Kilogram" },
+    { value: "L", label: "Liter" },
+    { value: "HL", label: "Hectoliter" },
+    { value: "TM", label: "Tonne" },
+  ];
+  const handleApiErrors = (error) => {
+    const errors = error.response?.data.errors;
+
+    if (!errors) return;
+
+    Object.values(errors).forEach((messages) => {
+      messages.forEach((msg) => {
+        toast.error(msg);
+      });
+    });
+  };
 
   useEffect(() => {
     const fetchTypes = async () => {
@@ -42,11 +53,7 @@ const unitOptions = [
         const data = res.data.data.types;
         setProductTypes(data);
       } catch (error) {
-        const msg =
-        error.response?.data?.error ||
-        "Error loading product type";
-
-      toast.error(msg);
+        handleApiErrors(error);
       }
     };
 
@@ -67,7 +74,7 @@ const unitOptions = [
     const fetchData = async () => {
       try {
         const res = await getProducts();
-        const data = res.data.data.products ;
+        const data = res.data.data.products;
 
         const current = data.find((p) => p.id === Number(id));
 
@@ -88,11 +95,7 @@ const unitOptions = [
         setValue("unit", current.unit);
         setValue("productType", current.product_type);
       } catch (error) {
-        const msg =
-          error.response?.data?.error ||
-          "Error creating product";
-
-        toast.error(msg);
+        handleApiErrors(error);
       }
     };
 
@@ -109,11 +112,7 @@ const unitOptions = [
       const data = res.data.data.types;
       setProductTypes(Array.isArray(data) ? data : []);
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error deleting product";
-
-      toast.error(msg);
+      handleApiErrors(error);
     }
   };
 
@@ -126,7 +125,7 @@ const unitOptions = [
         description: data.description,
         unit_price: Number(data.unitPrice),
         unit: data.unit,
-        density: Number(data.density||0),
+        density: Number(data.density || 0),
         product_type: Number(data.productType),
       };
 
@@ -141,11 +140,7 @@ const unitOptions = [
 
       navigate("/Product");
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error deleting product";
-
-      toast.error(msg);
+      handleApiErrors(error);
     } finally {
       setLoading(false);
     }

@@ -17,6 +17,18 @@ export default function OrderDetails() {
   const [selectedBill, setSelectedBill] = useState(null);
   const { user } = useContext(AuthContext);
 
+  const handleApiErrors = (error) => {
+      const errors = error.response?.data.errors;
+  
+      if (!errors) return;
+  
+      Object.values(errors).forEach((messages) => {
+        messages.forEach((msg) => {
+          toast.error(msg);
+        });
+      });
+    };
+
 
   const fetchOrder = async () => {
     try {
@@ -27,7 +39,7 @@ export default function OrderDetails() {
 
       setOrder(data);
     } catch (error) {
-      toast.error("Error fetching order");
+      handleApiErrors(error);
     } finally {
       setLoading(false);
     }
@@ -43,8 +55,8 @@ export default function OrderDetails() {
       await fetchNotifications();
       toast.success("Order validated");
       fetchOrder();
-    } catch {
-      toast.error("Error validation");
+    } catch (error) {
+      handleApiErrors(error);
     }
   };
 
@@ -54,7 +66,8 @@ export default function OrderDetails() {
       await fetchNotifications();
       toast.success("Order rejected");
       fetchOrder();
-    } catch {
+    } catch (error) {
+      handleApiErrors(error);
       toast.error("Error rejection");
     }
   };

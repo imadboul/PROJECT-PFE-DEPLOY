@@ -8,6 +8,17 @@ export default function ContractClient() {
     const [contract, setContract] = useState([]);
     const navigate = useNavigate();
     const location = useLocation();
+    const handleApiErrors = (error) => {
+      const errors = error.response?.data.errors;
+  
+      if (!errors) return;
+  
+      Object.values(errors).forEach((messages) => {
+        messages.forEach((msg) => {
+          toast.error(msg);
+        });
+      });
+    };
 
 
     useEffect(() => {
@@ -16,11 +27,7 @@ export default function ContractClient() {
                 const resC = await getContractClient();
                 setContract(resC.data.data.results || []);
             } catch (error) {
-                const msg =
-                    error.response?.data?.errors ||
-                    "Error fatching data";
-
-                toast.error(msg);
+                handleApiErrors(error);
             }
         };
 

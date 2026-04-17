@@ -17,6 +17,17 @@ function RequestContract() {
     { value: "HL", label: "Hectoliter" },
     { value: "TM", label: "Tonne" },
   ];
+  const handleApiErrors = (error) => {
+      const errors = error.response?.data.errors;
+  
+      if (!errors) return;
+  
+      Object.values(errors).forEach((messages) => {
+        messages.forEach((msg) => {
+          toast.error(msg);
+        });
+      });
+    };
 
   const options = productTypes.map(type => ({
     value: type.id,
@@ -38,11 +49,7 @@ function RequestContract() {
         const data = res.data.data.types;
         setProductTypes(Array.isArray(data) ? data : []);
       } catch (error) {
-        const msg =
-          error.response?.data?.error ||
-          "Error fatching product type";
-
-        toast.error(msg);
+        handleApiErrors(error);
       }
     };
 
@@ -78,11 +85,7 @@ function RequestContract() {
       navigate("/Contracts");
 
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error creating contract";
-
-      toast.error(msg);
+      handleApiErrors(error);
     }
     finally {
       setLoading(false);

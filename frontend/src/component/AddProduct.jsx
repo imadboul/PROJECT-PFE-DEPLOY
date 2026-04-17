@@ -9,12 +9,12 @@ function AddProduct() {
   const [productTypes, setProductTypes] = useState([]);
   const [loading, setLoading] = useState(false);
 
-const unitOptions = [
-  { value: "KG", label: "Kilogram" },
-  { value: "L", label: "Liter" },
-  { value: "HL", label: "Hectoliter" },
-  { value: "TM", label: "Tonne" },
-];
+  const unitOptions = [
+    { value: "KG", label: "Kilogram" },
+    { value: "L", label: "Liter" },
+    { value: "HL", label: "Hectoliter" },
+    { value: "TM", label: "Tonne" },
+  ];
   const {
     register,
     handleSubmit,
@@ -27,6 +27,18 @@ const unitOptions = [
     value: type.id,
     label: type.name,
   }));
+  const handleApiErrors = (error) => {
+    const errors = error.response?.data.errors;
+
+    if (!errors) return;
+
+    Object.values(errors).forEach((messages) => {
+      messages.forEach((msg) => {
+        toast.error(msg);
+      });
+    });
+  };
+
 
 
   useEffect(() => {
@@ -36,11 +48,7 @@ const unitOptions = [
         const data = res.data.data.types || res.data;
         setProductTypes(Array.isArray(data) ? data : []);
       } catch (error) {
-        const msg =
-          error.response?.data?.error ||
-          "Error creating product";
-
-        toast.error(msg);
+        handleApiErrors(error);
       }
     };
 
@@ -67,12 +75,8 @@ const unitOptions = [
       reset();
 
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error creating product";
-        console.log(error.response?.data);
-
-      toast.error(msg);
+      handleApiErrors(error);
+    
     } finally {
       setLoading(false);
     }

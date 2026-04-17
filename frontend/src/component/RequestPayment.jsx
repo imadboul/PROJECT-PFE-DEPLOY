@@ -18,6 +18,18 @@ function RequestPayment() {
     formState: { errors }
   } = useForm();
 
+  const handleApiErrors = (error) => {
+      const errors = error.response?.data.errors;
+  
+      if (!errors) return;
+  
+      Object.values(errors).forEach((messages) => {
+        messages.forEach((msg) => {
+          toast.error(msg);
+        });
+      });
+    };
+
   useEffect(() => {
     const fetchProductTypes = async () => {
       try {
@@ -25,11 +37,7 @@ function RequestPayment() {
         const data = res.data.data.types
         setProductTypes(Array.isArray(data) ? data : [])
       } catch (error) {
-        const msg =
-          error.response?.data?.error ||
-          "Error fatching product type";
-
-        toast.error(msg);
+        handleApiErrors(error);
       }
     }
     fetchProductTypes()
@@ -58,11 +66,7 @@ function RequestPayment() {
       navigate("/Balance")
 
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error creating payment";
-
-      toast.error(msg);
+      handleApiErrors(error);
     } finally {
       setLoading(false)
     }

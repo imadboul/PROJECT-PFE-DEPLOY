@@ -16,6 +16,17 @@ export default function Sign() {
     watch,
     formState: { errors },
   } = useForm();
+  const handleApiErrors = (error) => {
+      const errors = error.response?.data.errors;
+  
+      if (!errors) return;
+  
+      Object.values(errors).forEach((messages) => {
+        messages.forEach((msg) => {
+          toast.error(msg);
+        });
+      });
+    };
 
   const password = watch("password");
 
@@ -33,11 +44,7 @@ export default function Sign() {
         toast.error("Sign up failed");
       }
     } catch (error) {
-      const msg =
-        error.response?.data?.message ||
-        "Error Sign up";
-
-      toast.error(msg);
+      handleApiErrors(error);
     } finally {
       setLoading(false);
     }

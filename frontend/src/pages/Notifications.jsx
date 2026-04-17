@@ -10,6 +10,17 @@ export default function NotificationsPage() {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const handleApiErrors = (error) => {
+      const errors = error.response?.data.errors;
+  
+      if (!errors) return;
+  
+      Object.values(errors).forEach((messages) => {
+        messages.forEach((msg) => {
+          toast.error(msg);
+        });
+      });
+    };
 
   useEffect(() => {
     fetchNotifications();
@@ -57,11 +68,7 @@ export default function NotificationsPage() {
         }
       }
     }catch (error) {
-        const msg =
-        error.response?.data?.error ||
-        "Error view ";
-
-      toast.error(msg);
+        handleApiErrors(error);
       }
   };
 

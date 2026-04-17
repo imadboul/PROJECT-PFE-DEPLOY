@@ -11,8 +11,20 @@ export default function OrderList() {
   const [showValidated, setShowValidated] = useState(true);
   const location = useLocation();
   const selectedclientID = location.state?.client_id || null;
-    const { user } = useContext(AuthContext);
-  
+  const { user } = useContext(AuthContext);
+
+  const handleApiErrors = (error) => {
+    const errors = error.response?.data;
+
+    if (!errors) return;
+
+    Object.values(errors).forEach((messages) => {
+      messages.forEach((msg) => {
+        toast.error(msg);
+      });
+    });
+  };
+
 
   const fetchOrders = async () => {
     try {
@@ -23,11 +35,7 @@ export default function OrderList() {
 
       setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error fatching data";
-
-      toast.error(msg);
+      handleApiErrors(error);
     } finally {
       setLoading(false);
     }
@@ -35,8 +43,8 @@ export default function OrderList() {
 
 
   useEffect(() => {
-  fetchOrders();
-}, [selectedclientID]);
+    fetchOrders();
+  }, [selectedclientID]);
 
   const handleValidate = async (id) => {
     try {
@@ -45,7 +53,7 @@ export default function OrderList() {
       setSelectedOrder(null);
       fetchOrders();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error validation");
+      handleApiErrors(error);
     }
   };
 
@@ -56,7 +64,7 @@ export default function OrderList() {
       setSelectedOrder(null);
       fetchOrders();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error rejection");
+      handleApiErrors(error);
     }
   };
 
@@ -67,23 +75,23 @@ export default function OrderList() {
       const url = URL.createObjectURL(file);
       window.open(url, "_blank");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error view");
+      handleApiErrors(error);
     }
   };
 
   const filteredOrder = orders.filter((o) => {
-  const state = o.state?.toLowerCase();
+    const state = o.state?.toLowerCase();
 
-  const matchState = showValidated
-    ? state === "validated"
-    : state !== "validated";
+    const matchState = showValidated
+      ? state === "validated"
+      : state !== "validated";
 
-  const matchClient = selectedclientID
-  ? String(o.client_id) === String(selectedclientID)
-  : true;
+    const matchClient = selectedclientID
+      ? String(o.client_id) === String(selectedclientID)
+      : true;
 
-  return matchState && matchClient;
-});
+    return matchState && matchClient;
+  });
 
 
   const changeStatus = () => {
@@ -100,21 +108,42 @@ export default function OrderList() {
           <h1 className="text-white text-xl font-bold">Orders</h1>
         </div>
 
-        <div className="flex justify-between items-center gap-4">
-          <button
-            onClick={changeStatus}
-            className="border border-white cursor-pointer text-white px-3 py-2 rounded hover:bg-white/10 mb-4"
-          >
-            {showValidated ? "Show No Valide" : "Show Valide"}
-          </button>
+        {["admin", "superAdmin"].includes(user?.role) && (
+          <div className="flex justify-between items-center">
 
-          <NavLink
-            to="/RequestOrder"
-            className="border border-white cursor-pointer text-white px-3 py-2 rounded hover:bg-white/10 mb-4"
-          >
-            Request Order
-          </NavLink>
-        </div>
+            <button
+              className="text-white text-2xl font-bold cursor-pointer hover:text-orange-500"
+              onClick={() => window.history.back()}
+            >
+              <i className="fa-solid fa-arrow-left"></i>
+            </button>
+            <button
+              onClick={changeStatus}
+              className="border border-white text-white cursor-pointer px-4 py-2 rounded hover:bg-white/10"
+            >
+              {showValidated ? "Show Pending" : "Show Validated"}
+            </button>
+          </div>
+        )}
+
+        {["client"].includes(user?.role) && (
+
+          <div className="flex justify-between items-center gap-4">
+            <button
+              onClick={changeStatus}
+              className="border border-white text-white cursor-pointer px-4 py-2 rounded hover:bg-white/10"
+            >
+              {showValidated ? "Show Pending" : "Show Validated"}
+            </button>
+            <NavLink
+              to="/RequestOrder"
+              className="border border-white cursor-pointer text-white px-3 py-2 rounded hover:bg-white/10 mb-4"
+            >
+              Request Order
+            </NavLink>
+          </div>
+        )}
+
 
         {filteredOrder
           .map((o) => (
@@ -179,11 +208,11 @@ export default function OrderList() {
                 <div className="flex gap-4">
                   {selectedOrder.state === "pending" && (
                     <>
-                     {["admin", "superAdmin"].includes(user?.role) && (
+                      {["admin", "superAdmin"].includes(user?.role) && (
                         <>
-                      <button onClick={() => handleValidate(selectedOrder.id)} className="bg-green-700 w-7 h-7 rounded-full">✔</button>
-                      <button onClick={() => handleReject(selectedOrder.id)} className="bg-red-700 w-7 h-7 rounded-full">✖</button>
-                      </>
+                          <button onClick={() => handleValidate(selectedOrder.id)} className="bg-green-700 w-7 h-7 rounded-full">✔</button>
+                          <button onClick={() => handleReject(selectedOrder.id)} className="bg-red-700 w-7 h-7 rounded-full">✖</button>
+                        </>
                       )}
                     </>
                   )}
