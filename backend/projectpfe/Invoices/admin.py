@@ -6,4 +6,4 @@ class InvoiceAdmin(admin.ModelAdmin):
     
 @admin.register(InvoiceLine)
 class InvoiceLineAllInfoAdmin(admin.ModelAdmin):
-    list_display=['id','invoice','product_name','tax_name','qte','unit','tax_price']    
+    list_display=['id','invoice','product','tax_name','qte','unit','tax_price']    

@@ -144,9 +144,9 @@ def tax_price(taxActiv,orderProduct,Tva,invoicesLins):
             total_tax+=tax_price 
                
             if(type=='mains'):
-                 additional_taxPrice_qte(orderProduct.order.invoice,invoicesLins,orderProduct.product.name,orderProduct.qte*-1,orderProduct.unit,tax_price*-1,tax['name'])
+                 additional_taxPrice_qte(orderProduct.order.invoice,invoicesLins,orderProduct.product,orderProduct.qte*-1,orderProduct.unit,tax_price*-1,tax['name'])
             else:
-                  additional_taxPrice_qte(orderProduct.order.invoice,invoicesLins,orderProduct.product.name,orderProduct.qte,orderProduct.unit,tax_price,tax['name'])        
+                  additional_taxPrice_qte(orderProduct.order.invoice,invoicesLins,orderProduct.product,orderProduct.qte,orderProduct.unit,tax_price,tax['name'])        
                     
        
         qte_unit=convert_unit(orderProduct.qte,orderProduct.product.density,orderProduct.unit,orderProduct.product.unit) 
@@ -167,11 +167,11 @@ def tax_price(taxActiv,orderProduct,Tva,invoicesLins):
   
      
 
-def additional_taxPrice_qte(invoice,invoicesLines,product_name,qte,unit,tax_price,tax_name):
+def additional_taxPrice_qte(invoice,invoicesLines,product,qte,unit,tax_price,tax_name):
     
     invoicesLines.append({
         "invoice":invoice,
-        "product_name":product_name,
+        "product":product,
         "qte":qte,
         "unit":unit,
         "tax_price":tax_price,
@@ -304,19 +304,22 @@ def update_or_save_invoiceLins(invoicesLins, invoice_map ):
         lines = invoice_map.get(inv_id.id, [])
 
         found = None
-
+        
         for line in lines:
-            if line.tax_name == item["tax_name"] and line.product_name == item["product_name"]:
+            
+            if line.tax_name == item["tax_name"] and line.product.name == item["product"].name:
+                
                 found = line
                 break
-
+        
         if found:
             grouped_update[found.id]["qte"] += item["qte"]
             grouped_update[found.id]["tax_price"] += item["tax_price"]
 
         else:
-            key = (inv_id, item["product_name"], item["tax_name"])
-
+            
+            key = (inv_id, item["product"], item["tax_name"])
+            
             grouped_save[key]["qte"] += item["qte"]
             grouped_save[key]["tax_price"] += item["tax_price"]
             grouped_save[key]["unit"] = item["unit"]
@@ -343,18 +346,15 @@ def update_or_save_invoiceLins(invoicesLins, invoice_map ):
             output_field=DecimalField()
         )
     
-        InvoiceLine.objects.filter(id__in=to_update_ids).update(
-            qte=qte_case,
-            tax_price=tax_price_case
-        )
+        InvoiceLine.objects.filter(id__in=to_update_ids).update( qte=qte_case , tax_price=tax_price_case )
      
      if grouped_save:
          to_save=[]
-         for (invoice, product_name, tax_name), data in grouped_save.items():
+         for (invoice, product, tax_name), data in grouped_save.items():
             print(invoice)
             to_save.append(InvoiceLine(
                 invoice=invoice,
-                product_name=product_name,
+                product=product,
                 tax_name=tax_name,
                 qte=data["qte"],
                 tax_price=data["tax_price"],
