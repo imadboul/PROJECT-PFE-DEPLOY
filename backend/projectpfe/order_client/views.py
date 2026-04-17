@@ -7,7 +7,7 @@ from .models import *
 from .serializers import *
 from rest_framework import generics
 from django.db import transaction
-from rest_framework.decorators import api_view
+
 from catalog.models import Contract,Client
 from django.utils.decorators import method_decorator
 from user.wraps import *
@@ -221,7 +221,6 @@ def orderclientpdf(request, id):
     try:
         order = Orderclient.objects.get(id=id)
 
-        # 🔒 client can only access his own order
         if request.role == 'client' and order.client_id != request.user_id: # type: ignore
             return error_response(
                 message="Order does not exist or you do not have permission", status_code=400

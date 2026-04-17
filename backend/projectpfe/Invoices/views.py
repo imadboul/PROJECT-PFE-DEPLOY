@@ -6,7 +6,10 @@ from rest_framework.response import Response
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 from .filters import*
+from rest_framework.decorators import api_view
 from Tax_Service.serilazers import get_now
+from user.wraps import *
+from .invoicepdf import generate_pdf
 
 class ValidateInvoice(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
@@ -51,3 +54,27 @@ class InvoiceList(generics.ListAPIView):
             self.serializer_class=InvoiceFilterSerializerTow
             self.filterset_class=InvoiceFilter 
         return super().get(request, *args, **kwargs)
+   
+@api_view(['GET'])
+def invoicepdf(request, id):
+     try:
+     
+     
+
+          try:
+               invoice = Invoice.objects.get(id=id)
+
+               ##if request.role == 'client' and invoice.contract.client_id != request.user_id:  # type: ignore
+                   ## return error_response(
+                     ##    message="Order does not exist or you do not have permission", status_code=400
+                    ##)
+
+               return generate_pdf(id)
+
+          except Invoice.DoesNotExist:
+               return error_response(
+                    message="invoice does not exist or you do not have permission" ,status_code=400
+               )
+     except Exception as e:
+          
+          return error_response(message="Unexpected error",errors=str(e),status_code=400)
