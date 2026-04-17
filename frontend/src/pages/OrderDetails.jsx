@@ -164,7 +164,7 @@ export default function OrderDetails() {
               {selectedBill.orderclient_Orderproductclient_items?.length > 0
                 ? selectedBill.orderclient_Orderproductclient_items.map((p, i) => (
                   <div key={i} className="text-xs">
-                    Product: {p.product} | Qte: {p.qte}{p.unit}
+                    Product: {p.product} | Qte: {p.qte} {p.unit}
                   </div>
                 ))
                 : "No products"}
