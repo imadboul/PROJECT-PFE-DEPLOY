@@ -163,6 +163,7 @@ class OrderSerializer(serializers.ModelSerializer):
                  orderProduct=OrderProductclient(
                  product=order_item['product'],
                  qte=order_item['qte'],
+                 unit= order_item['unit'],
                  order=order,
                  ) 
                  orderProduct.save()
