@@ -8,7 +8,7 @@ class InvoiceFilterSerializerTow(serializers.ModelSerializer):
     invoice_InvoiceLine_items=InvoiceLineFilterSerializer(many=True)
     class Meta:
         model=Invoice
-        fields=['id','contract','type','states','date_de_facteration','validated_by','HT','TVA','TTC']
+        fields=['invoice_InvoiceLine_items','id','contract','type','states','date_de_facteration','validated_by','HT','TVA','TTC']
 
 class InvoiceFilterSerializerOne(serializers.ModelSerializer):
     class Meta:
@@ -19,6 +19,5 @@ class InvoiceFilterSerializerOne(serializers.ModelSerializer):
 class vlaidatedInvoiceSerializerOne(serializers.Serializer):
     ids=serializers.ListField(child=serializers.IntegerField(),allow_empty=False) 
 
-class vlaidatedInvoiceSerializerTow(serializers.Serializer):
-    product_type=serializers.ListField(child=serializers.CharField(),allow_empty=False)
+
     

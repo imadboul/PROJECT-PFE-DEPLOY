@@ -62,6 +62,7 @@ class OrderValidateView(generics.UpdateAPIView):
  
 #@method_decorator(jwt_must, name='dispatch')   
 class RectificativeOrderView(generics.CreateAPIView):
+    
     queryset=Order.objects.all()
     serializer_class=RectificativeOrderSerializer
     def create(self, request, *args, **kwargs):
@@ -69,6 +70,7 @@ class RectificativeOrderView(generics.CreateAPIView):
             serializer=self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
+            
             return success_response(data=None,message='Order Rectificative successfully',status_code=201)
 
 #@method_decorator(jwt_must, name='dispatch')
@@ -76,14 +78,17 @@ class OrderListView(generics.ListAPIView):
    
    def get(self,request,*args,**kwargs):
        
-           type=int(kwargs['type'])
-           if type==1:
-              self.queryset=OrderProduct.objects.select_related('order','product').all().distinct()
-              self.serializer_class=OrderProductFilterSerializerOne
-              self.filterset_class=FilterOrderProduct    
-           elif type == 2:
-                     filtered = FilterOrder(   request.GET, queryset=Order.objects.select_related('client', 'contract__product_type')).qs 
-                                     
+           invoice_type=int(kwargs['invoice_type'])
+           
+           if invoice_type==1:
+               
+              queryset=OrderProduct.objects.select_related('order','product').all().distinct()
+              serializer_class=OrderProductFilterSerializerOne
+              filterset_class=FilterOrderProduct
+                  
+           elif invoice_type == 2:
+               
+                     filtered = FilterOrder(   request.GET, queryset=Order.objects.select_related('client', 'contract__product_type')).qs                 
                      seen = set()
                      result = []
                  
@@ -93,25 +98,29 @@ class OrderListView(generics.ListAPIView):
                          if key not in seen:
                              seen.add(key)
                              result.append(order)
-                 
-                     
+         
                      paginator = MyPagination()
                      page = paginator.paginate_queryset(result, request)
                      serializer =OrderFilterSerializerTow(page, many=True)
                      response=paginated_response(paginator=paginator,serializer=serializer)
+                     
                      return success_response(data=response , message="filter successfully",status_code=201)  
-           elif type==3:
-               self.queryset=Order.objects.select_related('client','contract__product_type').prefetch_related('order_orderProduct_items__product').all().distinct()
-               self.serializer_class=OrderFilterSerializerOne
-               self.filterset_class=FilterOrder   
-           elif type==4:
-               self.queryset=Client.objects.prefetch_related('client_contracts__contract_order_items','client_contracts__product_type').all().distinct()
-               self.serializer_class=ClientFilterSerializerOne
-               self.filterset_class=FilterOrderAll
+           elif invoice_type==3:
+               
+               queryset=Order.objects.select_related('client','contract__product_type').prefetch_related('order_orderProduct_items__product').all().distinct()
+               serializer_class=OrderFilterSerializerOne
+               filterset_class=FilterOrder   
+               
+           elif invoice_type==4:
+               
+               queryset=Client.objects.prefetch_related('client_contracts__contract_order_items','client_contracts__product_type').all().distinct()
+               serializer_class=ClientFilterSerializerOne
+               filterset_class=FilterOrderAll
            
+           queryset = filterset_class(request.GET, queryset=queryset).qs
            paginator = MyPagination()
-           page = paginator.paginate_queryset(self.queryset, request)
-           serializer = self.serializer_class(page, many=True)
+           page = paginator.paginate_queryset(queryset, request)
+           serializer = serializer_class(page, many=True)
            response=paginated_response(paginator=paginator,serializer=serializer)
            
            return  success_response(data=response , message="filter  successfully",status_code=201) 

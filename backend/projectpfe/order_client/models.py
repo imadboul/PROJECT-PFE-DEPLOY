@@ -3,8 +3,10 @@ from catalog.models import Contract,Client,Product
 from decimal import Decimal
 from catalog.models import ProductUnit
 class States(models.TextChoices):
-    
+       
        PENDING='pending','Pending'
+       ACCEPTED='accepted','Accepted'
+       LOADIN='loadin','Loadin'
        VALID='validated','Validated'
        REJECT='rejected','Rejected'    
 
