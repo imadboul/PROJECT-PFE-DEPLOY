@@ -125,13 +125,8 @@ class OrderSerializer(serializers.ModelSerializer):
                     test=True
             if not test:
                 raise serializers.ValidationError(f"c'est product {item_order['product'].name}n'appratien pas a order client product ")
-<<<<<<< HEAD
-        order_items=data['order_orderProduct_items']
-
-=======
         
         
->>>>>>> 3adbedbce1d203858d1cc7e56ba94058fa355bba
         
         return super().validate(data)   
     

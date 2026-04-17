@@ -119,15 +119,14 @@ export default function ChargmentOrder() {
       const payload = {
         contract: selectedContract.id,
         client_order: selectedOrder.id,
-        client: selectedOrder.client,
+        client: selectedOrder.client_id, 
         order_orderProduct_items: products.map(p => ({
           product: p.product,
           qte: Number(p.qte),
           unit: p.unit
         }))
+        
       };
-
-      console.log("PAYLOAD:", payload);
 
       await chargmentOrderAdmin(payload);
 
