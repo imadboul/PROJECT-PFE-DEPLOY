@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { useParams, useNavigate } from "react-router-dom";
 import { getProductTypes, updateProductType, createProductType } from "../context/services/productService";
+import { handleApiErrors } from "../utils/errorHandler";
 
 function EditProductType() {
   const { id } = useParams();
@@ -16,17 +17,7 @@ function EditProductType() {
     reset,
     formState: { errors },
   } = useForm();
-  const handleApiErrors = (error) => {
-    const errors = error.response?.data.errors;
 
-    if (!errors) return;
-
-    Object.values(errors).forEach((messages) => {
-      messages.forEach((msg) => {
-        toast.error(msg);
-      });
-    });
-  };
   // Load data if editing
   useEffect(() => {
     if (!id) return;

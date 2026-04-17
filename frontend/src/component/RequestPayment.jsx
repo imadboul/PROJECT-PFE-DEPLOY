@@ -5,6 +5,8 @@ import { createPayment } from '../context/services/BalanceService'
 import toast from 'react-hot-toast'
 import { getProductTypes } from '../context/services/productService'
 import Select from "react-select";
+import { handleApiErrors } from "../utils/errorHandler";
+
 
 function RequestPayment() {
   const [productTypes, setProductTypes] = useState([]);
@@ -18,17 +20,6 @@ function RequestPayment() {
     formState: { errors }
   } = useForm();
 
-  const handleApiErrors = (error) => {
-      const errors = error.response?.data.errors;
-  
-      if (!errors) return;
-  
-      Object.values(errors).forEach((messages) => {
-        messages.forEach((msg) => {
-          toast.error(msg);
-        });
-      });
-    };
 
   useEffect(() => {
     const fetchProductTypes = async () => {

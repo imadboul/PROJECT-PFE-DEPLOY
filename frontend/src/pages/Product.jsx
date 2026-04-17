@@ -2,21 +2,11 @@ import { useEffect, useState } from "react";
 import { getProducts, deleteProduct } from "../context/services/productService";
 import { NavLink } from "react-router-dom";
 import toast from "react-hot-toast";
+import { handleApiErrors } from "../utils/errorHandler";
 
 export default function ProductsList() {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const handleApiErrors = (error) => {
-    const errors = error.response?.data.errors;
-
-    if (!errors) return;
-
-    Object.values(errors).forEach((messages) => {
-      messages.forEach((msg) => {
-        toast.error(msg);
-      });
-    });
-  };
 
   useEffect(() => {
     fetchProducts();

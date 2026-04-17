@@ -8,6 +8,8 @@ import {
 import toast from "react-hot-toast";
 import { useNotifications } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
+import { handleApiErrors } from "../utils/errorHandler";
+
 
 export default function PaymentDetails() {
   const [payment, setPayment] = useState(null);
@@ -16,17 +18,7 @@ export default function PaymentDetails() {
   const { fetchNotifications } = useNotifications();
   const { user } = useContext(AuthContext);
   const { id } = useParams();
-  const handleApiErrors = (error) => {
-    const errors = error.response?.data.errors;
 
-    if (!errors) return;
-
-    Object.values(errors).forEach((messages) => {
-      messages.forEach((msg) => {
-        toast.error(msg);
-      });
-    });
-  };
 
   // Fetch data
   const fetchPayment = async () => {

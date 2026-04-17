@@ -115,13 +115,8 @@ class OrderSerializer(serializers.ModelSerializer):
         if not order_client:
             raise serializers.ValidationError("c'est order client n'exists pas ")
         
-<<<<<<< HEAD
-        for item_client in order_client.orderclient_Orderproductclient_items.all():
-            print('bouklila')
-=======
         for item_client in order_client.clientOrder_order_items.all():
             
->>>>>>> 2aff65abdc1b09c2a4b10b55bb8944e18496f5bc
             test=False
             for item_order in data['order_orderProduct_items']:
                 

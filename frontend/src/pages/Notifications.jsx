@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
 import { markNotificationAsViewed } from "../context/services/notificationService";
 import { useNotifications } from "../context/NotificationContext";
+import { handleApiErrors } from "../utils/handleApiErrors";
 
 export default function NotificationsPage() {
   const { notifications, setNotifications, fetchNotifications } = useNotifications();
@@ -10,17 +11,6 @@ export default function NotificationsPage() {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const handleApiErrors = (error) => {
-      const errors = error.response?.data.errors;
-  
-      if (!errors) return;
-  
-      Object.values(errors).forEach((messages) => {
-        messages.forEach((msg) => {
-          toast.error(msg);
-        });
-      });
-    };
 
   useEffect(() => {
     fetchNotifications();

@@ -2,23 +2,12 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { getBill } from "../context/services/orderService";
+import { handleApiErrors } from "../utils/errorHandler";
+
 export default function BillsList() {
   const [bill, setBill] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
-
-  const handleApiErrors = (error) => {
-      const errors = error.response?.data.errors;
-  
-      if (!errors) return;
-  
-      Object.values(errors).forEach((messages) => {
-        messages.forEach((msg) => {
-          toast.error(msg);
-        });
-      });
-    };
-
 
   useEffect(() => {
     const fetchData = async () => {

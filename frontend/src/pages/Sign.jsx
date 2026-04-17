@@ -16,18 +16,6 @@ export default function Sign() {
     watch,
     formState: { errors },
   } = useForm();
-  const handleApiErrors = (error) => {
-      const errors = error.response?.data.errors;
-  
-      if (!errors) return;
-  
-      Object.values(errors).forEach((messages) => {
-        messages.forEach((msg) => {
-          toast.error(msg);
-        });
-      });
-    };
-
   const password = watch("password");
 
   async function onSubmit(data) {

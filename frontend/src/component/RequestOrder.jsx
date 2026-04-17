@@ -7,6 +7,8 @@ import Select from "react-select";
 import { createOrder } from "../context/services/orderService";
 import { getContracts } from "../context/services/contractService";
 import { getProducts } from "../context/services/productService";
+import { handleApiErrors } from "../utils/errorHandler";
+
 
 function RequestOrder() {
     const [contracts, setContracts] = useState([]);
@@ -26,17 +28,6 @@ function RequestOrder() {
         { value: "HL", label: "Hectoliter" },
         { value: "TM", label: "Tonne" },
     ];
-    const handleApiErrors = (error) => {
-        const errors = error.response?.data.errors;
-
-        if (!errors) return;
-
-        Object.values(errors).forEach((messages) => {
-            messages.forEach((msg) => {
-                toast.error(msg);
-            });
-        });
-    };
 
     useEffect(() => {
         const fetchData = async () => {

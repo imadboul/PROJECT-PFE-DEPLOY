@@ -10,6 +10,8 @@ import { FaXTwitter } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import { handleApiErrors } from "../utils/errorHandler";
+
 
 export default function Login() {
   const { login, user } = useContext(AuthContext);
@@ -23,17 +25,6 @@ export default function Login() {
     formState: { errors },
   } = useForm();
 
-  const handleApiErrors = (error) => {
-      const errors = error.response?.data.errors;
-  
-      if (!errors) return;
-  
-      Object.values(errors).forEach((messages) => {
-        messages.forEach((msg) => {
-          toast.error(msg);
-        });
-      });
-    };
 
   async function onSubmit(data) {
     try {

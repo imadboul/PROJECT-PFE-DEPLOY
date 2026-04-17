@@ -5,6 +5,8 @@ import { createContract } from "../context/services/contractService";
 import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import Select from "react-select";
+import { handleApiErrors } from "../utils/errorHandler";
+
 
 function RequestContract() {
   const [productTypes, setProductTypes] = useState([]);
@@ -17,17 +19,7 @@ function RequestContract() {
     { value: "HL", label: "Hectoliter" },
     { value: "TM", label: "Tonne" },
   ];
-  const handleApiErrors = (error) => {
-      const errors = error.response?.data.errors;
-  
-      if (!errors) return;
-  
-      Object.values(errors).forEach((messages) => {
-        messages.forEach((msg) => {
-          toast.error(msg);
-        });
-      });
-    };
+
 
   const options = productTypes.map(type => ({
     value: type.id,

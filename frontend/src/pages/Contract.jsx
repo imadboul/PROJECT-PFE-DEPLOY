@@ -4,6 +4,8 @@ import toast from "react-hot-toast";
 import { NavLink, useLocation } from "react-router-dom";
 import { useNotifications } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
+import { handleApiErrors } from "../utils/errorHandler";
+
 
 
 
@@ -16,17 +18,6 @@ export default function ContractsList() {
   const location = useLocation();
   const selectedclientID = location.state?.client_id || null;
   const { user } = useContext(AuthContext);
-  const handleApiErrors = (error) => {
-    const errors = error.response?.data.errors;
-
-    if (!errors) return;
-
-    Object.values(errors).forEach((messages) => {
-      messages.forEach((msg) => {
-        toast.error(msg);
-      });
-    });
-  };
 
   //  Validate
   const handleValidate = async (id) => {

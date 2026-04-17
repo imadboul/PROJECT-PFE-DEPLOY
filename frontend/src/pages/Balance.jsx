@@ -3,24 +3,14 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { getBalances } from "../context/services/BalanceService";
 import toast from "react-hot-toast";
 import { AuthContext } from "../context/AuthContext";
+import { handleApiErrors } from "../utils/errorHandler";
+
 
 export default function BalanceList() {
   const [balances, setBalances] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
   const {user}= useContext(AuthContext);
-  const handleApiErrors = (error) => {
-    const errors = error.response?.data.errors;
-
-    if (!errors) return;
-
-    Object.values(errors).forEach((messages) => {
-      messages.forEach((msg) => {
-        toast.error(msg);
-      });
-    });
-  };
-
 
   useEffect(() => {
     const fetchData = async () => {

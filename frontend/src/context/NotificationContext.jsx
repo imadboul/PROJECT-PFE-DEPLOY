@@ -1,21 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getNotifications } from "./services/notificationService";
+import { handleApiErrors } from "../utils/handleApiErrors";
 
 const NotificationContext = createContext();
 
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
-  const handleApiErrors = (error) => {
-      const errors = error.response?.data.errors;
-  
-      if (!errors) return;
-  
-      Object.values(errors).forEach((messages) => {
-        messages.forEach((msg) => {
-          toast.error(msg);
-        });
-      });
-    };
 
   const fetchNotifications = async () => {
     try {

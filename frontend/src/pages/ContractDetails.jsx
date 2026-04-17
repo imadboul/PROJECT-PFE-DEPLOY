@@ -9,6 +9,8 @@ import {
 } from "../context/services/contractService";
 import { useNotifications } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
+import { handleApiErrors } from "../utils/errorHandler";
+
 
 export default function ContractDetails() {
   const { id } = useParams();
@@ -18,17 +20,6 @@ export default function ContractDetails() {
   const [contract, setContract] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedContract, setSelectedContract] = useState(null);
-  const handleApiErrors = (error) => {
-      const errors = error.response?.data.errors;
-  
-      if (!errors) return;
-  
-      Object.values(errors).forEach((messages) => {
-        messages.forEach((msg) => {
-          toast.error(msg);
-        });
-      });
-    };
 
 
   const viewContract = async (id) => {

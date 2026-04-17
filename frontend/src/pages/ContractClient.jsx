@@ -2,24 +2,14 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { getContractClient } from "../context/services/contractService";
+import { handleApiErrors } from "../utils/errorHandler";
+
 
 export default function ContractClient() {
 
     const [contract, setContract] = useState([]);
     const navigate = useNavigate();
     const location = useLocation();
-    const handleApiErrors = (error) => {
-      const errors = error.response?.data.errors;
-  
-      if (!errors) return;
-  
-      Object.values(errors).forEach((messages) => {
-        messages.forEach((msg) => {
-          toast.error(msg);
-        });
-      });
-    };
-
 
     useEffect(() => {
         const fetchData = async () => {

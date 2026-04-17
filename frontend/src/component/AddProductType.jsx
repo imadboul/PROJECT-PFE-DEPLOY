@@ -2,6 +2,8 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { createProductType } from "../context/services/productService";
+import { handleApiErrors } from "../utils/errorHandler";
+
 
 function AddTypeProduct() {
   const [loading, setLoading] = useState(false);
@@ -12,18 +14,6 @@ function AddTypeProduct() {
     reset,
     formState: { errors },
   } = useForm();
-
-  const handleApiErrors = (error) => {
-      const errors = error.response?.data.errors;
-  
-      if (!errors) return;
-  
-      Object.values(errors).forEach((messages) => {
-        messages.forEach((msg) => {
-          toast.error(msg);
-        });
-      });
-    };
 
   const onSubmit = async (data) => {
     try {

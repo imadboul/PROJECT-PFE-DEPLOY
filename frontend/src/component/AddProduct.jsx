@@ -4,6 +4,8 @@ import { getProductTypes, createProduct } from "../context/services/productServi
 import { Controller, useForm } from "react-hook-form";
 import Select from "react-select";
 import { NavLink } from "react-router-dom";
+import { handleApiErrors } from "../utils/errorHandler";
+
 
 function AddProduct() {
   const [productTypes, setProductTypes] = useState([]);
@@ -27,17 +29,6 @@ function AddProduct() {
     value: type.id,
     label: type.name,
   }));
-  const handleApiErrors = (error) => {
-    const errors = error.response?.data.errors;
-
-    if (!errors) return;
-
-    Object.values(errors).forEach((messages) => {
-      messages.forEach((msg) => {
-        toast.error(msg);
-      });
-    });
-  };
 
 
 

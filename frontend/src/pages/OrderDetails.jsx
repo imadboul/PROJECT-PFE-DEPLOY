@@ -8,6 +8,8 @@ import {
 } from "../context/services/orderService";
 import { useNotifications } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
+import { handleApiErrors } from "../utils/errorHandler";
+
 
 export default function OrderDetails() {
   const { id } = useParams();
@@ -16,18 +18,6 @@ export default function OrderDetails() {
   const [loading, setLoading] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
   const { user } = useContext(AuthContext);
-
-  const handleApiErrors = (error) => {
-      const errors = error.response?.data.errors;
-  
-      if (!errors) return;
-  
-      Object.values(errors).forEach((messages) => {
-        messages.forEach((msg) => {
-          toast.error(msg);
-        });
-      });
-    };
 
 
   const fetchOrder = async () => {

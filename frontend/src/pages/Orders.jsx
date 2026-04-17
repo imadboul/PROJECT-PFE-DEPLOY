@@ -4,6 +4,8 @@ import toast from "react-hot-toast";
 import { NavLink } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { handleApiErrors } from "../utils/errorHandler";
+
 export default function OrderList() {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -12,19 +14,6 @@ export default function OrderList() {
   const location = useLocation();
   const selectedclientID = location.state?.client_id || null;
   const { user } = useContext(AuthContext);
-
-  const handleApiErrors = (error) => {
-    const errors = error.response?.data;
-
-    if (!errors) return;
-
-    Object.values(errors).forEach((messages) => {
-      messages.forEach((msg) => {
-        toast.error(msg);
-      });
-    });
-  };
-
 
   const fetchOrders = async () => {
     try {

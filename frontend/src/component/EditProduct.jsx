@@ -10,6 +10,8 @@ import {
   deleteProductType,
 } from "../context/services/productService";
 import Select from "react-select";
+import { handleApiErrors } from "../utils/errorHandler";
+
 
 function EditProduct() {
   const { id } = useParams();
@@ -34,17 +36,7 @@ function EditProduct() {
     { value: "HL", label: "Hectoliter" },
     { value: "TM", label: "Tonne" },
   ];
-  const handleApiErrors = (error) => {
-    const errors = error.response?.data.errors;
-
-    if (!errors) return;
-
-    Object.values(errors).forEach((messages) => {
-      messages.forEach((msg) => {
-        toast.error(msg);
-      });
-    });
-  };
+  
 
   useEffect(() => {
     const fetchTypes = async () => {
