@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 import { getContractClient } from "../context/services/contractService";
+import { handleApiErrors} from "../utils/handleApiErrors"
+
 
 export default function ContractClient() {
 
@@ -9,18 +10,13 @@ export default function ContractClient() {
     const navigate = useNavigate();
     const location = useLocation();
 
-
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const resC = await getContractClient();
                 setContract(resC.data.data.results || []);
             } catch (error) {
-                const msg =
-                    error.response?.data?.errors ||
-                    "Error fatching data";
-
-                toast.error(msg);
+                handleApiErrors(error);
             }
         };
 

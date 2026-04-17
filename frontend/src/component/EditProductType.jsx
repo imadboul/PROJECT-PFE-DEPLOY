@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { useParams, useNavigate } from "react-router-dom";
 import { getProductTypes, updateProductType, createProductType } from "../context/services/productService";
+import { handleApiErrors} from "../utils/handleApiErrors"
 
 function EditProductType() {
   const { id } = useParams();
@@ -24,7 +25,7 @@ function EditProductType() {
     const fetchData = async () => {
       try {
         const res = await getProductTypes();
-        const data = res.data.data.types 
+        const data = res.data.data.types
 
         const current = data.find((t) => t.id === Number(id));
 
@@ -36,12 +37,8 @@ function EditProductType() {
         setValue("name", current.name);
         setValue("description", current.description);
 
-      }catch (error) {
-        const msg =
-        error.response?.data?.error ||
-        "Error fatching data";
-
-      toast.error(msg);
+      } catch (error) {
+        handleApiErrors(error);
       }
     };
 
@@ -68,13 +65,9 @@ function EditProductType() {
 
       navigate("/AddProduct");
 
-    }catch (error) {
-        const msg =
-        error.response?.data?.error ||
-        "Error creating product type";
-
-      toast.error(msg);
-      }finally {
+    } catch (error) {
+      handleApiErrors(error);
+    } finally {
       setLoading(false);
     }
   };

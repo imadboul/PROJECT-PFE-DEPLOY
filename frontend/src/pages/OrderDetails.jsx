@@ -8,6 +8,8 @@ import {
 } from "../context/services/orderService";
 import { useNotifications } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
+import { handleApiErrors} from "../utils/handleApiErrors"
+
 
 export default function OrderDetails() {
   const { id } = useParams();
@@ -27,7 +29,7 @@ export default function OrderDetails() {
 
       setOrder(data);
     } catch (error) {
-      toast.error("Error fetching order");
+      handleApiErrors(error);
     } finally {
       setLoading(false);
     }
@@ -43,8 +45,8 @@ export default function OrderDetails() {
       await fetchNotifications();
       toast.success("Order validated");
       fetchOrder();
-    } catch {
-      toast.error("Error validation");
+    } catch (error) {
+      handleApiErrors(error);
     }
   };
 
@@ -54,7 +56,8 @@ export default function OrderDetails() {
       await fetchNotifications();
       toast.success("Order rejected");
       fetchOrder();
-    } catch {
+    } catch (error) {
+      handleApiErrors(error);
       toast.error("Error rejection");
     }
   };

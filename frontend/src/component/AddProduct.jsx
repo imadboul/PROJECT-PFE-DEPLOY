@@ -4,17 +4,19 @@ import { getProductTypes, createProduct } from "../context/services/productServi
 import { Controller, useForm } from "react-hook-form";
 import Select from "react-select";
 import { NavLink } from "react-router-dom";
+import { handleApiErrors} from "../utils/handleApiErrors"
+
 
 function AddProduct() {
   const [productTypes, setProductTypes] = useState([]);
   const [loading, setLoading] = useState(false);
 
-const unitOptions = [
-  { value: "KG", label: "Kilogram" },
-  { value: "L", label: "Liter" },
-  { value: "HL", label: "Hectoliter" },
-  { value: "TM", label: "Tonne" },
-];
+  const unitOptions = [
+    { value: "KG", label: "Kilogram" },
+    { value: "L", label: "Liter" },
+    { value: "HL", label: "Hectoliter" },
+    { value: "TM", label: "Tonne" },
+  ];
   const {
     register,
     handleSubmit,
@@ -29,6 +31,7 @@ const unitOptions = [
   }));
 
 
+
   useEffect(() => {
     const fetchProductTypes = async () => {
       try {
@@ -36,11 +39,7 @@ const unitOptions = [
         const data = res.data.data.types || res.data;
         setProductTypes(Array.isArray(data) ? data : []);
       } catch (error) {
-        const msg =
-          error.response?.data?.error ||
-          "Error creating product";
-
-        toast.error(msg);
+        handleApiErrors(error);
       }
     };
 
@@ -67,12 +66,8 @@ const unitOptions = [
       reset();
 
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error creating product";
-        console.log(error.response?.data);
-
-      toast.error(msg);
+      handleApiErrors(error);
+    
     } finally {
       setLoading(false);
     }

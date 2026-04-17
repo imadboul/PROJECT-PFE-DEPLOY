@@ -8,6 +8,8 @@ import {
 import toast from "react-hot-toast";
 import { useNotifications } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
+import { handleApiErrors} from "../utils/handleApiErrors"
+
 
 export default function PaymentsList() {
   const [payments, setPayments] = useState([]);
@@ -18,6 +20,7 @@ export default function PaymentsList() {
   const location = useLocation();
   const selectedProductType = location.state?.productType;
   const { user } = useContext(AuthContext);
+
 
   //  Fetch data
   const fetchPayments = async () => {
@@ -30,11 +33,7 @@ export default function PaymentsList() {
 
       setPayments(Array.isArray(paymentsData) ? paymentsData : []);
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error fatching data";
-
-      toast.error(msg);
+      handleApiErrors(error);
     } finally {
       setLoading(false);
     }
@@ -53,10 +52,7 @@ export default function PaymentsList() {
       setSelectedPayment(null);
       fetchPayments();
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error validation";
-      toast.error(msg);
+      handleApiErrors(error);
     }
   };
 
@@ -69,10 +65,7 @@ export default function PaymentsList() {
       setSelectedPayment(null);
       fetchPayments();
     } catch (error) {
-      const msg =
-        error.response?.data?.error ||
-        "Error rejection";
-      toast.error(msg);
+      handleApiErrors(error);
     }
   };
 
