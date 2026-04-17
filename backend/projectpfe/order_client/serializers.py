@@ -173,7 +173,7 @@ class OrderProductreadSerializer(serializers.ModelSerializer):
     product = serializers.CharField(source="product.name")
     class Meta:
         model=OrderProductclient
-        fields=['product','qte','qte_taken']
+        fields=['product','qte','unit','qte_taken']
         
 class OrderreadSerializer(serializers.ModelSerializer):
     client = serializers.CharField(source ="client.lastName")
@@ -182,7 +182,7 @@ class OrderreadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=Orderclient
-        fields = ['id', 'client_id','date_created', 'contract', 'client','orderclient_Orderproductclient_items', 'state','pickup_date', 'validated_by']
+        fields = ['id', 'client_id','date_created', 'contract', 'client','orderclient_Orderproductclient_items','state','pickup_date', 'validated_by']
 
 
 class ClientreadSerializer(serializers.ModelSerializer):

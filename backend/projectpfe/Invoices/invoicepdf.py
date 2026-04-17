@@ -8,6 +8,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from .models import Invoice
 from django.conf import settings
 from datetime import datetime
+from Tax_Service.taxCalcul import convert_unit
 import os
 
 def generate_pdf(invoice_id):
@@ -132,7 +133,17 @@ def generate_pdf(invoice_id):
 
     elements.append(client_table)
     elements.append(Spacer(1,20))
-    table_data = [['ID', 'Product','Unit Price','Unit','qte', 'Total(BT)', 'TAX','Total']]
+    table_data = [['ID', 'Product','Unit Price','Unit','qte','qte Unit','HT', 'TAX','Total']]
+    
+    for prod in lines:
+        table_data.append([
+            prod.product.id,
+            prod.product.name,
+            prod.product.unit_price,
+            prod.product.unit,
+            str(prod.qte),
+            str(prod.unit),
+            ])
 
 
 
