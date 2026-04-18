@@ -46,10 +46,10 @@ class OrderValidateView(generics.UpdateAPIView):
                  serializer.is_valid(raise_exception=True)
                  ids=serializer.validated_data['ids'] # type: ignore
                  #validated_by=request.user_id                 
-                 nbOrdes=Order.objects.filter(id__in=ids, states=States.PENDING).update(states=States.VALID)                 
+                 nbOrdes=Order.objects.filter(id__in=ids, states=States.LOADING).update(states=States.VALID)                 
                  if nbOrdes!=0:
                     mains_balances(Order.objects.filter(id__in=ids).prefetch_related(
-                       'order_orderProduct_items__product__product_taxProduct_items',
+                     'order_orderProduct_items__product__product_taxProduct_items',
                      'client__client_balances',
                      'contract__product_type',
                      'contract__contract_invoice_items__invoice_InvoiceLine_items'

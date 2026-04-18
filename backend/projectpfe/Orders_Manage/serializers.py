@@ -133,9 +133,9 @@ class OrderSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f"c'est product {item_order['product'].name}n'appratien pas a order client product ")
         
 
-        Orderclient.objects.filter(id=order_client.id).update(state=States.LOADING)
+        
 
-        print(order_client)
+        
         return super().validate(data)   
     
     def create(self, validated_data):
