@@ -19,6 +19,7 @@ class ProductTypeFilterSerializerOne(serializers.ModelSerializer):
         fields = ['name']
 
 class OrderFilterSerializerOne(serializers.ModelSerializer):
+    
     class Meta:
         model = Order
         fields = ['id', 'type', 'states', 'date_created','parent_order']
@@ -54,8 +55,13 @@ class OrderProductFilterSerializerOne(serializers.ModelSerializer):
     class Meta:
         model=OrderProduct
         fields=["id","qte","unit","order","product" ]
-   
- 
+
+class OrderFilterSerializerTri(serializers.ModelSerializer):
+    order_orderProduct_items=OrderProductFilterSerializerOne(many=True)
+    class Meta:
+        model = Order
+        fields = ['id', 'type', 'states', 'date_created','parent_order','contract','client','client_order','parent_order','invoice','validated_by','order_orderProduct_items']   
+
  
 #serializer for orders filter
 class ClientFilterSerializerTow(serializers.ModelSerializer):

@@ -86,7 +86,7 @@ class OrderListView(generics.ListAPIView):
               serializer_class=OrderProductFilterSerializerOne
               filterset_class=FilterOrderProduct
                   
-           elif order_type == 'a':
+           elif order_type == 'b':
                
                      filtered = FilterOrder(   request.GET, queryset=Order.objects.select_related('client', 'contract__product_type')).qs                 
                      seen = set()
@@ -108,10 +108,10 @@ class OrderListView(generics.ListAPIView):
            elif order_type=='chargement':
                
                queryset=Order.objects.select_related('client','contract__product_type').prefetch_related('order_orderProduct_items__product').all().distinct()
-               serializer_class=OrderFilterSerializerOne
+               serializer_class=OrderFilterSerializerTri # serilazerone
                filterset_class=FilterOrder   
                
-           elif order_type=='e':
+           elif order_type=='ch':
                
                queryset=Client.objects.prefetch_related('client_contracts__contract_order_items','client_contracts__product_type').all().distinct()
                serializer_class=ClientFilterSerializerOne
