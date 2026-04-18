@@ -7,13 +7,9 @@ export const getChargmentOrderAdmin = () =>
      api.get("/orders/chargement/");
 
 export const rechargmentOrderAdmin = (data) =>
-     api.post(`/orders/rectificative/`,data);
+     api.post(`/orders/rectificative/`, data);
 
-export const getRechargmentOrderAdmin = (id) =>
-     api.get(`/orders/rectificative/`);
-
-export const validateOrder = (id, pickup_date) =>
-  api.put("/orderclient/validateorder/", {
-    id,
-    state: "validated",
-  });
+export const validateOrderAdmin = (id) =>
+     api.put("/orders/validated/", {
+          ids: [id],
+     });

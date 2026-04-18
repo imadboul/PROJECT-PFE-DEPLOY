@@ -12,7 +12,7 @@ class Types(models.TextChoices):
 class States(models.TextChoices):
     
        LOADING='loading','Loading'
-       VALID='valid','Valid'
+       VALID='validated','Validated'
        INVOICED = 'invoiced','Invoiced'      
 
  

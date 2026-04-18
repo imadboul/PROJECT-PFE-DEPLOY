@@ -117,13 +117,15 @@ export default function OrderDetails() {
               </p>
             </div>
               <p
-                className={
-                  order.state === "validated"
-                    ? "text-green-500"
-                    : order.state === "rejected"
-                      ? "text-red-500"
-                      : "text-yellow-500"
-                }
+                 className={
+                    order.state === "validated"
+                      ? "text-green-500"
+                      : order.state === "rejected"
+                        ? "text-red-500"
+                        : order.state === "accepted"
+                          ? "text-orange-500"
+                          : "text-gray-500"
+                  }
               >
                 <strong className="text-white">State:</strong>{" "}
                 {order.state}
@@ -170,13 +172,15 @@ export default function OrderDetails() {
                 : "No products"}
 
               <p
-                className={
-                  selectedBill.state === "validated"
-                    ? "text-green-500"
-                    : selectedBill.state === "rejected"
-                      ? "text-red-500"
-                      : "text-yellow-500"
-                }
+                   className={
+                    selectedBill.state === "validated"
+                      ? "text-green-500"
+                      : selectedBill.state === "rejected"
+                        ? "text-red-500"
+                        : selectedBill.state === "accepted"
+                          ? "text-orange-500"
+                          : "text-gray-500"
+                  }
               >
                 <strong className="text-white">State:</strong>{" "}
                 {selectedBill.state}

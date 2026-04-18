@@ -32,9 +32,6 @@ export default function ChargmentOrder() {
     { value: "TM", label: "Tonne" },
   ];
 
-  // ===============================
-  // LOAD DATA
-  // ===============================
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -54,9 +51,6 @@ export default function ChargmentOrder() {
     fetchData();
   }, []);
 
-  // ===============================
-  // AUTO LOAD ORDER
-  // ===============================
   useEffect(() => {
 
     if (!id || !orders.length || !contracts.length || !allProducts.length) return;
@@ -85,18 +79,13 @@ export default function ChargmentOrder() {
 
   }, [id, orders, contracts, allProducts]);
 
-  // ===============================
-  // HANDLE CHANGE
-  // ===============================
+
   const handleChange = (i, field, value) => {
     const updated = [...products];
     updated[i][field] = value;
     setProducts(updated);
   };
 
-  // ===============================
-  // SUBMIT FIXED
-  // ===============================
   const onSubmit = async () => {
 
     if (!selectedContract || !selectedOrder) {
@@ -119,19 +108,19 @@ export default function ChargmentOrder() {
       const payload = {
         contract: selectedContract.id,
         client_order: selectedOrder.id,
-        client: selectedOrder.client_id, 
+        client: selectedOrder.client_id,
         order_orderProduct_items: products.map(p => ({
           product: p.product,
           qte: Number(p.qte),
           unit: p.unit
         }))
-        
+
       };
 
       await chargmentOrderAdmin(payload);
 
       toast.success("Order created successfully");
-      navigate("/order");
+      navigate("/orderToday");
 
     } catch (error) {
       handleApiErrors(error);
@@ -188,7 +177,7 @@ export default function ChargmentOrder() {
                 placeholder="Qte"
                 value={p.qte}
                 onChange={(e) => handleChange(i, "qte", e.target.value)}
-                className="w-1/3 p-2 bg-black/30 text-white border rounded"
+                 className="w-1/3 p-2 bg-black/30 text-white border border-white/20 rounded placeholder:text-white/40 focus:outline-none focus:border-orange-500"
               />
 
               {/* UNIT */}
@@ -196,8 +185,26 @@ export default function ChargmentOrder() {
                 className="w-1/3"
                 options={unitOptions}
                 placeholder="Unit"
+                styles={{
+                  control: (base, state) => ({
+                    ...base,
+                    backgroundColor: "rgba(0,0,0,0.3)",
+                    borderColor: state.isFocused ? "#f97316" : "rgba(255,255,255,0.2)",
+                    boxShadow: "none",
+                    "&:hover": { borderColor: "#f97316" }
+                  }),
+                  menu: (base) => ({ ...base, backgroundColor: "rgba(0,0,0,0.9)" }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isFocused ? "rgba(249,115,22,0.8)" : "transparent",
+                    color: "#fff",
+                    cursor: "pointer"
+                  }),
+                  singleValue: (base) => ({ ...base, color: "#fff" }),
+                  placeholder: (base) => ({ ...base, color: "rgba(255,255,255,0.4)" }),
+                }}
                 onChange={(val) => handleChange(i, "unit", val.value)}
-                value={unitOptions.find(u => u.value === p.unit)}
+                value={unitOptions.find(u => u.value === p.unit) || null}
               />
 
             </div>
@@ -211,7 +218,7 @@ export default function ChargmentOrder() {
           disabled={loading}
           className="w-full mt-5 bg-orange-600 py-2 rounded hover:bg-orange-700"
         >
-          {loading ? "Loading..." : "Create Order"}
+          {loading ? "Loading..." : "Chargement Order"}
         </button>
 
       </form>
