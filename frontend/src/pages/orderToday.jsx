@@ -43,13 +43,13 @@ export default function OrderToday() {
           const hasChargement = dataAdmin.some((c) => c.client_order === o.id);
           return !hasChargement;
         })
-        .map((o) => ({ ...o, _type: "pickup" }));
+        .map((o) => ({ ...o, _type: "accepted" }));
 
       const loadingOrders = dataAdmin
         .filter((o) =>
           o.date_created?.split("T")[0] === today && o.states === "loading"
         )
-        .map((o) => ({ ...o, _type: "chargement" }));
+        .map((o) => ({ ...o, _type: "loading" }));
 
 
       const validatedOrders =
@@ -157,37 +157,37 @@ export default function OrderToday() {
                     <p className="text-lg font-semibold">
                       <strong>Order:</strong> {o.id}
                     </p>
-                    <span className={`text-xs px-2 py-1 rounded-full border ${o._type === "pickup"
+                    <span className={`text-xs px-2 py-1 rounded-full border ${o._type === "accepted"
                       ? "border-orange-500 text-orange-400"
-                      : o._type === "chargement"
+                      : o._type === "loading"
                         ? "border-blue-500 text-blue-400"
                         : "border-green-500 text-green-400"
                       }`}>
-                      {o._type === "pickup" ? "📦 Pickup" : o._type === "chargement" ? "🚚 chargement" : "✅ Validated"}
+                      {o._type === "accepted" ? "📦 Pickup" : o._type === "loading" ? "🚚 chargement" : "✅ Validated"}
                     </span>
                   </div>
 
                   <div className="md:flex items-center justify-between">
                     <p>
                       <strong>Client:</strong>{" "}
-                      {o._type === "pickup" ? o.client : o.client_firstName + " " + o.client_lastName}
+                      {o._type === "accepted" ? o.client : o.client_firstName + " " + o.client_lastName}
                     </p>
                     <p>
                       <strong>Contract:</strong> {o.contract}
                     </p>
                   </div>
 
-                  {o._type === "pickup" && (
+                  {o._type === "accepted" && (
                     <p><strong>Pickup Date:</strong> {o.pickup_date}</p>
                   )}
-                  {o._type === "chargement" && (
+                  {o._type === "loading" && (
                     <p><strong>Date Created:</strong> {o.date_created?.split("T")[0]}</p>
                   )}
                   <div className="flex items-center justify-between">
                     <p className={getStateClass(state)}>
                       <strong className="text-white">State:</strong> {state}
                     </p>
-                    {o._type === "validated" ? (
+                    {o._type !== "accepted" ? (
                       <p>
                         <strong className="text-white">Type:</strong> {o.type}
                       </p>
@@ -216,19 +216,19 @@ export default function OrderToday() {
             <div className="space-y-2 text-sm">
 
               <p className="text-center text-orange-500 font-bold mb-2">
-                {selectedOrder._type === "pickup" ? "📦 Pickup Order" : selectedOrder._type === "rechargement" ? "🚚 Rechargement Order" : "✅ Validated Order"}
+                {selectedOrder._type === "accepted" ? "📦 Pickup Order" : selectedOrder._type === "loading" ? "🚚 Loading Order" : "✅ Validated Order"}
               </p>
 
               <p>
                 <strong>Client:</strong>{" "}
-                {selectedOrder._type === "pickup"
+                {selectedOrder._type === "accepted"
                   ? selectedOrder.client
                   : `Client #${selectedOrder.client}`}
               </p>
 
               <div>
                 <strong>Products:</strong>
-                {selectedOrder._type === "pickup" ? (
+                {selectedOrder._type === "accepted" ? (
                   selectedOrder.orderclient_Orderproductclient_items?.length > 0
                     ? selectedOrder.orderclient_Orderproductclient_items.map((p, i) => (
                       <div key={i} className="ml-2">
@@ -247,7 +247,7 @@ export default function OrderToday() {
                 )}
               </div>
 
-              {selectedOrder._type === "pickup" ? (
+              {selectedOrder._type === "accepted" ? (
                 <p><strong>Pick Up Date:</strong> {selectedOrder.pickup_date}</p>
               ) : (
                 <p><strong>Date Created:</strong> {selectedOrder.date_created?.split("T")[0]}</p>
@@ -264,7 +264,7 @@ export default function OrderToday() {
                   {selectedOrder.state || selectedOrder.states}
                 </p>
 
-                {selectedOrder._type === "pickup" && selectedOrder.state === "accepted" && (
+                {selectedOrder._type === "accepted" && selectedOrder.state === "accepted" && (
                   <NavLink
                     to={`/chargmentOrder/${selectedOrder.id}`}
                     className="text-xl cursor-pointer text-orange-600 hover:text-orange-700 transition"
@@ -273,7 +273,7 @@ export default function OrderToday() {
                   </NavLink>
                 )}
                 <div className="flex gap-6">
-                  {selectedOrder._type === "chargement" && selectedOrder.states === "loading" && (
+                  {selectedOrder._type === "loading" && selectedOrder.states === "loading" && (
                     <>
                       <NavLink
                         to={`/rechargmentOrder/${selectedOrder.id}`}
