@@ -5,6 +5,7 @@ import Select from "react-select";
 
 import { handleApiErrors } from "../utils/handleApiErrors";
 import { getChargmentOrderAdmin, rechargmentOrderAdmin } from "../context/services/orderAdmin";
+import { getProducts } from "../context/services/productService";
 
 export default function RechargmentOrder() {
 
@@ -36,17 +37,12 @@ export default function RechargmentOrder() {
                 setSelectedOrder(order);
                 setSelectedContract({ id: order.contract });
 
-                const items = order.order_orderProduct_items || [];
-
-                const formattedProducts = items.length > 0
-                    ? items.map(item => ({
-                        product_name: item.product_name,
-                        qte: "",
-                        unit: ""
-                    }))
-                    : [];
-
-                setProducts(formattedProducts);
+                setProducts({order_orderProduct_items: order.order_orderProduct_items.map(i => ({
+                    product: i.product,
+                    productName: i.product_name,
+                    qte: i.qte,
+                    unit: i.unit
+                }))});
             } catch (error) {
                 handleApiErrors(error);
             }
@@ -67,7 +63,7 @@ export default function RechargmentOrder() {
         }
 
         const invalid = products.some(
-            p => !p.product_name || !p.qte || !p.unit || Number(p.qte) <= 0
+            p => !p.product || !p.qte || !p.unit || Number(p.qte) <= 0
         );
 
         if (invalid) {
@@ -82,7 +78,7 @@ export default function RechargmentOrder() {
                 id_parent: selectedOrder.id,
                 type_choise: typeChoise,
                 order_orderProduct_items: products.map(p => ({
-                    product_name: p.product_name,
+                    product: p.product,
                     qte: Number(p.qte),
                     unit: p.unit
                 }))
@@ -162,7 +158,7 @@ export default function RechargmentOrder() {
                         products.map((p, i) => (
                             <div key={i} className="flex gap-2 items-center">
                                 <div className="w-1/2 p-2 bg-black/30 text-white rounded border border-white/20">
-                                    {p.product_name}
+                                    {p.productName}
                                 </div>
                                 <input
                                     type="number"

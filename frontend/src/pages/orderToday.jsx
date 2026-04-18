@@ -171,11 +171,6 @@ export default function OrderToday() {
                     <p>
                       <strong>Client:</strong>{" "}
                       {o._type === "pickup" ? o.client : o.client_firstName + " " + o.client_lastName}
-                    {o.client_firstName && o.client_lastName && (
-                      <span>
-                        {o.client_firstName} {o.client_lastName}
-                      </span>
-                    )}
                     </p>
                     <p>
                       <strong>Contract:</strong> {o.contract}
