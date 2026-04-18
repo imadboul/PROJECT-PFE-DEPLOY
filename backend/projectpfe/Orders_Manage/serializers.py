@@ -99,7 +99,6 @@ class OrderSerializer(serializers.ModelSerializer):
         
         qte=0
         for item_order in data['order_orderProduct_items']:
-            
             qte+=convert_unit(item_order['qte'],item_order['product'].density,item_order['unit'],data['contract'].unit)
          
         
@@ -126,9 +125,11 @@ class OrderSerializer(serializers.ModelSerializer):
                     test=True
             if not test:
                 raise serializers.ValidationError(f"c'est product {item_order['product'].name}n'appratien pas a order client product ")
-        order_items=data['order_orderProduct_items']
-
         
+
+        Orderclient.objects.filter(id=order_client.id).update(state=States.LOADING)
+
+        print(order_client)
         return super().validate(data)   
     
     def create(self, validated_data):
@@ -212,7 +213,7 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
                     invoice=Invoice.objects.create( contract=order.contract, type=validated_data['type_choise'] )
                     
                 order_items=validated_data.pop('order_orderProduct_items')
-                print("bouk")
+                
                 newOrder=Order.objects.create(
                     contract=order.contract,
                     client=order.client,

@@ -11,7 +11,7 @@ class Types(models.TextChoices):
        
 class States(models.TextChoices):
     
-       PENDING='pending','Pending'
+       LOADING='loading','Loading'
        VALID='valid','Valid'
        INVOICED = 'invoiced','Invoiced'      
 
@@ -27,7 +27,7 @@ class Order(models.Model):
     parent_order =models.ForeignKey('self',related_name='children',null=True,blank=True,on_delete=models.PROTECT)
     invoice=models.ForeignKey('Invoices.Invoice',related_name='invoice_order_items',null=False,blank=False,on_delete=models.PROTECT)
     type=models.CharField(null=False,blank=False,choices=Types.choices,max_length=20,default=Types.NORMAL)
-    states=models.CharField(choices=States.choices,max_length=20,default=States.PENDING)
+    states=models.CharField(choices=States.choices,max_length=20,default=States.LOADING)
     validated_by =models.ForeignKey(Client,null=True,on_delete=models.PROTECT)
     
  
@@ -37,7 +37,7 @@ class OrderProduct(models.Model):
     product=models.ForeignKey(Product,related_name='product_orderProduct_items',null=False,blank=False,on_delete=models.PROTECT)
     qte=models.DecimalField(null=False,blank=False,max_digits=12,decimal_places=3)
     unit=models.CharField(null=False,blank=False,choices=ProductUnit,max_length=20)
-   
+    
 
 
 

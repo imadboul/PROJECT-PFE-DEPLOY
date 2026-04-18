@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getOrders } from "../context/services/orderService";
 import { handleApiErrors } from "../utils/handleApiErrors";
+import { NavLink } from "react-router-dom";
 
 export default function OrderToday() {
   const [orders, setOrders] = useState([]);
@@ -44,53 +45,55 @@ export default function OrderToday() {
     return <div className="text-white text-center mt-10">Loading...</div>;
 
   return (
-       <div className="p-6 flex justify-center relative z-10">
+    <div className="p-6 flex justify-center relative z-10">
       <div className="w-full max-w-3xl flex flex-col gap-4">
-      <h1 className="text-xl text-white font-bold mb-4">Today Orders</h1>
+        <h1 className="text-xl text-white font-bold mb-4">Today Orders</h1>
 
-      {orders.length === 0 ? (
-        <p>No orders for today</p>
-      ) : (
-        orders.map((o) => (
-          <div
-            key={o.id}
-            onClick={() => setSelectedOrder(o)}
-            className="cursor-pointer bg-black/50 text-white rounded-2xl p-5 border hover:bg-black/80 transition"
-          >
-            <div className="space-y-2 text-sm">
-              <p className="text-lg font-semibold">
-                <strong>Order:</strong>{" "}
-                {o.id}
-              </p>
-
-              <div className="md:flex items-center justify-between">
-                <p>
-                  <strong>client:</strong>{" "}
-                  {o.client}
+        {orders.length === 0 ? (
+          <p>No orders for today</p>
+        ) : (
+          orders.map((o) => (
+            <div
+              key={o.id}
+              onClick={() => setSelectedOrder(o)}
+              className="cursor-pointer bg-black/50 text-white rounded-2xl p-5 border hover:bg-black/80 transition"
+            >
+              <div className="space-y-2 text-sm">
+                <p className="text-lg font-semibold">
+                  <strong>Order:</strong>{" "}
+                  {o.id}
                 </p>
 
-                <p>
-                  <strong>contract:</strong>{" "}
-                  {o.contract}
+                <div className="md:flex items-center justify-between">
+                  <p>
+                    <strong>client:</strong>{" "}
+                    {o.client}
+                  </p>
+
+                  <p>
+                    <strong>contract:</strong>{" "}
+                    {o.contract}
+                  </p>
+                </div>
+
+                <p
+                  className={
+                    o.state === "validated"
+                      ? "text-green-500"
+                      : o.state === "rejected"
+                        ? "text-red-500"
+                        : o.state === "accepted"
+                          ? "text-orange-500"
+                          : "text-gray-500"
+                  }
+                >
+                  <strong className="text-white">State:</strong>{" "}
+                  {o.state}
                 </p>
               </div>
-
-              <p
-                className={
-                  o.state === "validated"
-                    ? "text-green-500"
-                    : o.state === "rejected"
-                      ? "text-red-500"
-                      : "text-yellow-500"
-                }
-              >
-                <strong className="text-white">State:</strong>{" "}
-                {o.state}
-              </p>
             </div>
-          </div>
-        ))
-      )}
+          ))
+        )}
       </div>
       {selectedOrder && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
@@ -118,18 +121,30 @@ export default function OrderToday() {
                 <strong>Pick Up Date:</strong>{" "}
                 {selectedOrder.pickup_date}
               </p>
-
-              <p
-                className={
-                  selectedOrder.state === "validated"
-                    ? "text-green-500"
-                    : selectedOrder.state === "rejected"
-                      ? "text-red-500"
-                      : "text-yellow-500"
-                }
-              >
-                <strong className="text-white">State:</strong> {selectedOrder.state}
-              </p>
+              <div className="flex items-center justify-between">
+                <p
+                  className={
+                    selectedOrder.state === "validated"
+                      ? "text-green-500"
+                      : selectedOrder.state === "rejected"
+                        ? "text-red-500"
+                        : selectedOrder.state === "accepted"
+                          ? "text-orange-500"
+                          : "text-gray-500"
+                  }
+                >
+                  <strong className="text-white">State:</strong> {selectedOrder.state}
+                </p>
+                {selectedOrder.state === "accepted" && (
+                  <NavLink
+                   to={`/chargmentOrder/${selectedOrder.id}`}
+                    className="text-xl cursor-pointer
+                           text-orange-600 hover:text-orange-700 transition"
+                  >
+                    <i className="fa-solid fa-truck"></i>
+                  </NavLink>
+                )}
+              </div>
               {selectedOrder.state === "pending" && (
                 <div className="mb-4">
                   <label className="text-sm">Pickup Date</label>
@@ -141,7 +156,6 @@ export default function OrderToday() {
                   />
                 </div>
               )}
-                
             </div>
           </div>
         </div>

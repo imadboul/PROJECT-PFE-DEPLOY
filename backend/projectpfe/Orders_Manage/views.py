@@ -78,15 +78,15 @@ class OrderListView(generics.ListAPIView):
    
    def get(self,request,*args,**kwargs):
        
-           invoice_type=int(kwargs['invoice_type'])
+           order_type=str(kwargs['order_type'])
            
-           if invoice_type==1:
+           if order_type=='a':
                
               queryset=OrderProduct.objects.select_related('order','product').all().distinct()
               serializer_class=OrderProductFilterSerializerOne
               filterset_class=FilterOrderProduct
                   
-           elif invoice_type == 2:
+           elif order_type == 'a':
                
                      filtered = FilterOrder(   request.GET, queryset=Order.objects.select_related('client', 'contract__product_type')).qs                 
                      seen = set()
@@ -105,13 +105,13 @@ class OrderListView(generics.ListAPIView):
                      response=paginated_response(paginator=paginator,serializer=serializer)
                      
                      return success_response(data=response , message="filter successfully",status_code=201)  
-           elif invoice_type==3:
+           elif order_type=='chargement':
                
                queryset=Order.objects.select_related('client','contract__product_type').prefetch_related('order_orderProduct_items__product').all().distinct()
                serializer_class=OrderFilterSerializerOne
                filterset_class=FilterOrder   
                
-           elif invoice_type==4:
+           elif order_type=='e':
                
                queryset=Client.objects.prefetch_related('client_contracts__contract_order_items','client_contracts__product_type').all().distinct()
                serializer_class=ClientFilterSerializerOne
@@ -137,10 +137,7 @@ def inValid(request):
                      
                     ).select_related('invoice').all()
     
-    mains_balances(order)
-    
-
-    
+    mains_balances(order)   
     return Response({'data':'bouklia'})
             
 

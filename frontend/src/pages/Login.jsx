@@ -14,7 +14,7 @@ import { handleApiErrors} from "../utils/handleApiErrors"
 
 
 export default function Login() {
-  const { login, user } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const [authError, setAuthError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -139,17 +139,6 @@ export default function Login() {
             <Link to="#">Forgot Password?</Link>
           </div>
 
-          {/* CREATE ACCOUNT */}
-          {user?.role === "superAdmin" && (
-            <div className="flex justify-center mt-3">
-              <Link
-                to="/sign"
-                className="px-6 py-2 rounded-full border border-orange-500 text-orange-500 hover:bg-orange-800/10 transition"
-              >
-                Create an account
-              </Link>
-            </div>
-          )}
 
           {/* DIVIDER */}
           <div className="flex items-center my-4">
