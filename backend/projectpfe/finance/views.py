@@ -111,7 +111,6 @@ def check_if_enough(amount, client_id, type_id):
     print(balance)
     if amount > balance.amount: # type: ignore
         return {"success": False, "message": "Not enough balance"}
-    balance.amount -= amount # type: ignore
     balance.save() # type: ignore
 
     return {"success": True, "message": "Balance is sufficient"}
