@@ -18,8 +18,12 @@ from user.views import notify_a_client
 
 
 #serializer for orderProduct with product name filter
+class ProductFilterSerilazer(serializers.ModelSerializer):
+    class Meta:
+        model=Product
+        fields='__all__'
 class OrderProductFilterSerializerOne(serializers.ModelSerializer):
-
+    product = ProductFilterSerilazer(many=False)
     class Meta:
         model=OrderProduct
         fields=["id","qte","unit","order","product" ]
