@@ -4,7 +4,7 @@ export const chargmentOrderAdmin = (data) =>
      api.post("/orders/create/", data);
 
 export const getChargmentOrderAdmin = () =>
-     api.get("/orders/create/");
+     api.get("/orders/chargement/");
 
 export const rechargmentOrderAdmin = (data) =>
      api.post(`/orders/rectificative/`,data);

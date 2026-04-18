@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getOrders } from "../context/services/orderService";
 import { handleApiErrors } from "../utils/handleApiErrors";
 import { NavLink } from "react-router-dom";
+import { getChargmentOrderAdmin } from "../context/services/orderAdmin";
 
 export default function OrderToday() {
   const [orders, setOrders] = useState([]);
@@ -20,14 +21,27 @@ export default function OrderToday() {
       const res = await getOrders();
       const data = res.data.data.results || [];
 
+      const resAdmin = await getChargmentOrderAdmin();
+      const dataAdmin = resAdmin.data.data.results || [];
+
       const today = getToday();
 
-      const filtered = data.filter((o) => {
+      if (dataAdmin.length === 0) {
 
-        const pickupDate = o.pickup_date;
 
-        return pickupDate === today;
-      });
+        const filtered = data.filter((o) => {
+
+          const pickupDate = o.pickup_date;
+
+          return pickupDate === today;
+        });
+      } else {
+
+        const filtered = dataAdmin.filter((o) => {
+          const laodingToday = o.date_created.split("T")[0];
+          return laodingToday === today;
+        });
+      }
 
       setOrders(filtered);
     } catch (error) {
@@ -112,7 +126,7 @@ export default function OrderToday() {
                 {selectedOrder.orderclient_Orderproductclient_items?.length > 0
                   ? selectedOrder.orderclient_Orderproductclient_items.map((p, i) => (
                     <div key={i} className="text-md">
-                      Product: {p.product} | Qte: {p.qte} {p.unit}
+                      Product: {p.product} | Qte: {p.qte} {p.unit} | qte taken
                     </div>
                   ))
                   : "No products"}
@@ -137,7 +151,7 @@ export default function OrderToday() {
                 </p>
                 {selectedOrder.state === "accepted" && (
                   <NavLink
-                   to={`/chargmentOrder/${selectedOrder.id}`}
+                    to={`/chargmentOrder/${selectedOrder.id}`}
                     className="text-xl cursor-pointer
                            text-orange-600 hover:text-orange-700 transition"
                   >
