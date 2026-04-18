@@ -47,15 +47,15 @@ export default function OrderToday() {
 
       const loadingOrders = dataAdmin
         .filter((o) =>
-          o.date_created?.split("T")[0] === today && o.states === "loading"  
+          o.date_created?.split("T")[0] === today && o.states === "loading"
         )
         .map((o) => ({ ...o, _type: "chargement" }));
 
-      
-      const validatedOrders = 
+
+      const validatedOrders =
         dataAdmin
           .filter((o) =>
-            o.date_created?.split("T")[0] === today && o.states === "validated"  
+            o.date_created?.split("T")[0] === today && o.states === "validated"
           )
           .map((o) => ({ ...o, _type: "validated" }));
 
@@ -159,9 +159,9 @@ export default function OrderToday() {
                     </p>
                     <span className={`text-xs px-2 py-1 rounded-full border ${o._type === "pickup"
                       ? "border-orange-500 text-orange-400"
-                      :o._type === "chargement"
-                      ? "border-blue-500 text-blue-400"
-                      : "border-green-500 text-green-400"
+                      : o._type === "chargement"
+                        ? "border-blue-500 text-blue-400"
+                        : "border-green-500 text-green-400"
                       }`}>
                       {o._type === "pickup" ? "📦 Pickup" : o._type === "chargement" ? "🚚 chargement" : "✅ Validated"}
                     </span>
@@ -184,12 +184,12 @@ export default function OrderToday() {
                     <p><strong>Date Created:</strong> {o.date_created?.split("T")[0]}</p>
                   )}
                   <div className="flex items-center justify-between">
-                  <p className={getStateClass(state)}>
-                    <strong className="text-white">State:</strong> {state}
-                  </p>
-                  <p>
-                    <strong className="text-white">Type:</strong> {o.type}
-                  </p>
+                    <p className={getStateClass(state)}>
+                      <strong className="text-white">State:</strong> {state}
+                    </p>
+                    <p>
+                      <strong className="text-white">Type:</strong> {o.type}
+                    </p>
                   </div>
 
                 </div>
@@ -214,7 +214,7 @@ export default function OrderToday() {
             <div className="space-y-2 text-sm">
 
               <p className="text-center text-orange-500 font-bold mb-2">
-                {selectedOrder._type === "pickup" ? "📦 Pickup Order" :selectedOrder._type === "rechargement" ? "🚚 Rechargement Order" : "✅ Validated Order"}
+                {selectedOrder._type === "pickup" ? "📦 Pickup Order" : selectedOrder._type === "rechargement" ? "🚚 Rechargement Order" : "✅ Validated Order"}
               </p>
 
               <p>
@@ -250,6 +250,9 @@ export default function OrderToday() {
               ) : (
                 <p><strong>Date Created:</strong> {selectedOrder.date_created?.split("T")[0]}</p>
               )}
+              <p>
+                <strong className="text-white">Type:</strong> {selectedOrder.type}
+              </p>
 
               <div className="flex items-center justify-between">
                 <p className={getStateClass(selectedOrder.state || selectedOrder.states)}>
