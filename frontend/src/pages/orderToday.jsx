@@ -170,7 +170,12 @@ export default function OrderToday() {
                   <div className="md:flex items-center justify-between">
                     <p>
                       <strong>Client:</strong>{" "}
-                      {o._type === "pickup" ? o.client : `#${o.client}`}
+                      {o._type === "pickup" ? o.client : o.client_firstName + " " + o.client_lastName}
+                    {o.client_firstName && o.client_lastName && (
+                      <span>
+                        {o.client_firstName} {o.client_lastName}
+                      </span>
+                    )}
                     </p>
                     <p>
                       <strong>Contract:</strong> {o.contract}
@@ -187,9 +192,11 @@ export default function OrderToday() {
                     <p className={getStateClass(state)}>
                       <strong className="text-white">State:</strong> {state}
                     </p>
-                    <p>
-                      <strong className="text-white">Type:</strong> {o.type}
-                    </p>
+                    {o._type === "validated" ? (
+                      <p>
+                        <strong className="text-white">Type:</strong> {o.type}
+                      </p>
+                    ) : null}
                   </div>
 
                 </div>
@@ -250,9 +257,11 @@ export default function OrderToday() {
               ) : (
                 <p><strong>Date Created:</strong> {selectedOrder.date_created?.split("T")[0]}</p>
               )}
-              <p>
-                <strong className="text-white">Type:</strong> {selectedOrder.type}
-              </p>
+              {selectedOrder._type === "validated" ? (
+                <p>
+                  <strong className="text-white">Type:</strong> {selectedOrder.type}
+                </p>
+              ): null}
 
               <div className="flex items-center justify-between">
                 <p className={getStateClass(selectedOrder.state || selectedOrder.states)}>
