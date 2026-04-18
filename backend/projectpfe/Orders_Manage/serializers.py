@@ -19,9 +19,10 @@ from user.views import notify_a_client
 
 #serializer for orderProduct with product name filter
 class ProductFilterSerilazer(serializers.ModelSerializer):
+    product_type=serializers.CharField(source='product_type.name',read_only=True)
     class Meta:
         model=Product
-        fields='__all__'
+        fields=['id','name','product_type']
 class OrderProductFilterSerializerOne(serializers.ModelSerializer):
     product = ProductFilterSerilazer(many=False)
     class Meta:
