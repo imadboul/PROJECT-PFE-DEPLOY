@@ -26,7 +26,6 @@ class OrderProductFilterSerializerOne(serializers.ModelSerializer):
 
 class OrderFilterSerializerThri(serializers.ModelSerializer):
     order_orderProduct_items=OrderProductFilterSerializerOne(many=True)
-    contract_name = serializers.CharField(source='contract.name', read_only=True)
     client_firstName=serializers.CharField(source='client.firstName',read_only=True)
     client_lastName=serializers.CharField(source='client.lastName',read_only=True)
     validated_by=serializers.SerializerMethodField()
@@ -34,7 +33,7 @@ class OrderFilterSerializerThri(serializers.ModelSerializer):
        return obj.validated_by.firstName if obj.validated_by else None
     class Meta:
         model = Order
-        fields = ['id', 'client_firstName','client_lastName', 'date_created','contract_name','type', 'states','validated_by','client_order','parent_order','invoice','order_orderProduct_items']   
+        fields = ['id', 'client_firstName','client_lastName', 'date_created','contract','type', 'states','validated_by','client_order','parent_order','invoice','order_orderProduct_items']   
 
  
 
