@@ -5,86 +5,42 @@ from catalog.models import Client,Contract,ProductType,Product
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from finance.views import check_if_enough
-from order_client.models import OrderProductclient
+from order_client.models import OrderProductclient,Orderclient
 from django.db import models
 from Invoices.models import Invoice , StatesInv
 from order_client.models import *
 from Tax_Service.taxCalcul import convert_unit
 from user.views import notify_a_client
 
-#serializer for client contract order productType filter
-class ProductTypeFilterSerializerOne(serializers.ModelSerializer):
-    class Meta:
-        model = ProductType
-        fields = ['name']
-
-class OrderFilterSerializerOne(serializers.ModelSerializer):
-    
-    class Meta:
-        model = Order
-        fields = ['id', 'type', 'states', 'date_created','parent_order']
-           
-class ContractFilterSerializerOne(serializers.ModelSerializer):
-    contract_order_items = OrderFilterSerializerOne(many=True)
-    product_type = ProductTypeFilterSerializerOne(read_only=True)
-
-    class Meta:
-        model = Contract
-        fields = ['id', 'product_type', 'contract_order_items']
-
-class ClientFilterSerializerOne(serializers.ModelSerializer):
-    client_contracts = ContractFilterSerializerOne(many=True)
-
-    class Meta:
-        model = Client
-        fields = ['id', 'firstName', 'lastName','phoneNumber','client_contracts']
-        
-   
+  
 
 
 
 
 #serializer for orderProduct with product name filter
-class ProductFilterSerializerOne(serializers.ModelSerializer):
-    class Meta:
-        model=Product
-        fields=['name']
-
 class OrderProductFilterSerializerOne(serializers.ModelSerializer):
-    product=ProductFilterSerializerOne(many=False)
+    product_name=serializers.CharField(source='product.name')
     class Meta:
         model=OrderProduct
-        fields=["id","qte","unit","order","product" ]
+        fields=["id","qte","unit","order","product_name" ]
 
-class OrderFilterSerializerTri(serializers.ModelSerializer):
+class OrderFilterSerializerThri(serializers.ModelSerializer):
     order_orderProduct_items=OrderProductFilterSerializerOne(many=True)
+    contract_name = serializers.CharField(source='contract.name', read_only=True)
+    client_firstName=serializers.CharField(source='client.firstName',read_only=True)
+    client_lastName=serializers.CharField(source='client.lastName',read_only=True)
+    validated_by=serializers.SerializerMethodField()
+    def get_validated_by(self, obj):
+       return obj.validated_by.firstName if obj.validated_by else None
     class Meta:
         model = Order
-        fields = ['id', 'type', 'states', 'date_created','parent_order','contract','client','client_order','parent_order','invoice','validated_by','order_orderProduct_items']   
+        fields = ['id', 'client_firstName','client_lastName', 'date_created','contract_name','type', 'states','validated_by','client_order','parent_order','invoice','order_orderProduct_items']   
 
  
-#serializer for orders filter
-class ClientFilterSerializerTow(serializers.ModelSerializer):
-    class Meta:
-        model=Client
-        fields=['id','firstName','lastName','phoneNumber']
-        
-class ContractFilterSerializerTow(serializers.ModelSerializer):
-    product_type = ProductTypeFilterSerializerOne(read_only=True)
-    class Meta:
-        model=Contract
-        fields=['id','product_type']
-        
-        
-class OrderFilterSerializerTow(serializers.ModelSerializer):
-       client=ClientFilterSerializerTow(many=False)
-       contract=ContractFilterSerializerTow(many=False)
-       class Meta:
-           model=Order
-           fields=['client','contract']
 
 
-#serializer for save order and orderProduct and rectificative 
+
+#serializer for save order and orderProduct 
 class OrderProductSerializer(serializers.ModelSerializer):
     class Meta:
         model=OrderProduct
@@ -168,10 +124,14 @@ class OrderSerializer(serializers.ModelSerializer):
                     productorder.save()
                  
                  
-                 
-             notify_a_client( order.client.id ,title="transport",content="***",link='')
+             Orderclient.objects.filter(id=order.client_order.id).update(state=States.LOADING)  
+             notify_a_client( order.client.id ,title="transport",content=f" Mr. {order.client.firstName} {order.client.lastName} , your shipment has been successfully loaded from {order.contract.product_type.name} ",link='')
+             
         return order
     
+    
+   
+# rectificative order
 class RectificativeOrderSerializer(serializers.ModelSerializer):
         Type_Choise=( ('plus') , ('mains')  , )
         order_orderProduct_items=OrderProductSerializer(many=True)
@@ -213,10 +173,12 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
             
             
             with transaction.atomic():    
+                
                 invoice=Invoice.objects.filter(id=order.invoice.id,states=StatesInv.NO_VALID).first()
                 
                 if not invoice:
                     invoice=Invoice.objects.create( contract=order.contract, type=validated_data['type_choise'] )
+                    
                     
                 order_items=validated_data.pop('order_orderProduct_items')
                 
@@ -247,3 +209,115 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
 #serializer for list validated orders            
 class ValidateOrdersSerializer(serializers.Serializer):
     ids=serializers.ListField(child=serializers.IntegerField(),allow_empty=False)      
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+"""#serializer for client contract order productType filter
+class ProductTypeFilterSerializerOne(serializers.ModelSerializer):
+    class Meta:
+        model = ProductType
+        fields = ['name']
+
+class OrderFilterSerializerOne(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Order
+        fields = ['id', 'type', 'states', 'date_created','parent_order']
+           
+class ContractFilterSerializerOne(serializers.ModelSerializer):
+    contract_order_items = OrderFilterSerializerOne(many=True)
+    product_type = ProductTypeFilterSerializerOne(read_only=True)
+
+    class Meta:
+        model = Contract
+        fields = ['id', 'product_type', 'contract_order_items']
+
+class ClientFilterSerializerOne(serializers.ModelSerializer):
+    client_contracts = ContractFilterSerializerOne(many=True)
+
+    class Meta:
+        model = Client
+        fields = ['id', 'firstName', 'lastName','phoneNumber','client_contracts']
+        
+"""
+"""#serializer for orders filter
+class ClientFilterSerializerTow(serializers.ModelSerializer):
+    class Meta:
+        model=Client
+        fields=['id','firstName','lastName','phoneNumber']
+        
+class ContractFilterSerializerTow(serializers.ModelSerializer):
+    product_type = ProductTypeFilterSerializerOne(read_only=True)
+    class Meta:
+        model=Contract
+        fields=['id','product_type']
+        
+        
+class OrderFilterSerializerTow(serializers.ModelSerializer):
+       client=ClientFilterSerializerTow(many=False)
+       contract=ContractFilterSerializerTow(many=False)
+       class Meta:
+           model=Order
+           fields=['client','contract']
+           """  

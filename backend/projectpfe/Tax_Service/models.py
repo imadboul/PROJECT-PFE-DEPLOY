@@ -10,6 +10,7 @@ class TaxUnit(models.TextChoices):
 class Tax(models.Model):
     id=models.AutoField(primary_key=True)
     name=models.CharField(null=False,blank=False,max_length=100)
+    description=models.TextField(null=True,blank=True,max_length=1000)
     
     def __str__(self):
         return self.name
