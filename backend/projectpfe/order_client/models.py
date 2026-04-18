@@ -29,6 +29,7 @@ class OrderProductclient(models.Model):
     product=models.ForeignKey(Product,related_name='product_OrderProductclient_items',null=False,blank=False,on_delete=models.PROTECT)
     qte=models.DecimalField(null=False,blank=False,max_digits=12,decimal_places=3)
     qte_taken = models.DecimalField(max_digits=12,decimal_places=3,default=Decimal('0'))
+    unit = models.CharField(max_length=20,choices=ProductUnit,default='L', db_index=True)
     
 
 
