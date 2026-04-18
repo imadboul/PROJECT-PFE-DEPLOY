@@ -3,7 +3,6 @@ import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
 
-import { getProducts } from "../context/services/productService";
 import { handleApiErrors } from "../utils/handleApiErrors";
 import { getChargmentOrderAdmin, rechargmentOrderAdmin } from "../context/services/orderAdmin";
 
@@ -37,26 +36,12 @@ export default function RechargmentOrder() {
                 setSelectedOrder(order);
                 setSelectedContract({ id: order.contract });
 
-                const resProducts = await getProducts();
-                const allProducts = resProducts.data?.data?.products || [];
-
-                const mapped = order.order_orderProduct_items.map(item => {
-                    const found = allProducts.find(p => p.name === item.product.name);
-                    return {
-                        product: found?.id || null,
-                        productName: item.product.name,
-                        qte: "",
-                        unit: null
-                    };
-                });
-
-                setProducts(mapped);
+                setProducts({ productName: order.order_orderProduct_items[0].product_name, qte: "", unit: "" } || []);
 
             } catch (error) {
                 handleApiErrors(error);
             }
         };
-
         fetchData();
     }, [id]);
 
@@ -85,10 +70,10 @@ export default function RechargmentOrder() {
             setLoading(true);
 
             const payload = {
-                id_parent: selectedOrder.id,
-                type_choise: typeChoise,
+                parent_order: selectedOrder.id,
+                type: typeChoise,
                 order_orderProduct_items: products.map(p => ({
-                    product: p.product,
+                    product_name: p.product_name,
                     qte: Number(p.qte),
                     unit: p.unit
                 }))
@@ -135,7 +120,7 @@ export default function RechargmentOrder() {
 
                     <div className="py-2 px-4 bg-black/30 text-white rounded border border-white/20">
                         <span className="text-white/50 text-sm">Client:</span>{" "}
-                        {selectedOrder ? `#${selectedOrder.client}` : "-"}
+                        {selectedOrder ? `${selectedOrder.client_lastName} ${selectedOrder.client_firstName}` : "-"}
                     </div>
                 </div>
 
@@ -149,8 +134,8 @@ export default function RechargmentOrder() {
                                 type="button"
                                 onClick={() => setTypeChoise(t)}
                                 className={`flex-1 py-2 rounded border cursor-pointer capitalize transition font-medium ${typeChoise === t
-                                        ? "border-orange-500 text-orange-500 bg-orange-500/10"
-                                        : "border-white/20 text-white/50 hover:border-white/40"
+                                    ? "border-orange-500 text-orange-500 bg-orange-500/10"
+                                    : "border-white/20 text-white/50 hover:border-white/40"
                                     }`}
                             >
                                 {t}
