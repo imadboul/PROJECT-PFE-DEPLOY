@@ -36,8 +36,17 @@ export default function RechargmentOrder() {
                 setSelectedOrder(order);
                 setSelectedContract({ id: order.contract });
 
-                setProducts({ productName: order.order_orderProduct_items[0].product_name, qte: "", unit: "" } || []);
+                const items = order.order_orderProduct_items || [];
 
+                const formattedProducts = items.length > 0
+                    ? items.map(item => ({
+                        product_name: item.product_name,
+                        qte: "",
+                        unit: ""
+                    }))
+                    : [];
+
+                setProducts(formattedProducts);
             } catch (error) {
                 handleApiErrors(error);
             }
@@ -58,7 +67,7 @@ export default function RechargmentOrder() {
         }
 
         const invalid = products.some(
-            p => !p.product || !p.qte || !p.unit || Number(p.qte) <= 0
+            p => !p.product_name || !p.qte || !p.unit || Number(p.qte) <= 0
         );
 
         if (invalid) {
@@ -70,8 +79,8 @@ export default function RechargmentOrder() {
             setLoading(true);
 
             const payload = {
-                parent_order: selectedOrder.id,
-                type: typeChoise,
+                id_parent: selectedOrder.id,
+                type_choise: typeChoise,
                 order_orderProduct_items: products.map(p => ({
                     product_name: p.product_name,
                     qte: Number(p.qte),
@@ -118,7 +127,7 @@ export default function RechargmentOrder() {
                         {selectedOrder ? `#${selectedOrder.id}` : "-"}
                     </div>
 
-                    <div className="py-2 px-4 bg-black/30 text-white rounded border border-white/20">
+                    <div className="py-2 px-4 bg-black/30 text-sm text-white rounded border border-white/20">
                         <span className="text-white/50 text-sm">Client:</span>{" "}
                         {selectedOrder ? `${selectedOrder.client_lastName} ${selectedOrder.client_firstName}` : "-"}
                     </div>
@@ -153,7 +162,7 @@ export default function RechargmentOrder() {
                         products.map((p, i) => (
                             <div key={i} className="flex gap-2 items-center">
                                 <div className="w-1/2 p-2 bg-black/30 text-white rounded border border-white/20">
-                                    {p.productName}
+                                    {p.product_name}
                                 </div>
                                 <input
                                     type="number"
