@@ -45,10 +45,15 @@ class OrderValidateView(generics.UpdateAPIView):
                  serializer=ValidateOrdersSerializer(data=request.data)
                  serializer.is_valid(raise_exception=True)
                  ids=serializer.validated_data['ids'] # type: ignore
-                 #validated_by=request.user_id                 
-                 nbOrdes=Order.objects.filter(id__in=ids, states=States.LOADING).update(states=States.VALID)                 
-                 if nbOrdes!=0:
-                    mains_balances(Order.objects.filter(id__in=ids).prefetch_related(
+                 #validated_by=request.user_id           
+                  
+                 nbOrdes = Order.objects.select_for_update().filter(id__in=ids, states=States.LOADING).update(states=States.VALID)  
+                 
+                 orders= Order.objects.select_for_update().filter(id__in=ids) 
+                  
+                 if nbOrdes:
+                    
+                    mains_balances(orders.prefetch_related(
                      'order_orderProduct_items__product__product_taxProduct_items',
                      'client__client_balances',
                      'contract__product_type',
@@ -56,7 +61,12 @@ class OrderValidateView(generics.UpdateAPIView):
                      
                     ).select_related('invoice').all())
                     
-                 
+                    Orderclient.objects.filter( id__in=orders.values_list('client_order_id', flat=True).distinct() ).update(state=States.VALID)
+                    
+                    for order in orders.all():
+                        
+                        notify_a_client( order.client.id ,title="la validation termine ",content=f" Mr. {order.client.firstName} {order.client.lastName} , Your order has been confirmed and an amount has been deducted from your account for the order corresponding to the following contract: {order.contract.product_type.name} ",link='')
+                    
                  return success_response(data=nbOrdes,message='number Order validated successfully',status_code=200)
         
  
@@ -75,6 +85,65 @@ class RectificativeOrderView(generics.CreateAPIView):
 
 #@method_decorator(jwt_must, name='dispatch')
 class OrderListView(generics.ListAPIView):
+   
+   def get(self,request,*args,**kwargs):
+               
+              queryset=Order.objects.select_related('contract__product_type','invoice').prefetch_related('order_orderProduct_items__product').all().distinct()
+              serializer_class=OrderFilterSerializerThri
+              filterset_class=FilterOrder
+              queryset = filterset_class(request.GET, queryset=queryset).qs
+              paginator = MyPagination()
+              page = paginator.paginate_queryset(queryset, request)
+              serializer = serializer_class(page, many=True)
+              response=paginated_response(paginator=paginator,serializer=serializer)
+              
+              return  success_response(data=response , message="filter  successfully",status_code=200)    
+                  
+       
+ 
+         
+@api_view(['PUT'])     
+def inValid(request):
+    order=Order.objects.prefetch_related(
+                     'order_orderProduct_items__product__product_taxProduct_items',
+                     'client__client_balances',
+                     'contract__product_type',
+                     'contract__contract_invoice_items__invoice_InvoiceLine_items'
+                     
+                    ).select_related('invoice').all()
+    
+    mains_balances(order)   
+    return Response({'data':'bouklia'})
+            
+
+    
+
+    
+
+    
+   
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""class OrderListView(generics.ListAPIView):
    
    def get(self,request,*args,**kwargs):
        
@@ -123,30 +192,4 @@ class OrderListView(generics.ListAPIView):
            serializer = serializer_class(page, many=True)
            response=paginated_response(paginator=paginator,serializer=serializer)
            
-           return  success_response(data=response , message="filter  successfully",status_code=201) 
-       
- 
-         
-@api_view(['PUT'])     
-def inValid(request):
-    order=Order.objects.prefetch_related(
-                     'order_orderProduct_items__product__product_taxProduct_items',
-                     'client__client_balances',
-                     'contract__product_type',
-                     'contract__contract_invoice_items__invoice_InvoiceLine_items'
-                     
-                    ).select_related('invoice').all()
-    
-    mains_balances(order)   
-    return Response({'data':'bouklia'})
-            
-
-    
-
-    
-
-    
-   
-    
-    
-    
+           return  success_response(data=response , message="filter  successfully",status_code=201) """

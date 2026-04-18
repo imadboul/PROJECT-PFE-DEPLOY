@@ -46,23 +46,20 @@ class ValidateInvoice(generics.UpdateAPIView):
 class InvoiceList(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
          
-        invoice_type=kwargs['invoice_type']
         
-        if invoice_type==1:
-             
-            queryset=Invoice.objects.select_related('contract__client').all()
-            serializer_class=InvoiceFilterSerializerTow
-            filterset_class=InvoiceFilter 
-            
-        
+        queryset=Invoice.objects.select_related('contract__client').all()
+        serializer_class=InvoiceFilterSerializerOne
+        filterset_class=InvoiceFilter 
         queryset = filterset_class(request.GET, queryset=queryset).qs
         paginator = MyPagination()
         page = paginator.paginate_queryset(queryset, request)
         serializer = serializer_class(page, many=True)
-        response = paginated_response( paginator=paginator ,  serializer=serializer )
-                   
-        
+        response = paginated_response( paginator=paginator ,  serializer=serializer )  
         return  success_response(data=response , message="filter  successfully",status_code=200)
+   
+   
+   
+   
    
 @api_view(['GET'])
 def invoicepdf(request, id):

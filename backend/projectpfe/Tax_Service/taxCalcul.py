@@ -252,7 +252,7 @@ def update_invoices_bulk(invoicesFinal):
     ids_balance=list(balance_grouped.keys())
     
     
-    print(dict(balance_grouped))
+    
     
     blc_case = Case(
         *[
@@ -289,16 +289,16 @@ def update_invoices_bulk(invoicesFinal):
     
     Invoice.objects.filter(id__in=ids_invoices).update( HT=ht_case , TVA=tva_case , TTC=ttc_case )
     Balance.objects.filter(id__in=ids_balance).update( amount=blc_case )
-    print(len(connection.queries))
+
     
     
 def update_or_save_invoiceLins(invoicesLins, invoice_map ):
      
      grouped_update = defaultdict(lambda: {"qte":0,"tax_price":0})
      grouped_save= defaultdict(lambda: {"qte":0,"unit":None,"tax_price":0})
-     print(len(connection.queries)) 
+    
      for item in invoicesLins:
-        print(len(connection.queries))   
+          
         inv_id = item["invoice"]  
 
         lines = invoice_map.get(inv_id.id, [])
@@ -351,7 +351,7 @@ def update_or_save_invoiceLins(invoicesLins, invoice_map ):
      if grouped_save:
          to_save=[]
          for (invoice, product, tax_name), data in grouped_save.items():
-            print(invoice)
+            
             to_save.append(InvoiceLine(
                 invoice=invoice,
                 product=product,

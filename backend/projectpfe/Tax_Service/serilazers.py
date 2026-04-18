@@ -45,8 +45,17 @@ class TaxSerializer(serializers.ModelSerializer):
                 
         return tax        
                 
+class TaxFilterSerilazerOne(serializers.ModelSerializer):
+    class Meta:
+        model=Tax
+        fields='__all__'
 
-
+class TaxProductFilterSerializer(serializers.ModelSerializer):
+    tax_name = serializers.CharField(source='tax.name', read_only=True)
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    class Meta:
+        model=TaxProduct
+        fields=['id','tax_name','product_name','start_date','end_date','unit','par_unit','is_active']
 
 
 

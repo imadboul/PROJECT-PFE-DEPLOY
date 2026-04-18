@@ -1,23 +1,49 @@
 from django.shortcuts import render
 from rest_framework import generics
 from .models import Tax,TaxProduct
-from .serilazers import TaxSerializer
+from .serilazers import *
 from django.db import transaction
 from rest_framework import status
 from rest_framework.response import Response
+from projectpfe.utils.response import *
+from .filters import *
 
 
 class TaxSaveView(generics.CreateAPIView):
     queryset = Tax.objects.all()
     serializer_class = TaxSerializer
     def create(self, request, *args, **kwargs):
-        try:
+        
             serializer=self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
             return Response({'data':'Tax created successfully'},status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response({  "message": "Failed to create tax", "error": str(e)},status.HTTP_400_BAD_REQUEST)
+        
+class TaxListView(generics.ListAPIView):
+    
+    def get(self, request, *args, **kwargs):
+        search_type=kwargs['search_type'] 
+        if search_type=='tax':
+         queryset=Tax.objects.all()
+         serializer_class=TaxFilterSerilazerOne
+         filterset_class=FilterTax
+        elif search_type=='tax_product':
+         queryset=TaxProduct.objects.all()
+         serializer_class=TaxProductFilterSerializer
+         filterset_class=FilterTaxProduct
+        queryset = filterset_class(request.GET, queryset=queryset).qs
+        paginator = MyPagination()
+        page = paginator.paginate_queryset(queryset, request)
+        serializer = serializer_class(page, many=True)
+        response=paginated_response(paginator=paginator,serializer=serializer)
+        
+        return  success_response(data=response , message=" filter successfully ",status_code=200) 
+        
+        
+        
+        
+        
+        
     
 
     """ @transaction.atomic
