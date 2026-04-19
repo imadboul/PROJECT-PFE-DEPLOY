@@ -176,7 +176,7 @@ export default function OrderToday() {
                       {o._type === "accepted" ? o.client : o.client_firstName + " " + o.client_lastName}
                     </p>
                     <p>
-                      <strong>Contract:</strong> {"contract" + o.contract + "-" + o.order_orderProduct_items?.[0]?.product?.product_type}
+                      <strong>Contract:</strong> {o.contract + " - " + o.order_orderProduct_items?.[0]?.product?.product_type}
                     </p>
                   </div>
 
