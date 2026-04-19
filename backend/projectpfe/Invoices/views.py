@@ -73,24 +73,24 @@ class InvoiceList(generics.ListAPIView):
    
    
 @api_view(['GET'])
+@jwt_must
 def invoicepdf(request, id):
      try:
      
      
 
           try:
-               invoice = Invoice.objects.get(id=id)
+               invoice = Invoice.objects.get(id=id, states = StatesInv.NO_VALID)
 
-               ##if request.role == 'client' and invoice.contract.client_id != request.user_id:  # type: ignore
-                   ## return error_response(
-                     ##    message="Order does not exist or you do not have permission", status_code=400
-                    ##)
+               if request.role == 'client' and invoice.contract.client_id != request.user_id:  # type: ignore
+                    return error_response(
+                         message="Order does not exist or you do not have permission", status_code=400)
 
                return generate_pdf(id)
 
           except Invoice.DoesNotExist:
                return error_response(
-                    message="invoice does not exist or you do not have permission" ,status_code=400
+                    message="invoice does not exist yet or you do not have permission" ,status_code=400
                )
      except Exception as e:
           
