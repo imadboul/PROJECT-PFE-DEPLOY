@@ -147,17 +147,17 @@ export default function ChargmentOrder() {
 
         {/* CONTRACT */}
         <div className="p-2 mb-3 bg-black/30 text-white rounded border">
-          Contract: {selectedContract ? `#${selectedContract.id}` : "-"}
+          Contract: {selectedContract ? `${selectedContract.id}` : "-"}
         </div>
 
         {/* ORDER */}
         <div className="p-2 mb-4 bg-black/30 text-white rounded border">
-          Client Order: {selectedOrder ? `#${selectedOrder.id}` : "-"}
+          Client Order: {selectedOrder ? `${selectedOrder.id}` : "-"}
         </div>
 
         {/* CLIENT */}
         <div className="p-2 mb-4 bg-black/30 text-white rounded border">
-          Client: {selectedOrder ? selectedOrder.client : "-"}
+          Client: {selectedOrder ? `${selectedOrder.client}` : "-"}
         </div>
 
         {/* PRODUCTS */}

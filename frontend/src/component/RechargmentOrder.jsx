@@ -118,12 +118,12 @@ export default function RechargmentOrder() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <div className="p-2 bg-black/30 text-white rounded border border-white/20">
                         <span className="text-white/50 text-sm">Contract:</span>{" "}
-                        {selectedContract ? `#${selectedContract.id}` : "-"}
+                        {selectedContract ? `${selectedContract.id} - ${selectedOrder.order_orderProduct_items?.[0]?.product?.product_type}` : "-"}
                     </div>
 
                     <div className="p-2 bg-black/30 text-white rounded border border-white/20">
                         <span className="text-white/50 text-sm">Chargement Order:</span>{" "}
-                        {selectedOrder ? `#${selectedOrder.id}` : "-"}
+                        {selectedOrder ? `${selectedOrder.id}` : "-"}
                     </div>
 
                     <div className="py-2 px-4 bg-black/30 text-sm text-white rounded border border-white/20">
