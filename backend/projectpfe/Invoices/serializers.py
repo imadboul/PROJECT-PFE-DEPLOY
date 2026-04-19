@@ -11,13 +11,15 @@ class InvoiceLineFilterSerializer(serializers.ModelSerializer):
 class InvoiceFilterSerializerOne(serializers.ModelSerializer):
     invoice_InvoiceLine_items=InvoiceLineFilterSerializer(many=True)
     contract_type=serializers.CharField(source='contract.name',read_only=True)
+    client_firstName=serializers.CharField(source='contract.client.firstName',read_only=True)
+    client_lastName=serializers.CharField(source='contract.client.lastName',read_only=True)
     validated_by=serializers.SerializerMethodField()
     def get_validated_by(self,obj):
         return obj.validated_by.firstName if obj.validated_by else None
         
     class Meta:
         model=Invoice
-        fields=['invoice_InvoiceLine_items','id','contract_type','type','states','date_de_facteration','validated_by','HT','TVA','TTC']
+        fields=['invoice_InvoiceLine_items','id','client_firstName','client_lastName','contract_type','type','states','date_de_facteration','validated_by','HT','TVA','TTC']
 
 
 # pour la validation des facteurs 

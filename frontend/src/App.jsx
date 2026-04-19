@@ -7,7 +7,6 @@ import Sign from "./pages/Sign";
 import ContractsList from "./pages/Contract"
 import ContractDetails from "./pages/ContractDetails"
 import BalanceList from "./pages/Balance";
-import Invoice from "./pages/Invoice";
 import Navbar from "./component/Navbar";
 import Notifications from "./pages/Notifications";
 import ProtectedRoute from "./component/ProtectedRoute";
@@ -31,6 +30,8 @@ import ChargmentOrder from "./component/chargmentOrder";
 import RechargmentOrder from "./component/RechargmentOrder";
 import TaxList from "./pages/TaxList";
 import AddTax from "./component/AddTax";
+import InvoiceList from "./pages/InvoiceList";
+import ValidateInvoice from "./pages/ValidateInvoice";
 
 /* Layout */
 function Layout() {
@@ -137,7 +138,8 @@ function App() {
           <Route path="/Contracts/:id" element={<ContractDetails />} />
           <Route path="/Balance" element={<BalanceList />} />
           <Route path="/product" element={<ProductsList />} />
-          <Route path="/Invoices" element={<Invoice />} />
+          <Route path="/Invoices" element={<InvoiceList />} />
+          <Route path="/ValidateInvoice" element={<ValidateInvoice />} />
           <Route path="/order" element={<Orders />} />
           <Route path="/order/:id" element={<OrderDetails />} />
           <Route path="/Notifications" element={<Notifications />} />
