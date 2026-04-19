@@ -175,11 +175,16 @@ class OrderProductreadSerializer(serializers.ModelSerializer):
     class Meta:
         model=OrderProductclient
         fields=['product','qte','unit','qte_taken']
-        
+class contractSerializerOne(serializers.ModelSerializer):
+    product_type=serializers.CharField(source='product_type.name',read_only=True)
+    class Meta:
+        model=Contract
+        fields=['id','product_type']        
 class OrderreadSerializer(serializers.ModelSerializer):
     client = serializers.CharField(source ="client.lastName")
     client_id = serializers.CharField(source ="client.id")
     orderclient_Orderproductclient_items = OrderProductreadSerializer(many=True)
+    conttract=contractSerializerOne()
 
     class Meta:
         model=Orderclient
