@@ -20,6 +20,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='invoice',
             name='type',
-            field=models.CharField(choices=[('normal', 'Normal'), ('plus', 'Plus'), ('mains', 'Mains')], default='normal', max_length=20),
+            field=models.CharField(choices=[('normal', 'Normal'), ('plus', 'Plus'), ('minus', 'Minus')], default='normal', max_length=20),
         ),
     ]

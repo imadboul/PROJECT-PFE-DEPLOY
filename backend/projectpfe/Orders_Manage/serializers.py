@@ -137,7 +137,7 @@ class OrderSerializer(serializers.ModelSerializer):
    
 # rectificative order
 class RectificativeOrderSerializer(serializers.ModelSerializer):
-        Type_Choise=( ('plus') , ('mains')  , )
+        Type_Choise=( ('plus') , ('minus')  , )
         order_orderProduct_items=OrderProductSerializer(many=True)
         id_parent=serializers.IntegerField(required=True)
         type_choise=serializers.ChoiceField(choices=Type_Choise)

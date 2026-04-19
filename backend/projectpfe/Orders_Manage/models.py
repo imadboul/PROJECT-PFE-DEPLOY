@@ -7,7 +7,7 @@ class Types(models.TextChoices):
     
        NORMAL='normal','Normal'
        PLUS=  'plus','Plus'
-       MAINS= 'minus','Minus' 
+       MANUS= 'minus','Minus' 
        
 class States(models.TextChoices):
     

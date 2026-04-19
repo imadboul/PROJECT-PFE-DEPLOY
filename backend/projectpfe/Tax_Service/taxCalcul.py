@@ -23,7 +23,7 @@ from collections import defaultdict
 
     
     
-def mains_balances(ordersValidated):
+def minus_balances(ordersValidated):
         
         invoices=[]
         invoicesLins=[]
@@ -143,7 +143,7 @@ def tax_price(taxActiv,orderProduct,Tva,invoicesLins):
             
             total_tax+=tax_price 
                
-            if(type=='mains'):
+            if(type=='minus'):
                  additional_taxPrice_qte(orderProduct.order.invoice,invoicesLins,orderProduct.product,orderProduct.qte*-1,orderProduct.unit,tax_price*-1,tax['name'])
             else:
                   additional_taxPrice_qte(orderProduct.order.invoice,invoicesLins,orderProduct.product,orderProduct.qte,orderProduct.unit,tax_price,tax['name'])        
@@ -155,7 +155,7 @@ def tax_price(taxActiv,orderProduct,Tva,invoicesLins):
         TTC=(HT+total_tax)*(1+Tva/100)
         TVA=(HT+total_tax)*Tva/100
         
-        if(type == 'mains'):  
+        if(type == 'minus'):  
             HT*=-1 
             TVA*=-1 
             TTC*=-1
