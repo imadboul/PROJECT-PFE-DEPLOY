@@ -28,36 +28,36 @@ export default function Navbar() {
       {/* Desktop Links */}
       <div className="hidden md:flex items-center gap-4">
         {["admin", "superAdmin"].includes(user?.role) && (
-        <NavLink to="/ContractClient" className={linkStyle}>
-          Contracts
-        </NavLink>
+          <NavLink to="/ContractClient" className={linkStyle}>
+            Contracts
+          </NavLink>
         )}
         {["client"].includes(user?.role) && (
-        <NavLink to="/Contracts" className={linkStyle}>
-          Contract
-        </NavLink>
+          <NavLink to="/Contracts" className={linkStyle}>
+            Contract
+          </NavLink>
         )}
         <NavLink to="/Balance" className={linkStyle}>
           Balance
         </NavLink>
         {["admin", "superAdmin"].includes(user?.role) && (
           <NavLink to="/Bills" className={linkStyle}>
-          Bills
-        </NavLink>
+            Bills
+          </NavLink>
         )}
         {["client"].includes(user?.role) && (
-        <NavLink to="/order" className={linkStyle}>
-          Orders
-        </NavLink>
+          <NavLink to="/order" className={linkStyle}>
+            Orders
+          </NavLink>
         )}
-        
+
         <NavLink to="/Invoices" className={linkStyle}>
           Invoices
         </NavLink>
         <NavLink to="/product" className={linkStyle}>
           Product
         </NavLink>
-         {["admin", "superAdmin"].includes(user?.role) && (
+        {["admin", "superAdmin"].includes(user?.role) && (
           <NavLink to="/TaxList" className={linkStyle}>
             Tax
           </NavLink>
@@ -75,15 +75,6 @@ export default function Navbar() {
       {/* Right Side */}
       <div className="flex items-center gap-4 ">
         <div className="hidden md:block">
-          {/* add product for superAdmin */}
-          <NavLink
-            to="/AddProduct"
-            className={linkStyle}>
-            {["admin", "superAdmin"].includes(user?.role) && (
-              <i className="fa-solid fa-plus"></i>
-            )}
-          </NavLink>
-
           <NavLink
             to="/orderToday"
             className={linkStyle}>
@@ -105,7 +96,6 @@ export default function Navbar() {
 
         </div>
 
-        {/* mobile */}
         <button
           onClick={() => setOpen(!open)}
           className="text-xl text-white cursor-pointer hover:text-orange-500 md:hidden"
@@ -114,7 +104,6 @@ export default function Navbar() {
         </button>
 
 
-        {/* Menu (optional dropdown - language) */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="text-xl text-white cursor-pointer hover:text-orange-500 hidden md:block"

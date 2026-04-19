@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getProducts, deleteProduct } from "../context/services/productService";
 import { NavLink } from "react-router-dom";
 import toast from "react-hot-toast";
-import { handleApiErrors} from "../utils/handleApiErrors"
+import { handleApiErrors } from "../utils/handleApiErrors"
 
 export default function ProductsList() {
   const [products, setProducts] = useState([]);
@@ -44,12 +44,12 @@ export default function ProductsList() {
 
         {/* Header */}
         <div className="flex justify-between items-center">
-          <button
-            className="text-white text-2xl font-bold cursor-pointer hover:text-orange-500"
-            onClick={() => window.history.back()}
+          <NavLink
+            to="/AddProduct"
+            className="border border-orange-500 text-orange-400 cursor-pointer px-4 py-2 rounded hover:bg-orange-500/10 text-sm"
           >
-            <i className="fa-solid fa-arrow-left"></i>
-          </button>
+            Add Product
+          </NavLink>
         </div>
 
         {/* List */}
