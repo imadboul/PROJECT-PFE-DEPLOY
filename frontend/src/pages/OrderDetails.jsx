@@ -156,7 +156,7 @@ export default function OrderDetails() {
 
               <p>
                 <strong>contract:</strong>{" "}
-                {selectedBill.contract}
+                {selectedBill.contract.id} - {selectedBill.contract.product_type}
               </p>
               <p>
                 <strong>Pick Up Date:</strong>{" "}

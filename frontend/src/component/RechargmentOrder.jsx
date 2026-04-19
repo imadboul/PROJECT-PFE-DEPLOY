@@ -35,7 +35,7 @@ export default function RechargmentOrder() {
                 if (!order) { toast.error("Order not found"); return; }
 
                 setSelectedOrder(order);
-                setSelectedContract({ id: order.contract });
+                setSelectedContract({ contract: order.contract.id , product_type: order.contract.product_type });
 
                 setProducts(
                     order.order_orderProduct_items.map(i => ({
@@ -117,17 +117,17 @@ export default function RechargmentOrder() {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <div className="p-2 bg-black/30 text-white rounded border border-white/20">
-                        <span className="text-white/50 text-sm">Contract:</span>{" "}
-                        {selectedContract ? `${selectedContract.id} - ${selectedOrder.order_orderProduct_items?.[0]?.product?.product_type}` : "-"}
+                        <span className="text-white text-sm">Contract:</span>{" "}
+                        {selectedContract ? `${selectedContract.contract} - ${selectedContract.product_type}` : "-"}
                     </div>
 
                     <div className="p-2 bg-black/30 text-white rounded border border-white/20">
-                        <span className="text-white/50 text-sm">Chargement Order:</span>{" "}
+                        <span className="text-white text-sm">Order:</span>{" "}
                         {selectedOrder ? `${selectedOrder.id}` : "-"}
                     </div>
 
                     <div className="py-2 px-4 bg-black/30 text-sm text-white rounded border border-white/20">
-                        <span className="text-white/50 text-sm">Client:</span>{" "}
+                        <span className="text-white text-sm">Client:</span>{" "}
                         {selectedOrder ? `${selectedOrder.client_lastName} ${selectedOrder.client_firstName}` : "-"}
                     </div>
                 </div>
@@ -166,7 +166,7 @@ export default function RechargmentOrder() {
                                 <input
                                     type="number"
                                     placeholder="Qte"
-                                    value={p.qte}
+                                    
                                     onChange={(e) => handleChange(i, "qte", e.target.value)}
                                     className="w-1/3 p-2 bg-black/30 text-white border border-white/20 rounded placeholder:text-white/40 focus:outline-none focus:border-orange-500"
                                 />
@@ -193,7 +193,7 @@ export default function RechargmentOrder() {
                                         placeholder: (base) => ({ ...base, color: "rgba(255,255,255,0.4)" }),
                                     }}
                                     onChange={(val) => handleChange(i, "unit", val.value)}
-                                    value={unitOptions.find(u => u.value === p.unit) || null}
+                                   
                                 />
                             </div>
                         ))
@@ -203,7 +203,7 @@ export default function RechargmentOrder() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full mt-6 bg-orange-600 text-white py-2 rounded hover:bg-orange-700 cursor-pointer disabled:opacity-50 transition"
+                    className="w-full mt-6 bg-orange-600 font-bold text-white py-2 rounded hover:bg-orange-700 cursor-pointer disabled:opacity-50 transition"
                 >
                     {loading ? "Loading..." : "Rechargement Order"}
                 </button>

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
-
 import { getContracts } from "../context/services/contractService";
 import { getOrders } from "../context/services/orderService";
 import { getProducts } from "../context/services/productService";
@@ -52,32 +51,30 @@ export default function ChargmentOrder() {
   }, []);
 
   useEffect(() => {
+  if (!id || !orders.length || !allProducts.length) return;
 
-    if (!id || !orders.length || !contracts.length || !allProducts.length) return;
+  const order = orders.find(o => o.id == id);
+  if (!order) return;
 
-    const order = orders.find(o => o.id == id);
-    if (!order) return;
+  const contract = order.contract;
 
-    const contract = contracts.find(c => c.id == order.contract);
-    if (!contract) return;
+  setSelectedOrder(order);
+  setSelectedContract(contract);
 
-    setSelectedOrder(order);
-    setSelectedContract(contract);
+  const filteredProducts = allProducts.filter(
+    p => p.product_type === contract.product_type
+  );
 
-    const filteredProducts = allProducts.filter(
-      p => p.product_type === contract.product_type
-    );
+  setProducts(
+    filteredProducts.map(p => ({
+      product: p.id,
+      productName: p.name,
+      qte: "",
+      unit: null
+    }))
+  );
 
-    setProducts(
-      filteredProducts.map(p => ({
-        product: p.id,
-        productName: p.name,
-        qte: "",
-        unit: null
-      }))
-    );
-
-  }, [id, orders, contracts, allProducts]);
+}, [id, orders, allProducts]);
 
 
   const handleChange = (i, field, value) => {
@@ -147,7 +144,7 @@ export default function ChargmentOrder() {
 
         {/* CONTRACT */}
         <div className="p-2 mb-3 bg-black/30 text-white rounded border">
-          Contract: {selectedContract ? `${selectedContract.id}` : "-"}
+          Contract: {selectedContract ? `${selectedContract.id} - ${selectedContract.product_type}` : "-"}
         </div>
 
         {/* ORDER */}
@@ -216,7 +213,7 @@ export default function ChargmentOrder() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full mt-5 bg-orange-600 py-2 rounded hover:bg-orange-700"
+          className="w-full mt-5 bg-orange-600 text-white font-bold cursor-pointer py-2 rounded hover:bg-orange-700"
         >
           {loading ? "Loading..." : "Chargement Order"}
         </button>

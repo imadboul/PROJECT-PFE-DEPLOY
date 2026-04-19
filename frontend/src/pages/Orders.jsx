@@ -170,7 +170,7 @@ export default function OrderList() {
 
                 <p>
                   <strong>contract:</strong>{" "}
-                  {o.contract}
+                  {o.contract.id} - {o.contract.product_type}
                 </p>
               </div>
 
