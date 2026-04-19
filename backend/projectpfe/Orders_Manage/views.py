@@ -13,6 +13,7 @@ from user.wraps import *
 from projectpfe.utils.response import success_response,paginated_response,MyPagination
 from django.utils.decorators import method_decorator
 from django.db import connection
+from order_client.chackblc import total_price
 
 
 #@method_decorator(jwt_must, name='dispatch')
@@ -99,18 +100,15 @@ class OrderListView(generics.ListAPIView):
        
  
          
-@api_view(['PUT'])     
+@api_view(['POST'])     
 def inValid(request):
-    order=Order.objects.prefetch_related(
-                     'order_orderProduct_items__product__product_taxProduct_items',
-                     'client__client_balances',
-                     'contract__product_type',
-                     'contract__contract_invoice_items__invoice_InvoiceLine_items'
-                     
-                    ).select_related('invoice').all()
+    order = Orderclient.objects.get(id= 13)
+    total = total_price(order.orderclient_Orderproductclient_items.all())
+    print(total)
+    check = check_if_enough(total,order.client_id,order.contract.product_type)
+        
     
-    minus_balances(order)   
-    return Response({'data':'bouklia'})
+    return Response({'data':check})
             
 
     

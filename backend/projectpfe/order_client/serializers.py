@@ -5,6 +5,8 @@ from catalog.models import Client,Contract,ProductType,Product
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from finance.views import check_if_enough
+from Tax_Service.taxCalcul import convert_unit
+from .chackblc import total_price
 
 from datetime import date
 
@@ -96,28 +98,11 @@ class OrderSerializer(serializers.ModelSerializer):
         fields=['contract','orderclient_Orderproductclient_items']
         
         
-    def validate_orderclient_Orderproductclient_items(self, value):
-       total_qte = 0
-       total_price = 0
-       
-       for item in value:
-           qte = item.get('qte', 0)
-           product = item.get('product')
-
-           total_qte += qte 
-           total_price += product.unit_price * qte   #order (1)
-
-       self.total_qte = total_qte
-       self.total_price = total_price
-
-       return value
         
     def validate(self, data):
         request_user_id = self.context.get('user_id') 
         
         contract = data.get('contract')
-        total_qte = getattr(self, 'total_qte', 0)
-        total_price = getattr(self, 'total_price', 0)
         
         
         if not contract:
@@ -128,23 +113,35 @@ class OrderSerializer(serializers.ModelSerializer):
 
         if contract.state != 'validated':
             raise serializers.ValidationError("contract is not validated")
+        total_qte = 0
+        
+        
         for item in data.get('orderclient_Orderproductclient_items'):
+           qte = item.get('qte', 0)
+           unit = item.get('unit')
+           
            product = item.get('product')
+
            if product.product_type != contract.product_type:
                raise serializers.ValidationError(f"product {product.id } is not included in the contract")
-    
 
-        print(  total_qte)
-        print(contract.qte_rest())
-        print(type(total_qte), total_qte)
-        print(type(contract.qte_rest()), contract.qte_rest())
+           total_qte +=  convert_unit(qte,product.density,unit,contract.unit )
+           
+
+    
         if total_qte > contract.qte_rest():
-            print('karim')
+            
             raise serializers.ValidationError(
-                f"declared quantity ({ self.total_qte}) is larger than the quantity left in the contract ({contract.qte_rest()})"
+                f"declared quantity ({ total_qte}) is larger than the quantity left in the contract ({contract.qte_rest()})"
             )
-        print(total_price)
-        check = check_if_enough(total_price,request_user_id,contract.product_type)
+        
+        print(data.get('orderclient_Orderproductclient_items'))
+        total = total_price(data.get('orderclient_Orderproductclient_items'))
+        print('helllllllllllllllllll')
+        print(total)
+        
+        check = check_if_enough(total,request_user_id,contract.product_type)
+        
         print('karim2')
         if not check['success']:
             raise serializers.ValidationError(check['message'])

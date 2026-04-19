@@ -1,4 +1,5 @@
 from Tax_Service.taxCalcul import convert_unit
+from .models import *
 
 
      
@@ -8,6 +9,7 @@ def total_price(ordersProduct):
         for orderProduct in ordersProduct:
             Tva=0
             taxActiv=[]
+            
             
             for tax in orderProduct.product.product_taxProduct_items.all():
             
@@ -30,7 +32,6 @@ def tax_price(taxActiv,orderProduct,Tva):
         
         total_tax=0 
         
-        type=orderProduct.order.type
         
         
         for tax in taxActiv:
