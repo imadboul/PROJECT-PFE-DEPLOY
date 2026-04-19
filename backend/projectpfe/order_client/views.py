@@ -147,7 +147,7 @@ def validateorder(request):
             order.pickup_date = serializer.validated_data['pickup_date'] # type: ignore
             order.validated_by_id = request.user_id  # type: ignore
             order.save()
-            notify_a_client(order.client_id,'ORDER UPDATE',f'your order {order.id} has been validated by an admin do not forget the order notice pick up is on {order.pickup_date}',f'http://localhost:5173/order/{order.id}') # type: ignore
+            notify_a_client(order.client_id,'ORDER UPDATE',f'your order {order.id} has been {serializer.validated_data['state']} by an admin do not forget the order notice pick up is on {order.pickup_date}',f'http://localhost:5173/order/{order.id}') # type: ignore
 
             return success_response(
                 message="Order validated successfully",

@@ -6,7 +6,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from finance.views import check_if_enough
 from Tax_Service.taxCalcul import convert_unit
-from .chackblc import total_price
+from .chackblc import total_price, total_priceobject
 
 from datetime import date
 
@@ -135,14 +135,19 @@ class OrderSerializer(serializers.ModelSerializer):
                 f"declared quantity ({ total_qte}) is larger than the quantity left in the contract ({contract.qte_rest()})"
             )
         
-        print(data.get('orderclient_Orderproductclient_items'))
-        total = total_price(data.get('orderclient_Orderproductclient_items'))
+        sum = 0
+        for order in contract.client.client_Ordersclient_items.filter(state__in=[States.PENDING, States.ACCEPTED]).all():
+            sum += total_priceobject(order.orderclient_Orderproductclient_items.all())
+        total = total_price(data.get('orderclient_Orderproductclient_items')) + sum
         print('helllllllllllllllllll')
         print(total)
         
+
+        
+        
         check = check_if_enough(total,request_user_id,contract.product_type)
         
-        print('karim2')
+        
         if not check['success']:
             raise serializers.ValidationError(check['message'])
             
