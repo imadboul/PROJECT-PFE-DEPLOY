@@ -184,7 +184,7 @@ class OrderreadSerializer(serializers.ModelSerializer):
     client = serializers.CharField(source ="client.lastName")
     client_id = serializers.CharField(source ="client.id")
     orderclient_Orderproductclient_items = OrderProductreadSerializer(many=True)
-    conttract=contractSerializerOne()
+    contract=contractSerializerOne()
 
     class Meta:
         model=Orderclient
