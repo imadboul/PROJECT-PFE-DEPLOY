@@ -202,7 +202,7 @@ export default function OrderDetails() {
                           className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
                           bg-green-700 hover:bg-green-800 text-white transition"
                         >
-                          ✓
+                          <i className="fa-solid fa-check text-sm"></i>
                         </button>
 
                         <button
@@ -210,7 +210,7 @@ export default function OrderDetails() {
                           className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
                           bg-red-700 hover:bg-red-800 text-white transition"
                         >
-                          ✕
+                          <i className="fa-solid fa-xmark text-sm"></i>
                         </button>
                       </>
                     )}
