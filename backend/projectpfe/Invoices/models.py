@@ -4,8 +4,8 @@ from catalog.models import Contract,Product
 from Tax_Service.models import TaxProduct
 from user.models import Client
 class StatesInv(models.TextChoices):
-    VALID='valid','Valid'
-    NO_VALID='no_valid','No_Valid'
+    VALID='validated','Validated'
+    NO_VALID='pending','Pending'
 
 
 class Invoice(models.Model):
