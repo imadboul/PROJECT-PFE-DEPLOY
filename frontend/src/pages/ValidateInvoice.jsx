@@ -77,7 +77,7 @@ export default function ValidateInvoice() {
 
     try {
       setLoading(true);
-      const payload = mode === "v_all" ? { ids: [] } : { ids: selectedIds };
+      const payload = mode === "v_all" ? { ids: [0] } : { ids: selectedIds };
       await validateInvoices(mode, payload);
       toast.success("Invoices validated successfully");
       setSelectedIds([]);
