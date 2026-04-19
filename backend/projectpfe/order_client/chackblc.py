@@ -3,13 +3,12 @@ from .models import *
 
 
      
-def total_price(ordersProduct):
+def total_priceobject(ordersProduct):
         
         TTC=0
         for orderProduct in ordersProduct:
             Tva=0
             taxActiv=[]
-            
             
             for tax in orderProduct.product.product_taxProduct_items.all():
             
@@ -20,14 +19,14 @@ def total_price(ordersProduct):
                      Tva=tax.par_unit
         
             
-            TTC+=tax_price(taxActiv,orderProduct,Tva)
+            TTC+=tax_priceobject(taxActiv,orderProduct,Tva)
         print(TTC)
         return TTC     
               
             
         
     
-def tax_price(taxActiv,orderProduct,Tva):
+def tax_priceobject(taxActiv,orderProduct,Tva):
         
         
         total_tax=0 
@@ -50,4 +49,62 @@ def tax_price(taxActiv,orderProduct,Tva):
         
         
         return TTC  
+    
+    
+    
+    
+    
+
+
+
+     
+def total_price(ordersProduct):
+        
+        TTC=0
+        for orderProduct in ordersProduct:
+            Tva=0
+            taxActiv=[]
+            
+            product = orderProduct.get('product')
+            for tax in product.product_taxProduct_items.all():
+            
+                if tax.is_active==True and tax.tax.name!="TVA":
+                    taxActiv.append({  "name":tax.tax.name , "unit":tax.unit , "par_unit":tax.par_unit })
+                    
+                elif tax.is_active==True and tax.tax.name=="TVA":
+                     Tva=tax.par_unit
+        
+            
+            TTC+=tax_price(taxActiv,orderProduct,Tva)
+        print(TTC)
+        return TTC     
+              
+            
+        
+    
+def tax_price(taxActiv,orderProduct,Tva):
+        
+        
+        total_tax=0 
+        
+        product = orderProduct.get('product')
+        
+        for tax in taxActiv:
+            
+            
+            unit_l=convert_unit(orderProduct.get('qte'),product.density,orderProduct.get('unit'),tax['unit'])
+                    
+            tax_price=unit_l*tax['par_unit']
+            
+            total_tax+=tax_price 
+               
+           
+       
+        qte_unit=convert_unit(orderProduct.get('qte'),product.density,orderProduct.get('unit'),product.unit) 
+        
+        TTC=((qte_unit*product.unit_price)+total_tax)*(1+Tva/100)
+        
+        
+        return TTC  
+    
     
