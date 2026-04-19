@@ -173,7 +173,7 @@ export default function OrderToday() {
                   <div className="md:flex items-center justify-between">
                     <p>
                       <strong>Client:</strong>{" "}
-                      {o._type === "accepted" ? o.client : o.client_firstName + " " + o.client_lastName}
+                      {o.client_firstName + " " + o.client_lastName}
                     </p>
                     <p>
                       <strong>Contract:</strong> {o.contract.id + " - " + o.contract.product_type}
