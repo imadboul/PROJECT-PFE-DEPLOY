@@ -8,8 +8,7 @@ import {
 } from "../context/services/orderService";
 import { useNotifications } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
-import { handleApiErrors } from "../utils/handleApiErrors"
-
+import { handleApiErrors } from "../utils/handleApiErrors";
 
 export default function OrderDetails() {
   const { id } = useParams();
@@ -20,14 +19,11 @@ export default function OrderDetails() {
   const [pickupDate, setPickupDate] = useState("");
   const { user } = useContext(AuthContext);
 
-
   const fetchOrder = async () => {
     try {
       setLoading(true);
-
       const res = await getOrderById(id);
       const data = res.data.data.order;
-
       setOrder(data);
     } catch (error) {
       handleApiErrors(error);
@@ -52,11 +48,9 @@ export default function OrderDetails() {
       }
 
       const formattedDate = formatDate(pickupDate);
-
       await validateOrder(id, formattedDate);
 
       toast.success("Order validated");
-
       setPickupDate("");
       setSelectedBill(null);
       fetchOrder();
@@ -94,146 +88,139 @@ export default function OrderDetails() {
           <h1 className="text-white text-xl font-bold">Bills</h1>
         </div>
 
-
         {/* CARD */}
-        <div onClick={() => setSelectedBill(order)}
-          className="cursor-pointer bg-black/50 text-white rounded-2xl p-5 border hover:bg-black/80 transition">
-
+        <div
+          onClick={() => setSelectedBill(order)}
+          className="cursor-pointer bg-black/50 text-white rounded-2xl p-5 border hover:bg-black/80 transition"
+        >
           <div className="space-y-2 text-sm">
+
             <p className="text-lg font-semibold">
-              <strong>Order:</strong>{" "}
-              {order.id}
+              <strong>Order:</strong> {order.id}
             </p>
 
             <div className="md:flex items-center justify-between">
               <p>
                 <strong>client:</strong>{" "}
-                {order.client}
+                {order.client?.id || order.client}
               </p>
 
               <p>
                 <strong>contract:</strong>{" "}
-                {order.contract}
+                {order.contract?.id} - {order.contract?.product_type}
               </p>
             </div>
-              <p
-                 className={
-                    order.state === "validated"
-                      ? "text-green-500"
-                      : order.state === "rejected"
-                        ? "text-red-500"
-                        : order.state === "accepted"
-                          ? "text-orange-500"
-                          : "text-gray-500"
-                  }
-              >
-                <strong className="text-white">State:</strong>{" "}
-                {order.state}
-              </p>
 
+            <p
+              className={
+                order.state === "validated"
+                  ? "text-green-500"
+                  : order.state === "rejected"
+                  ? "text-red-500"
+                  : order.state === "accepted"
+                  ? "text-orange-500"
+                  : "text-gray-500"
+              }
+            >
+              <strong className="text-white">State:</strong> {order.state}
+            </p>
 
-            </div>
           </div>
         </div>
-      {/* MODAL */}
-      {selectedBill && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-black border border-white text-white p-6 rounded-xl w-[350px] relative">
 
-            <button
-              onClick={() => setSelectedBill(null)}
-              className="absolute top-2 right-3 text-white cursor-pointer hover:text-red-500"
-            >
-              ✕
-            </button>
+        {/* MODAL */}
+        {selectedBill && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+            <div className="bg-black border border-white text-white p-6 rounded-xl w-[350px] relative">
 
-            <div className="space-y-2 text-sm">
+              <button
+                onClick={() => setSelectedBill(null)}
+                className="absolute top-2 right-3 text-white cursor-pointer hover:text-red-500"
+              >
+                ✕
+              </button>
 
-              <p>
-                <strong>client:</strong>{" "}
-                {selectedBill.client}
-              </p>
+              <div className="space-y-2 text-sm">
 
-              <p>
-                <strong>contract:</strong>{" "}
-                {selectedBill.contract.id} - {selectedBill.contract.product_type}
-              </p>
-              <p>
-                <strong>Pick Up Date:</strong>{" "}
-                {selectedBill.pickup_date}
-              </p>
+                <p>
+                  <strong>client:</strong>{" "}
+                  {selectedBill.client?.id || selectedBill.client}
+                </p>
 
-              {selectedBill.orderclient_Orderproductclient_items?.length > 0
-                ? selectedBill.orderclient_Orderproductclient_items.map((p, i) => (
-                  <div key={i} className="text-xs">
-                    Product: {p.product} | Qte: {p.qte} {p.unit}
-                  </div>
-                ))
-                : "No products"}
+                <p>
+                  <strong>contract:</strong>{" "}
+                  {selectedBill.contract?.id} - {selectedBill.contract?.product_type}
+                </p>
 
-              <p
-                   className={
+                <p>
+                  <strong>Pick Up Date:</strong>{" "}
+                  {selectedBill.pickup_date || "Not set"}
+                </p>
+
+                {selectedBill.orderclient_Orderproductclient_items?.length > 0
+                  ? selectedBill.orderclient_Orderproductclient_items.map((p, i) => (
+                      <div key={i} className="text-xs">
+                        Product: {p.product?.id || p.product} | Qte: {p.qte} {p.unit}
+                      </div>
+                    ))
+                  : "No products"}
+
+                <p
+                  className={
                     selectedBill.state === "validated"
                       ? "text-green-500"
                       : selectedBill.state === "rejected"
-                        ? "text-red-500"
-                        : selectedBill.state === "accepted"
-                          ? "text-orange-500"
-                          : "text-gray-500"
+                      ? "text-red-500"
+                      : selectedBill.state === "accepted"
+                      ? "text-orange-500"
+                      : "text-gray-500"
                   }
-              >
-                <strong className="text-white">State:</strong>{" "}
-                {selectedBill.state}
+                >
+                  <strong className="text-white">State:</strong>{" "}
+                  {selectedBill.state}
+                </p>
 
-              </p>
-
-              {/* Actions */}
+                {/* Actions */}
                 {selectedBill.state === "pending" && (
-                <div className="mb-4">
-                  <label className="text-sm">Pickup Date</label>
-                  <input
-                    type="date"
-                    value={pickupDate}
-                    onChange={(e) => setPickupDate(e.target.value)}
-                    className="w-full p-2 mt-1 rounded bg-white/20 text-white"
-                  />
-                </div>
-              )}
+                  <div className="mb-4">
+                    <label className="text-sm">Pickup Date</label>
+                    <input
+                      type="date"
+                      value={pickupDate}
+                      onChange={(e) => setPickupDate(e.target.value)}
+                      className="w-full p-2 mt-1 rounded bg-white/20 text-white"
+                    />
+                  </div>
+                )}
 
                 <div className="flex gap-4">
-                  {selectedBill.state === "pending" && (
-                    <>
-                      {["admin", "superAdmin"].includes(user?.role) && (
-                        <>
-                          <button
-                            onClick={() => handleValidate(selectedBill.id)}
-                            className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
-                           bg-green-700 hover:bg-green-800 
-                           text-white transition"
-                          >
-                            <i className="fa-solid fa-check text-sm"></i>
-                          </button>
+                  {selectedBill.state === "pending" &&
+                    ["admin", "superAdmin"].includes(user?.role) && (
+                      <>
+                        <button
+                          onClick={handleValidate}
+                          className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                          bg-green-700 hover:bg-green-800 text-white transition"
+                        >
+                          ✓
+                        </button>
 
-                          <button
-                            onClick={() => handleReject(selectedBill.id)}
-                            className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
-                           bg-red-700 hover:bg-red-800 
-                           text-white transition"
-                          >
-                            <i className="fa-solid fa-xmark text-sm"></i>
-                          </button>
-                        </>
-                      )}
-                    </>
-                  )}
-
+                        <button
+                          onClick={handleReject}
+                          className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                          bg-red-700 hover:bg-red-800 text-white transition"
+                        >
+                          ✕
+                        </button>
+                      </>
+                    )}
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
-      )}
+        )}
+      </div>
     </div>
-
   );
 }

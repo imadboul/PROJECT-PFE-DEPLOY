@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { handleApiErrors } from "../utils/handleApiErrors";
 import { getInvoices, getInvoicePDF } from "../context/services/invoiceService";
+import { AuthContext } from "../context/AuthContext";
 
 export default function InvoiceList() {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showValid, setShowValid] = useState(true);
+  const { user } = useContext(AuthContext);
 
   const fetchInvoices = async () => {
     try {
@@ -55,13 +57,14 @@ export default function InvoiceList() {
           >
             {showValid ? "Show Pending" : "Show Validated"}
           </button>
-
+          {["admin", "superAdmin"].includes(user?.role) && (
           <NavLink
             to="/ValidateInvoice"
             className="border border-orange-500 text-orange-400 cursor-pointer px-4 py-2 rounded hover:bg-orange-500/10 text-sm"
           >
             <i className="fa-solid fa-check mr-1"></i> Validate
           </NavLink>
+          )}
         </div>
 
         {/* List */}
