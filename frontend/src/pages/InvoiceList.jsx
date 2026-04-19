@@ -119,7 +119,7 @@ export default function InvoiceList() {
               <p className="text-lg font-semibold">Client: {selectedInvoice.client_firstName} {selectedInvoice.client_lastName}</p>
               <p><strong>Type:</strong> {selectedInvoice.type}</p>
 
-              <p className={selectedInvoice.states === "valid" ? "text-green-500" : "text-orange-400"}>
+              <p className={selectedInvoice.states === "validated" ? "text-green-500" : "text-orange-400"}>
                 <strong className="text-white">State:</strong> {selectedInvoice.states}
               </p>
 
@@ -159,7 +159,7 @@ export default function InvoiceList() {
               )}
 
               {/* PDF Button */}
-              {selectedInvoice.states === "valid" && (
+              {selectedInvoice.states === "validated" && (
                 <div className="flex justify-end mt-3">
                   <button
                     onClick={() => viewPDF(selectedInvoice.id)}
