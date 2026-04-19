@@ -101,7 +101,11 @@ export default function InvoiceList() {
                   {inv.states}
                 </span>
               </div>
-              <p className="text-lg font-semibold">Client: {inv.client_firstName} {inv.client_lastName}</p>
+              <div className="flex justify-between">
+                <p className="text-lg font-semibold">Client: {inv.client_firstName} {inv.client_lastName}</p>
+                <p className="text-lg font-semibold">Contract: {inv.contract?.id} - {inv.contract?.product_type}</p>
+              </div>
+
               <div className="md:flex justify-between">
                 <p><strong>Type:</strong> {inv.type}</p>
                 <p><strong>Date:</strong> {inv.date_de_facteration
