@@ -29,13 +29,14 @@ class ValidateInvoice(generics.UpdateAPIView):
                                 nbi=Invoice.objects.filter(contract__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
                
                            case "v_client":
-                                nbi=Invoice.objects.filter(contract__client__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
-                                
+                                nbi=Invoice.objects.filter(contract__client__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())  
                            case "v_product_type":
                                 nbi=Invoice.objects.filter(contract__product_type__id__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
                            case "v_all":
                                 nbi=Invoice.objects.filter(states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
-                                      
+                           case "v_id":
+                                nbi=Invoice.objects.filter(id__in=ids , states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
+                                  
                  return Response({"data":"Invoices validated successfully","nbr invoice validated":nbi})
              
 class InvoiceValidatedList(generics.ListAPIView):

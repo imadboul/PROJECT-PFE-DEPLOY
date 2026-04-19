@@ -20,7 +20,7 @@ def total_priceobject(ordersProduct):
         
             
             TTC+=tax_priceobject(taxActiv,orderProduct,Tva)
-        print(TTC)
+        
         return TTC     
               
             
