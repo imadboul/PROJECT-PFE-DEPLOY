@@ -77,12 +77,12 @@ export default function InvoiceList() {
           >
             <div className="space-y-2 text-sm">
               <div className="flex justify-between items-center">
-                <p className="text-lg font-semibold">Invoice #{inv.id}</p>
+                <p className="text-lg font-semibold">Invoice {inv.id}</p>
                 <span className={inv.states === "valid" ? "text-green-500 text-xs" : "text-orange-400 text-xs"}>
                   {inv.states}
                 </span>
               </div>
-
+              <p className="text-lg font-semibold">Client: {inv.client_firstName} {inv.client_lastName}</p>
               <div className="md:flex justify-between">
                 <p><strong>Type:</strong> {inv.type}</p>
                 <p><strong>Date:</strong> {inv.date_de_facteration
@@ -112,8 +112,8 @@ export default function InvoiceList() {
             >✕</button>
 
             <div className="space-y-2 text-sm">
-              <p className="text-lg font-bold">Invoice #{selectedInvoice.id}</p>
-
+              <p className="text-lg font-bold">Invoice {selectedInvoice.id}</p>
+              <p className="text-lg font-semibold">Client: {selectedInvoice.client_firstName} {selectedInvoice.client_lastName}</p>
               <p><strong>Type:</strong> {selectedInvoice.type}</p>
 
               <p className={selectedInvoice.states === "valid" ? "text-green-500" : "text-orange-400"}>
