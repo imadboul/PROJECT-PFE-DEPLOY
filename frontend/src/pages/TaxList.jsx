@@ -20,7 +20,6 @@ export default function TaxList() {
             setTaxProducts(resProd.data.data.results);
         } catch (error) {
             handleApiErrors(error);
-            toast.error("Failed to load data");
         } finally {
             setLoading(false);
         }
@@ -41,22 +40,23 @@ export default function TaxList() {
                 <h1 className="text-white text-xl font-bold">Taxes</h1>
 
                 <div className="flex justify-between items-center">
-                    <div className="flex gap-3 items-center">
-                        <button
-                            onClick={() => { setView(v => v === "tax" ? "tax_product" : "tax");
-                                 setSelectedItem(null); }}
-                            className="border border-white text-white cursor-pointer px-4 py-2 rounded hover:bg-white/10 text-sm"
-                        >
-                            {view === "tax" ? "Show Tax Products" : "Show Taxes"}
-                        </button>
 
-                        <NavLink
-                            to="/AddTax"
-                            className="border border-orange-500 text-orange-400 cursor-pointer px-4 py-2 rounded hover:bg-orange-500/10 text-sm"
-                        >
-                            <i className="fa-solid fa-plus mr-1"></i> New Tax
-                        </NavLink>
-                    </div>
+                    <button
+                        onClick={() => {
+                            setView(v => v === "tax" ? "tax_product" : "tax");
+                            setSelectedItem(null);
+                        }}
+                        className="border border-white text-white cursor-pointer px-4 py-2 rounded hover:bg-white/10 text-sm"
+                    >
+                        {view === "tax" ? "Show Tax Products" : "Show Taxes"}
+                    </button>
+
+                    <NavLink
+                        to="/AddTax"
+                        className="border border-orange-500 text-orange-400 cursor-pointer px-4 py-2 rounded hover:bg-orange-500/10 text-sm"
+                    >
+                        Add Tax
+                    </NavLink>
                 </div>
 
                 {list.length === 0 && (
