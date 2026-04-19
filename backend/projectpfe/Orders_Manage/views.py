@@ -21,9 +21,6 @@ class OrderCreateView(generics.CreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     
-
-        
-    
     def create(self,request,*args,**kwargs):
     
             serializer=self.get_serializer(data=request.data)
