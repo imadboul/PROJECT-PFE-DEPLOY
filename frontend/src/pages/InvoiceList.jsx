@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { handleApiErrors } from "../utils/handleApiErrors";
-import { getInvoices, getInvoicePDF } from "../context/services/invoiceService";
+import { getInvoices, getInvoicePDF, validateInvoicesById } from "../context/services/invoiceService";
 import { AuthContext } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function InvoiceList() {
   const [invoices, setInvoices] = useState([]);
@@ -24,6 +25,21 @@ export default function InvoiceList() {
   };
 
   useEffect(() => { fetchInvoices(); }, []);
+
+  const handleValidate = async (id) => {
+    try {
+      setLoading(true);
+      await validateInvoicesById(id);
+      toast.success("Invoices validated successfully");
+      setSelectedInvoice(null);
+      fetchInvoices();
+    } catch (error) {
+      handleApiErrors(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const viewPDF = async (id) => {
     try {
@@ -58,12 +74,12 @@ export default function InvoiceList() {
             {showValid ? "Show Pending" : "Show Validated"}
           </button>
           {["admin", "superAdmin"].includes(user?.role) && (
-          <NavLink
-            to="/ValidateInvoice"
-            className="border border-orange-500 text-orange-400 cursor-pointer px-4 py-2 rounded hover:bg-orange-500/10 text-sm"
-          >
-            <i className="fa-solid fa-check mr-1"></i> Validate
-          </NavLink>
+            <NavLink
+              to="/ValidateInvoice"
+              className="border border-orange-500 text-orange-400 cursor-pointer px-4 py-2 rounded hover:bg-orange-500/10 text-sm"
+            >
+              <i className="fa-solid fa-check mr-1"></i> Validate
+            </NavLink>
           )}
         </div>
 
@@ -156,6 +172,22 @@ export default function InvoiceList() {
                     </div>
                   ))}
                 </div>
+              )}
+
+              {selectedInvoice.states === "pending" && (
+                <>
+                  {["admin", "superAdmin"].includes(user?.role) && (
+
+                    <button
+                      onClick={() => handleValidate(selectedInvoice.id)}
+                      className="flex items-center justify-center cursor-pointer w-7 h-7 rounded-full 
+                           bg-green-700 hover:bg-green-800 text-white transition"
+                    >
+                      <i className="fa-solid fa-check text-sm"></i>
+                    </button>
+
+                  )}
+                </>
               )}
 
               {/* PDF Button */}
