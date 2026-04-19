@@ -41,8 +41,8 @@ class ValidateInvoice(generics.UpdateAPIView):
 class InvoiceValidatedList(generics.ListAPIView):
     
     def get(self, request, *args, **kwargs):
-        clients = Client.objects.prefetch_related('client_contracts')
-        product_types = ProductType.objects.all()
+        clients = Client.objects.filter(client_contracts__contract_invoice_items__states=StatesInv.NO_VALID).distinct()
+        product_types = ProductType.objects.filter(contracts__contract_invoice_items__states=StatesInv.NO_VALID).distinct()
 
         response = {
             "clients": clientSerializerOne(clients, many=True).data,
