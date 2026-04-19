@@ -9,7 +9,7 @@ export default function OrderToday() {
   const [allOrders, setAllOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [activeTab, setActiveTab] = useState("accepted");
+  const [activeTab, setActiveTab] = useState("loading");
 
   const getToday = () => new Date().toISOString().split("T")[0];
 
@@ -43,13 +43,15 @@ export default function OrderToday() {
           const hasChargement = dataAdmin.some((c) => c.client_order === o.id);
           return !hasChargement;
         })
-        .map((o) => ({ ...o, _type: "accepted" }));
+        .map((o) => ({ ...o, _type: "accepted" }))
+        .sort((a, b) => b.id - a.id)
 
       const loadingOrders = dataAdmin
         .filter((o) =>
           o.date_created?.split("T")[0] === today && o.states === "loading"
         )
-        .map((o) => ({ ...o, _type: "loading" }));
+        .map((o) => ({ ...o, _type: "loading" }))
+        .sort((a, b) => b.id - a.id)
 
 
       const validatedOrders =
@@ -57,7 +59,8 @@ export default function OrderToday() {
           .filter((o) =>
             o.date_created?.split("T")[0] === today && o.states === "validated"
           )
-          .map((o) => ({ ...o, _type: "validated" }));
+          .map((o) => ({ ...o, _type: "validated" }))
+          .sort((a, b) => b.id - a.id)
 
       setAllOrders({ acceptedOrders, loadingOrders, validatedOrders });
 
@@ -173,7 +176,7 @@ export default function OrderToday() {
                       {o._type === "accepted" ? o.client : o.client_firstName + " " + o.client_lastName}
                     </p>
                     <p>
-                      <strong>Contract:</strong> {o.contract}
+                      <strong>Contract:</strong> {"contract" + o.contract + "-" + o.order_orderProduct_items?.[0]?.product?.product_type}
                     </p>
                   </div>
 
@@ -223,7 +226,7 @@ export default function OrderToday() {
                 <strong>Client:</strong>{" "}
                 {selectedOrder._type === "accepted"
                   ? selectedOrder.client
-                  : `Client #${selectedOrder.client}`}
+                  : `${selectedOrder.client_firstName} ${selectedOrder.client_lastName}`}
               </p>
 
               <div>
