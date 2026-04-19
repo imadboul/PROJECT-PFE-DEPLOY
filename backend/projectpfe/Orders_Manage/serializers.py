@@ -11,6 +11,7 @@ from Invoices.models import Invoice , StatesInv
 from order_client.models import *
 from Tax_Service.taxCalcul import convert_unit
 from user.views import notify_a_client
+from order_client.serializers import contractSerializerOne
 
   
 
@@ -18,11 +19,12 @@ from user.views import notify_a_client
 
 
 #serializer for orderProduct with product name filter
+
 class ProductFilterSerilazer(serializers.ModelSerializer):
-    product_type=serializers.CharField(source='product_type.name',read_only=True)
+    
     class Meta:
         model=Product
-        fields=['id','name','product_type']
+        fields=['id','name']
 class OrderProductFilterSerializerOne(serializers.ModelSerializer):
     product = ProductFilterSerilazer(many=False)
     class Meta:
@@ -34,6 +36,7 @@ class OrderFilterSerializerThri(serializers.ModelSerializer):
     client_firstName=serializers.CharField(source='client.firstName',read_only=True)
     client_lastName=serializers.CharField(source='client.lastName',read_only=True)
     validated_by=serializers.SerializerMethodField()
+    contract=contractSerializerOne()
     def get_validated_by(self, obj):
        return obj.validated_by.firstName if obj.validated_by else None
     class Meta:
