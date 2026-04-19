@@ -264,8 +264,8 @@ export default function OrderList() {
                       )}
                     </>
                   )}
-                  {selectedOrder.state === "validated" && (
-                    <button onClick={() => viewPDF(selectedOrder.id)} className="text-orange-400 text-3xl">
+                  {selectedOrder.state === "accepted" && (
+                    <button onClick={() => viewPDF(selectedOrder.id)} className="text-orange-400 cursor-pointer text-3xl">
                       <i className="fa-solid fa-file-pdf"></i>
                     </button>
                   )}
