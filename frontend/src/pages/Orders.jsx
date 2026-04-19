@@ -126,7 +126,7 @@ export default function OrderList() {
               onClick={changeStatus}
               className="border border-white text-white cursor-pointer px-4 py-2 rounded hover:bg-white/10"
             >
-              {showAccepted ? "Show Pending" : "Show Accepted"}
+              {showAccepted ? "Show Order status" : "Show Accepted"}
             </button>
           </div>
         )}
@@ -138,7 +138,7 @@ export default function OrderList() {
               onClick={changeStatus}
               className="border border-white text-white cursor-pointer px-4 py-2 rounded hover:bg-white/10"
             >
-              {showAccepted ? "Show Pending" : "Show Accepted"}
+              {showAccepted ? "Show Order status" : "Show Accepted"}
             </button>
             <NavLink
               to="/RequestOrder"
@@ -264,8 +264,8 @@ export default function OrderList() {
                       )}
                     </>
                   )}
-                  {selectedOrder.state === "validated" && (
-                    <button onClick={() => viewPDF(selectedOrder.id)} className="text-orange-400 text-3xl">
+                  {selectedOrder.state === "accepted" && (
+                    <button onClick={() => viewPDF(selectedOrder.id)} className="text-orange-400 cursor-pointer text-3xl">
                       <i className="fa-solid fa-file-pdf"></i>
                     </button>
                   )}
