@@ -51,30 +51,30 @@ export default function ChargmentOrder() {
   }, []);
 
   useEffect(() => {
-  if (!id || !orders.length || !allProducts.length) return;
+    if (!id || !orders.length || !allProducts.length) return;
 
-  const order = orders.find(o => o.id == id);
-  if (!order) return;
+    const order = orders.find(o => o.id == id);
+    if (!order) return;
 
-  const contract = order.contract;
+    const contract = order.contract;
 
-  setSelectedOrder(order);
-  setSelectedContract(contract);
+    setSelectedOrder(order);
+    setSelectedContract(contract);
 
-  const filteredProducts = allProducts.filter(
-    p => p.product_type === contract.product_type
-  );
+    const filteredProducts = allProducts.filter(
+      p => p.product_type === contract.product_type
+    );
 
-  setProducts(
-    filteredProducts.map(p => ({
-      product: p.id,
-      productName: p.name,
-      qte: "",
-      unit: null
-    }))
-  );
+    setProducts(
+      filteredProducts.map(p => ({
+        product: p.id,
+        productName: p.name,
+        qte: "",
+        unit: null
+      }))
+    );
 
-}, [id, orders, allProducts]);
+  }, [id, orders, allProducts]);
 
 
   const handleChange = (i, field, value) => {
@@ -136,11 +136,17 @@ export default function ChargmentOrder() {
         }}
         className="w-full max-w-xl bg-black/60 p-6 rounded-xl"
       >
-
-        {/* TITLE */}
+        <div>
+        <button
+            className="text-white text-2xl cursor-pointer font-bold hover:text-orange-500"
+            onClick={() => window.history.back()}
+          >
+            <i className="fa-solid fa-arrow-left"></i>
+          </button>
         <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
           Chargment Order
         </h2>
+        </div>
 
         {/* CONTRACT */}
         <div className="p-2 mb-3 bg-black/30 text-white rounded border">
@@ -174,7 +180,7 @@ export default function ChargmentOrder() {
                 placeholder="Qte"
                 value={p.qte}
                 onChange={(e) => handleChange(i, "qte", e.target.value)}
-                 className="w-1/3 p-2 bg-black/30 text-white border border-white/20 rounded placeholder:text-white/40 focus:outline-none focus:border-orange-500"
+                className="w-1/3 p-2 bg-black/30 text-white border border-white/20 rounded placeholder:text-white/40 focus:outline-none focus:border-orange-500"
               />
 
               {/* UNIT */}
