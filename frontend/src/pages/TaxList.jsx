@@ -41,16 +41,10 @@ export default function TaxList() {
                 <h1 className="text-white text-xl font-bold">Taxes</h1>
 
                 <div className="flex justify-between items-center">
-                    <button
-                        className="text-white text-2xl font-bold cursor-pointer hover:text-orange-500"
-                        onClick={() => window.history.back()}
-                    >
-                        <i className="fa-solid fa-arrow-left"></i>
-                    </button>
-
                     <div className="flex gap-3 items-center">
                         <button
-                            onClick={() => { setView(v => v === "tax" ? "tax_product" : "tax"); setSelectedItem(null); }}
+                            onClick={() => { setView(v => v === "tax" ? "tax_product" : "tax");
+                                 setSelectedItem(null); }}
                             className="border border-white text-white cursor-pointer px-4 py-2 rounded hover:bg-white/10 text-sm"
                         >
                             {view === "tax" ? "Show Tax Products" : "Show Taxes"}
