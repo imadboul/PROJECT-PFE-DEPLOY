@@ -57,6 +57,11 @@ export default function Navbar() {
         <NavLink to="/product" className={linkStyle}>
           Product
         </NavLink>
+         {["admin", "superAdmin"].includes(user?.role) && (
+          <NavLink to="/TaxList" className={linkStyle}>
+            Tax
+          </NavLink>
+        )}
         {["admin", "superAdmin"].includes(user?.role) && (
           <NavLink to="/Sign" className={linkStyle}>
             Sign Up
