@@ -1,0 +1,52 @@
+from Tax_Service.taxCalcul import convert_unit
+
+
+     
+def total_price(ordersProduct):
+        
+        TTC=0
+        for orderProduct in ordersProduct:
+            Tva=0
+            taxActiv=[]
+            
+            for tax in orderProduct.product.product_taxProduct_items.all():
+            
+                if tax.is_active==True and tax.tax.name!="TVA":
+                    taxActiv.append({  "name":tax.tax.name , "unit":tax.unit , "par_unit":tax.par_unit })
+                    
+                elif tax.is_active==True and tax.tax.name=="TVA":
+                     Tva=tax.par_unit
+        
+            
+            TTC+=tax_price(taxActiv,orderProduct,Tva)
+        print(TTC)
+        return TTC     
+              
+            
+        
+    
+def tax_price(taxActiv,orderProduct,Tva):
+        
+        
+        total_tax=0 
+        
+        type=orderProduct.order.type
+        
+        
+        for tax in taxActiv:
+            
+            unit_l=convert_unit(orderProduct.qte,orderProduct.product.density,orderProduct.unit,tax['unit'])
+                    
+            tax_price=unit_l*tax['par_unit']
+            
+            total_tax+=tax_price 
+               
+           
+       
+        qte_unit=convert_unit(orderProduct.qte,orderProduct.product.density,orderProduct.unit,orderProduct.product.unit) 
+        
+        TTC=((qte_unit*orderProduct.product.unit_price)+total_tax)*(1+Tva/100)
+        
+        
+        return TTC  
+    
