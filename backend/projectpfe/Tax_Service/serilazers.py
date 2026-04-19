@@ -17,7 +17,7 @@ class TaxSerializer(serializers.ModelSerializer):
     tax_taxProduct_items = TaxProductSerializer(many=True)
     class Meta:
         model = Tax
-        fields = ['name','tax_taxProduct_items']
+        fields = ['name','description','tax_taxProduct_items']
         
         
     @transaction.atomic
