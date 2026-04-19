@@ -30,16 +30,26 @@ class ValidateInvoice(generics.UpdateAPIView):
                
                            case "v_client":
                                 nbi=Invoice.objects.filter(contract__client__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
-                            
-                           case "v_id" :
-                                nbi=Invoice.objects.filter(id__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
                                 
                            case "v_product_type":
                                 nbi=Invoice.objects.filter(contract__product_type__id__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
-                                              
+                           case "v_all":
+                                nbi=Invoice.objects.filter(states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now())
+                                      
                  return Response({"data":"Invoices validated successfully","nbr invoice validated":nbi})
              
+class InvoiceValidatedList(generics.ListAPIView):
+    
+    def get(self, request, *args, **kwargs):
+        clients = Client.objects.prefetch_related('client_contracts')
+        product_types = ProductType.objects.all()
 
+        response = {
+            "clients": clientSerializerOne(clients, many=True).data,
+            "product_types": ProductTypeSerializer(product_types, many=True).data
+        }
+
+        return success_response(data=response, message=" data pour la validation ",status_code=200)
         
              
 

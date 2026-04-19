@@ -181,14 +181,16 @@ class contractSerializerOne(serializers.ModelSerializer):
         model=Contract
         fields=['id','product_type']        
 class OrderreadSerializer(serializers.ModelSerializer):
-    client = serializers.CharField(source ="client.lastName")
+    client_lastName = serializers.CharField(source ="client.lastName")
+    client_firstName=serializers.CharField(source='client.firstName',read_only=True)
+
     client_id = serializers.CharField(source ="client.id")
     orderclient_Orderproductclient_items = OrderProductreadSerializer(many=True)
     contract=contractSerializerOne()
 
     class Meta:
         model=Orderclient
-        fields = ['id', 'client_id','date_created', 'contract', 'client','orderclient_Orderproductclient_items','state','pickup_date', 'validated_by']
+        fields = ['id', 'client_id','date_created', 'contract', 'client_lastName','client_firstName','orderclient_Orderproductclient_items','state','pickup_date', 'validated_by']
 
 
 class ClientreadSerializer(serializers.ModelSerializer):
