@@ -11,3 +11,8 @@ export const getInvoicePDF = (id) =>
 
 export const validateInvoices = (type, data) =>
     api.put(`/invoices/validate/${type}/`, data);
+
+export const validateInvoicesById = (id) =>
+  api.put("/invoices/validate/v_id/", {
+    ids: [id],
+  });

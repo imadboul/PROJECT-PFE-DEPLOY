@@ -149,20 +149,54 @@ def generate_pdf(invoice_id):
     elements.append(Spacer(1,20))
     table_data = [['ID', 'Product','Unit Price','Unit','qte','qte Unit','HT', 'TAX','Total']]
     
+    
+    
+    grouped = {}
+
     for prod in lines:
-        qte = convert_unit(prod.qte,prod.product.density, prod.unit, prod.product.unit) 
+        product_id = prod.product.id
+
+        qte = convert_unit(prod.qte, prod.product.density, prod.unit, prod.product.unit)
         HT = qte * prod.product.unit_price
+        TAX = prod.tax_price
+
+        if product_id not in grouped:
+            grouped[product_id] = {
+                "row": [
+                    prod.product.id,
+                    prod.product.name,
+                    prod.product.unit_price,
+                    prod.product.unit,
+                    prod.qte,
+                    prod.unit,
+                    HT,
+                    TAX,
+                    HT + TAX
+                ]
+            }
+        else:
+            
+            grouped[product_id]["row"][7] += TAX
+            grouped[product_id]["row"][8] += TAX 
         
+        
+        
+        
+        
+    for item in grouped.values():
+        row = item["row"]
+
         table_data.append([
-            prod.product.id,
-            prod.product.name,
-            prod.product.unit_price,
-            prod.product.unit,
-            str(prod.qte),
-            str(prod.unit),
-            str(HT),
-            str(prod.tax_price),
-            str(HT+prod.tax_price)])
+            row[0],
+            row[1],
+            row[2],
+            row[3],
+            str(row[4]),
+            str(row[5]),
+            str(round(row[6], 2)),
+            str(round(row[7], 2)),
+            str(round(row[8], 2)),
+        ])
         
     product_table = Table(table_data,colWidths=[40,80, 60, 70, 40, 50,55,55,55])
     
