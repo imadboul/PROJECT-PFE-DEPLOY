@@ -61,18 +61,20 @@ export default function ChargmentOrder() {
     setSelectedOrder(order);
     setSelectedContract(contract);
 
-    const filteredProducts = allProducts.filter(
-      p => p.product_type === contract.product_type
-    );
+const orderProducts = order.orderclient_Orderproductclient_items || [];
 
-    setProducts(
-      filteredProducts.map(p => ({
-        product: p.id,
-        productName: p.name,
-        qte: "",
-        unit: null
-      }))
-    );
+const filteredProducts = orderProducts.map(op => {
+  const productData = allProducts.find(p => p.name === op.product);
+
+  return {
+    product: productData?.id || null,
+    productName: op.product,
+    qte: "",
+    unit: null
+  };
+});
+
+setProducts(filteredProducts);
 
   }, [id, orders, allProducts]);
 
