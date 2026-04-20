@@ -162,7 +162,9 @@ setProducts(filteredProducts);
 
         {/* CLIENT */}
         <div className="p-2 mb-4 bg-black/30 text-white rounded border">
-          Client: {selectedOrder ? `${selectedOrder.client}` : "-"}
+          Client: {selectedOrder
+  ? `${selectedOrder.client_firstName} ${selectedOrder.client_lastName}`
+: "-"}
         </div>
 
         {/* PRODUCTS */}
