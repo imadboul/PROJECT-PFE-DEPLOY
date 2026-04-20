@@ -7,30 +7,50 @@ from rest_framework import status
 from rest_framework.response import Response
 from projectpfe.utils.response import *
 from .filters import *
+from django.utils.decorators import method_decorator
+from user.wraps import *
 
+
+@method_decorator(jwt_must, name='dispatch')
+@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
 
 class TaxSaveView(generics.CreateAPIView):
+    
     queryset = Tax.objects.all()
     serializer_class = TaxSerializer
+    
     def create(self, request, *args, **kwargs):
         
+        with transaction.atomic():
             serializer=self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
-            return Response({'data':'Tax created successfully'},status=status.HTTP_201_CREATED)
+            
+        return Response({'data':'Tax created successfully'},status=status.HTTP_201_CREATED)
+    
+    
         
+@method_decorator(jwt_must, name='dispatch')
+@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')       
+
 class TaxListView(generics.ListAPIView):
     
     def get(self, request, *args, **kwargs):
+        
         search_type=kwargs['search_type'] 
+        
         if search_type=='tax':
+            
          queryset=Tax.objects.all()
          serializer_class=TaxFilterSerilazerOne
          filterset_class=FilterTax
+         
         elif search_type=='tax_product':
+            
          queryset=TaxProduct.objects.all()
          serializer_class=TaxProductFilterSerializer
          filterset_class=FilterTaxProduct
+         
         queryset = filterset_class(request.GET, queryset=queryset).qs
         paginator = MyPagination()
         page = paginator.paginate_queryset(queryset, request)

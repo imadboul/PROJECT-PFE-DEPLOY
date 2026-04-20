@@ -29,8 +29,9 @@ def verify_token(token):
 
 
 @api_view(['POST'])
+@jwt_must
 def signup(request):
-    serializer = ClientSerializer(data=request.data)
+    serializer = ClientSerializer(data=request.data ,  context={'user_id': request.user_id} )
 
     if serializer.is_valid():
         user = serializer.save()

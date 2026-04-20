@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Client, Notification
 from .auth import decode_jwt
-
+from django.db import transaction
 
 class ClientSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -9,11 +9,14 @@ class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = ["firstName", "lastName", "phoneNumber", "email", "password"]
-
+    @transaction.atomic
     def create(self, validated_data):
+        user_id = self.context.get('user_id') 
+        manage=Client.objects.filter(id=user_id).first()
         password = validated_data.pop("password")
         client = Client(**validated_data)
         client.setpassword(password)
+        client.manager=manage
         client.save()
         return client
 

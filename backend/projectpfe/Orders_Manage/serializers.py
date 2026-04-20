@@ -12,7 +12,7 @@ from order_client.models import *
 from Tax_Service.taxCalcul import convert_unit
 from user.views import notify_a_client
 from order_client.serializers import contractSerializerOne
-
+from django.db.models import F
   
 
 
@@ -105,34 +105,23 @@ class OrderSerializer(serializers.ModelSerializer):
         
         with transaction.atomic():
              
-            
              invoice, created = Invoice.objects.get_or_create( contract=validated_data['contract'], states=StatesInv.NO_VALID)  
                  
              order_items=validated_data.pop( 'order_orderProduct_items' )
             
              order=Order.objects.create(**validated_data,invoice=invoice)
              
-             print("bouklila")
+             order_products =[]
+             qte=0
+             for item in order_items:
+                 order_products.append( OrderProduct( product=item['product'], qte=item['qte'], unit=item['unit'], order=order )  )
+                 qte+=convert_unit( item['qte'] , item['product'].density , item['unit'] , order.contract.unit )
+                 
              
-             order_products = [
-                       OrderProduct(
-                       product=item['product'],
-                       qte=item['qte'],
-                       unit=item['unit'],
-                       order=order )
-                       for item in order_items  ]
-
              OrderProduct.objects.bulk_create(order_products)
-             for unit in order_items:
-                 
-                    productorder = OrderProductclient.objects.get(product=unit['product'],order=validated_data['client_order'])
-
-                    productorder.qte_taken += unit['qte']
-                    productorder.save()
-                 
-                 
+             Contract.objects.filter(id=order.contract.id).update(qte_used=F('qte_used')+qte) 
              Orderclient.objects.filter(id=order.client_order.id).update(state=States.LOADING)  
-             notify_a_client( order.client.id ,title="transport",content=f" Mr. {order.client.firstName} {order.client.lastName} , your shipment has been successfully loaded from {order.contract.product_type.name} ",link='')
+             notify_a_client( order.client.id ,title=" transport 🚚 : ",content=f" Mr. {order.client.firstName} {order.client.lastName} , your shipment has been successfully loaded from {order.contract.product_type.name} ",link='')
              
         return order
     
@@ -199,18 +188,18 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
                 )
                 
                 
-                orderProduct=[OrderProduct(
+            order_products =[]
+            qte=0
+            for item in order_items:
+                 order_products.append( OrderProduct( product=item['product'], qte=item['qte'], unit=item['unit'], order=order )  )
+                 qte+=item['qte']
+           
+            if validated_data['type_choise']=='minus':
+                qte*=-1
+            OrderProduct.objects.bulk_create(order_products)
+            Contract.objects.filter(id=order.contract.id).update(qte_used=F('qte_used')+qte)
                     
-                       product=order_item['product'],
-                       qte=order_item['qte'],
-                       unit=order_item['unit'],
-                       order=newOrder,  
-                    )
-                    for order_item in order_items ]
-                
-                OrderProduct.objects.bulk_create(orderProduct)
-                    
-                return newOrder   
+            return newOrder   
    
             
 #serializer for list validated orders            

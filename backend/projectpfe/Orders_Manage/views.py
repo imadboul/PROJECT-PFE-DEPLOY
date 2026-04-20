@@ -15,8 +15,8 @@ from django.utils.decorators import method_decorator
 from django.db import connection
 from order_client.chackblc import total_price
 
-
-#@method_decorator(jwt_must, name='dispatch')
+@method_decorator(jwt_must, name='dispatch')
+@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
 class OrderCreateView(generics.CreateAPIView):
     
     queryset = Order.objects.all()
@@ -33,46 +33,48 @@ class OrderCreateView(generics.CreateAPIView):
             
        
 
-#@method_decorator(jwt_must, name='dispatch')
+@method_decorator(jwt_must, name='dispatch')
+@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
 class OrderValidateView(generics.UpdateAPIView):
     
+    
+    @transaction.atomic()
     def update(self, request, *args, **kwargs):
-        
-            with transaction.atomic():
                  
-                 serializer=ValidateOrdersSerializer(data=request.data)
-                 serializer.is_valid(raise_exception=True)
-                 ids=serializer.validated_data['ids'] # type: ignore
-                 #validated_by=request.user_id           
-                  
-                 nbOrdes = Order.objects.select_for_update().filter(id__in=ids, states=States.LOADING).update(states=States.VALID)  
-                 
-                 orders= Order.objects.select_for_update().filter(id__in=ids) 
-                  
-                 if nbOrdes:
-                    
-                    minus_balances(orders.prefetch_related(
-                     'order_orderProduct_items__product__product_taxProduct_items',
-                     'client__client_balances',
-                     'contract__product_type',
-                     'contract__contract_invoice_items__invoice_InvoiceLine_items'
-                     
-                    ).select_related('invoice').all())
-                    
-                    Orderclient.objects.filter( id__in=orders.values_list('client_order_id', flat=True).distinct() ).update(state=States.VALID)
-                    
-                    for order in orders.all():
-                        
-                        notify_a_client( order.client.id ,title="la validation termine ",content=f" Mr. {order.client.firstName} {order.client.lastName} , Your order has been confirmed and an amount has been deducted from your account for the order corresponding to the following contract: {order.contract.product_type.name} ",link='')
-                    
-                 return success_response(data=nbOrdes,message='number Order validated successfully',status_code=200)
+         serializer=ValidateOrdersSerializer(data=request.data)
+         serializer.is_valid(raise_exception=True)
+         ids=serializer.validated_data['ids'] # type: ignore
+         user=request.user_id           
+          
+         nbOrdes = Order.objects.select_for_update().filter(id__in=ids, states=States.LOADING).update(states=States.VALID,validated_by=user)  
+         orders= Order.objects.select_for_update().filter(id__in=ids) 
+          
+         if nbOrdes:
+            
+            minus_balances(orders.prefetch_related(
+             'order_orderProduct_items__product__product_taxProduct_items',
+             'client__client_balances',
+             'contract__product_type',
+             'contract__contract_invoice_items__invoice_InvoiceLine_items'
+             
+            ).select_related('invoice').all())
+            
+            Orderclient.objects.filter( id__in=orders.values_list('client_order_id', flat=True).distinct() ).update(state=States.VALID)
+            
+            for order in orders.all():
+                
+                notify_a_client( order.client.id ,title=" validation ✅ : ",content=f" Mr. {order.client.firstName} {order.client.lastName} , Your order has been confirmed and an amount has been deducted from your account for the order corresponding to the following contract: {order.contract.product_type.name} ",link='')
+            
+         return success_response(data=nbOrdes,message='number Order validated successfully',status_code=200)
         
  
-#@method_decorator(jwt_must, name='dispatch')   
+@method_decorator(jwt_must, name='dispatch')
+@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')  
 class RectificativeOrderView(generics.CreateAPIView):
     
     queryset=Order.objects.all()
     serializer_class=RectificativeOrderSerializer
+    @transaction.atomic()
     def create(self, request, *args, **kwargs):
 
             serializer=self.get_serializer(data=request.data)
@@ -81,21 +83,36 @@ class RectificativeOrderView(generics.CreateAPIView):
             
             return success_response(data=None,message='Order Rectificative successfully',status_code=201)
 
-#@method_decorator(jwt_must, name='dispatch')
+
+
+
+@method_decorator(jwt_must, name='dispatch')
+@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
 class OrderListView(generics.ListAPIView):
+    
+    
+    serializer_class = OrderFilterSerializerThri
+    filterset_class  = FilterOrder
+    pagination_class = MyPagination
+
+    def list(self, request, *args, **kwargs):
+        user=request.user_id
+        role=request.role
+        
+        if role=='superAdmin':
+            self.queryset = Order.objects.select_related(  'contract__product_type','invoice').prefetch_related('order_orderProduct_items__product')
+        elif role=='Admin':
+            self.queryset = Order.objects.select_related(  'contract__product_type','invoice').prefetch_related('order_orderProduct_items__product').filter(client__manager=user)
+        else:
+            raise serializers.ValidationError("The is role not exist")
+        
+        response = super().list(request, *args, **kwargs)
+
+        return success_response(  data=response.data,   message="filter successfully",  status_code=200 )
+    
+    
    
-   def get(self,request,*args,**kwargs):
-               
-              queryset=Order.objects.select_related('contract__product_type','invoice').prefetch_related('order_orderProduct_items__product').all().distinct()
-              serializer_class=OrderFilterSerializerThri
-              filterset_class=FilterOrder
-              queryset = filterset_class(request.GET, queryset=queryset).qs
-              paginator = MyPagination()
-              page = paginator.paginate_queryset(queryset, request)
-              serializer = serializer_class(page, many=True)
-              response=paginated_response(paginator=paginator,serializer=serializer)
-              
-              return  success_response(data=response , message="filter  successfully",status_code=200)    
+ 
                   
        
  

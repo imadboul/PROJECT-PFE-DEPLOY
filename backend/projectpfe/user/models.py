@@ -18,7 +18,7 @@ class Client(models.Model):
     created_at = models.DateField(auto_now_add=True)
     role = models.CharField(max_length=15,choices=ROLES, default='client')
     email_verified = models.BooleanField(default=False)
-    
+    manager=models.ForeignKey('self',related_name='children',null=True,blank=True,on_delete=models.PROTECT)
    
     
     def setpassword(self,raw_password):
