@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from finance.views import check_if_enough
 from Tax_Service.taxCalcul import convert_unit
 from .chackblc import total_price, total_priceobject
+from decimal import Decimal
 
 from datetime import date
 
@@ -136,6 +137,7 @@ class OrderSerializer(serializers.ModelSerializer):
             )
         
         sum = 0
+        print("hererere")
         for order in contract.client.client_Ordersclient_items.filter(state__in=[States.PENDING, States.ACCEPTED]).all():
             sum += total_priceobject(order.orderclient_Orderproductclient_items.all())
         total = total_price(data.get('orderclient_Orderproductclient_items')) + sum

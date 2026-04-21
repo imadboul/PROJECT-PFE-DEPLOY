@@ -59,6 +59,7 @@ def tax_priceobject(taxActiv,orderProduct,Tva):
 
      
 def total_price(ordersProduct):
+        print('in this one')
         
         TTC=0
         for orderProduct in ordersProduct:
@@ -83,7 +84,7 @@ def total_price(ordersProduct):
         
     
 def tax_price(taxActiv,orderProduct,Tva):
-        
+        print('jjj')
         
         total_tax=0 
         
@@ -99,10 +100,12 @@ def tax_price(taxActiv,orderProduct,Tva):
             total_tax+=tax_price 
                
            
-       
+        
         qte_unit=convert_unit(orderProduct.get('qte'),product.density,orderProduct.get('unit'),product.unit) 
         
-        TTC=((qte_unit*product.unit_price)+total_tax)*(1+Tva/100)
+        
+        TTC = ((qte_unit * product.unit_price) + total_tax) * (Decimal("1") + Decimal(str(Tva)) / Decimal("100"))
+        
         
         
         return TTC  

@@ -43,7 +43,7 @@ def order(request):
                     f'validate order {order.id}', # type: ignore
                     f'http://localhost:5173/order/{order.id}' # type: ignore
                 )
-
+                print("3")
                 return success_response(
                     message="Order created successfully, wait for validation",
                     status_code=status.HTTP_201_CREATED
