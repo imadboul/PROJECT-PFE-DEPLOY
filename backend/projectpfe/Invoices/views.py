@@ -13,6 +13,10 @@ from .invoicepdf import generate_pdf
 from projectpfe.utils.response import *
 from django.utils.decorators import method_decorator
 from rest_framework import serializers
+from Orders_Manage.models import Order,States
+from Tax_Service.taxCalcul import minus_balances
+from order_client.models import Orderclient
+from user.views import notify_a_client
 
 @method_decorator(jwt_must, name='dispatch')
 @method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
@@ -33,28 +37,48 @@ class ValidateInvoice(generics.UpdateAPIView):
                    
                match type_validation:
                       case "v_contract": 
+                           orders=Order.objects.filter(contract__in=ids,states=States.VALID)
+                           facturation(orders)
                            nbi=Invoice.objects.filter(contract__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                       case "v_client":
+                           orders=Order.objects.filter(client__in=ids,status=States.VALID)
+                           facturation(orders)
                            nbi=Invoice.objects.filter(contract__client__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)  
                       case "v_product_type":
+                           orders=Order.objects.filter(contract__product_type__in=ids,status=States.VALID)
+                           facturation(orders)
                            nbi=Invoice.objects.filter(contract__product_type__id__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                       case "v_all":
+                           orders=Order.objects.filter(status=States.VALID)
+                           facturation(orders)
                            nbi=Invoice.objects.filter(states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                       case "v_id":
+                           orders=Order.objects.filter(invoice__in=ids,status=States.VALID)
+                           facturation(orders)
                            nbi=Invoice.objects.filter(id__in=ids , states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                            
             elif role=='Admin':
                  
                match type_validation:
                       case "v_contract": 
+                           orders=Order.objects.filter(contract__in=ids,client__manager=user,states=States.VALID)
+                           facturation(orders)
                            nbi=Invoice.objects.filter(contract__in=ids,contract__client__manager=user,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                       case "v_client":
+                           orders=Order.objects.filter(client__in=ids,client__manager=user,status=States.VALID)
+                           facturation(orders)
                            nbi=Invoice.objects.filter(contract__client__in=ids,contract__client__manager=user,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)  
                       case "v_product_type":
+                           orders=Order.objects.filter(contract__product_type__in=ids,client__manager=user,status=States.VALID)
+                           facturation(orders)
                            nbi=Invoice.objects.filter(contract__product_type__id__in=ids,contract__client__manager=user,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                       case "v_all":
+                           orders=Order.objects.filter(client__manager=user,status=States.VALID)
+                           facturation(orders)
                            nbi=Invoice.objects.filter(states=StatesInv.NO_VALID,contract__client__manager=user).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                       case "v_id":
+                           orders=Order.objects.filter(invoice__in=ids,client__manager=user,status=States.VALID)
+                           facturation(orders)
                            nbi=Invoice.objects.filter(id__in=ids ,contract__client__manager=user , states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)    
             else:
                raise  serializers.ValidationError(" The is role not exist ")     
@@ -148,3 +172,23 @@ def invoicepdf(request, id):
      except Exception as e:
           
           return error_response(message="Unexpected error",errors=str(e),status_code=400)
+     
+     
+
+
+def facturation(orders):
+                
+       minus_balances(orders.prefetch_related(
+        'order_orderProduct_items__product__product_taxProduct_items',
+        'client__client_balances',
+        'contract__product_type',
+        'contract__contract_invoice_items__invoice_InvoiceLine_items'
+        
+       ).select_related('invoice').all())
+       
+       Orderclient.objects.filter( id__in=orders.values_list('client_order_id', flat=True).distinct() ).update(state=States.VALID)
+       
+       for order in orders.all():
+           
+           notify_a_client( order.client.id ,title=" validation ✅ : ",content=f" Mr. {order.client.firstName} {order.client.lastName} , Your order has been confirmed and an amount has been deducted from your account for the order corresponding to the following contract: {order.contract.product_type.name} ",link='')
+            

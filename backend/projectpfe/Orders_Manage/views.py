@@ -7,13 +7,12 @@ from .serializers import *
 from rest_framework import generics
 from django.db import transaction
 from .filters import *
-from Tax_Service.taxCalcul import minus_balances
 from rest_framework.exceptions import ValidationError
 from user.wraps import *
 from projectpfe.utils.response import success_response,paginated_response,MyPagination
 from django.utils.decorators import method_decorator
 from django.db import connection
-from order_client.chackblc import total_price
+
 
 @method_decorator(jwt_must, name='dispatch')
 @method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
@@ -44,27 +43,8 @@ class OrderValidateView(generics.UpdateAPIView):
          serializer=ValidateOrdersSerializer(data=request.data)
          serializer.is_valid(raise_exception=True)
          ids=serializer.validated_data['ids'] # type: ignore
-         user=request.user_id           
-          
+         user=request.user_id            
          nbOrdes = Order.objects.select_for_update().filter(id__in=ids, states=States.LOADING).update(states=States.VALID,validated_by=user)  
-         orders= Order.objects.select_for_update().filter(id__in=ids) 
-          
-         if nbOrdes:
-            
-            minus_balances(orders.prefetch_related(
-             'order_orderProduct_items__product__product_taxProduct_items',
-             'client__client_balances',
-             'contract__product_type',
-             'contract__contract_invoice_items__invoice_InvoiceLine_items'
-             
-            ).select_related('invoice').all())
-            
-            Orderclient.objects.filter( id__in=orders.values_list('client_order_id', flat=True).distinct() ).update(state=States.VALID)
-            
-            for order in orders.all():
-                
-                notify_a_client( order.client.id ,title=" validation ✅ : ",content=f" Mr. {order.client.firstName} {order.client.lastName} , Your order has been confirmed and an amount has been deducted from your account for the order corresponding to the following contract: {order.contract.product_type.name} ",link='')
-            
          return success_response(data=nbOrdes,message='number Order validated successfully',status_code=200)
         
  
