@@ -133,7 +133,7 @@ def invoicepdf(request, id):
      
 
           try:
-               invoice = Invoice.objects.get(id=id, states = StatesInv.NO_VALID)
+               invoice = Invoice.objects.get(id=id, states = StatesInv.VALID)
 
                if request.role == 'client' and invoice.contract.client_id != request.user_id:  # type: ignore
                     return error_response(
