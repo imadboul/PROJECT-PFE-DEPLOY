@@ -37,3 +37,8 @@ class Payment(models.Model):
     def __str__(self):
         return f'payment of {self.client} ({self.state})'
     
+    
+    
+    """first_amount=models.DecimalField(max_digits=12, decimal_places=2, default= Decimal('0'))
+    client_payment=models.DecimalField(max_digits=12, decimal_places=2, default= Decimal('0'))
+    invoices_total=models.DecimalField(max_digits=12, decimal_places=2, default= Decimal('0'))"""

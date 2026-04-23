@@ -218,7 +218,14 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
 class ValidateOrdersSerializer(serializers.Serializer):
     ids=serializers.ListField(child=serializers.IntegerField(),allow_empty=False)      
     
-    
+class OrderInvoicesSerializer(serializers.ModelSerializer):
+    order_orderProduct_items=OrderProductFilterSerializerOne(many=True)
+    validated_by=serializers.SerializerMethodField()
+    def get_validated_by(self, obj):
+       return obj.validated_by.firstName  if obj.validated_by else None
+    class Meta:
+        model=Order
+        fields=['id', 'date_created','type', 'states','validated_by','client_order','parent_order','order_orderProduct_items']   
     
     
     

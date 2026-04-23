@@ -29,3 +29,4 @@ class InvoiceLine(models.Model):
     qte=models.DecimalField(decimal_places=2,max_digits=12,null=False,blank=False,default=0)
     unit=models.CharField(null=False,blank=False,choices=[('L', 'Liter'),('HL', 'Hectoliter'),('KG', 'Kilogram'),('TM', 'Ton')],max_length=20)
     tax_price=models.DecimalField(decimal_places=2,max_digits=12,null=False,blank=False)
+    Tva=models.DecimalField(decimal_places=2,max_digits=12,null=False,blank=False)

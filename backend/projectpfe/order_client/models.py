@@ -8,6 +8,7 @@ class States(models.TextChoices):
        ACCEPTED='accepted','Accepted'
        LOADING='loading','Loading'
        VALID='validated','Validated'
+       INVOICED = 'invoiced','Invoiced' 
        REJECT='rejected','Rejected'    
 
     

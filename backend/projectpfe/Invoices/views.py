@@ -14,9 +14,9 @@ from projectpfe.utils.response import *
 from django.utils.decorators import method_decorator
 from rest_framework import serializers
 from Orders_Manage.models import Order,States
-from Tax_Service.taxCalcul import minus_balances
 from order_client.models import Orderclient
-from user.views import notify_a_client
+from Tax_Service.taxCalcul import facturation 
+
 
 @method_decorator(jwt_must, name='dispatch')
 @method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
@@ -41,19 +41,22 @@ class ValidateInvoice(generics.UpdateAPIView):
                            facturation(orders)
                            nbi=Invoice.objects.filter(contract__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                       case "v_client":
-                           orders=Order.objects.filter(client__in=ids,status=States.VALID)
+                           print(ids)
+                           orders=Order.objects.filter(client__in=ids,states=States.VALID)
+                           print(orders)
+                           
                            facturation(orders)
                            nbi=Invoice.objects.filter(contract__client__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)  
                       case "v_product_type":
-                           orders=Order.objects.filter(contract__product_type__in=ids,status=States.VALID)
+                           orders=Order.objects.filter(contract__product_type__in=ids,states=States.VALID)
                            facturation(orders)
                            nbi=Invoice.objects.filter(contract__product_type__id__in=ids,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                       case "v_all":
-                           orders=Order.objects.filter(status=States.VALID)
+                           orders=Order.objects.filter(states=States.VALID)
                            facturation(orders)
                            nbi=Invoice.objects.filter(states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                       case "v_id":
-                           orders=Order.objects.filter(invoice__in=ids,status=States.VALID)
+                           orders=Order.objects.filter(invoice__in=ids,states=States.VALID)
                            facturation(orders)
                            nbi=Invoice.objects.filter(id__in=ids , states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                            
@@ -65,19 +68,19 @@ class ValidateInvoice(generics.UpdateAPIView):
                            facturation(orders)
                            nbi=Invoice.objects.filter(contract__in=ids,contract__client__manager=user,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                       case "v_client":
-                           orders=Order.objects.filter(client__in=ids,client__manager=user,status=States.VALID)
+                           orders=Order.objects.filter(client__in=ids,client__manager=user,states=States.VALID)
                            facturation(orders)
                            nbi=Invoice.objects.filter(contract__client__in=ids,contract__client__manager=user,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)  
                       case "v_product_type":
-                           orders=Order.objects.filter(contract__product_type__in=ids,client__manager=user,status=States.VALID)
+                           orders=Order.objects.filter(contract__product_type__in=ids,client__manager=user,states=States.VALID)
                            facturation(orders)
                            nbi=Invoice.objects.filter(contract__product_type__id__in=ids,contract__client__manager=user,states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                       case "v_all":
-                           orders=Order.objects.filter(client__manager=user,status=States.VALID)
+                           orders=Order.objects.filter(client__manager=user,states=States.VALID)
                            facturation(orders)
                            nbi=Invoice.objects.filter(states=StatesInv.NO_VALID,contract__client__manager=user).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                       case "v_id":
-                           orders=Order.objects.filter(invoice__in=ids,client__manager=user,status=States.VALID)
+                           orders=Order.objects.filter(invoice__in=ids,client__manager=user,states=States.VALID)
                            facturation(orders)
                            nbi=Invoice.objects.filter(id__in=ids ,contract__client__manager=user , states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)    
             else:
@@ -85,8 +88,28 @@ class ValidateInvoice(generics.UpdateAPIView):
                                   
             return Response({"data":"Invoices validated successfully","nbr invoice validated":nbi})
  
- 
- 
+@method_decorator(jwt_must, name='dispatch')
+@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
+class InvoicedOrNewInvoice(generics.CreateAPIView):
+    queryset = Invoice.objects.all()
+    serializer_class = InvoicedOrNewInvoiceSerializer
+    @transaction.atomic
+    def create(self,request,*args,**kwargs):
+            user=request.user_id
+            
+            invoice_type=kwargs['invoice_type']
+            serializer=self.get_serializer(data=request.data,context={'invoice_type': invoice_type,'user':user , })
+            serializer.is_valid(raise_exception=True)
+            
+            self.perform_create(serializer)
+            
+            if invoice_type=="invoiced":
+                 return success_response(data=None,message=' invoiced successfully',status_code=201) 
+            elif invoice_type=="new_invoice":
+                 return success_response(data=None,message=' create new invoice successfully',status_code=201)
+            else :
+                 raise serializers.ValidationError(" error invoice_type not exist in url ") 
+     
  
  
 @method_decorator(jwt_must, name='dispatch')
@@ -176,19 +199,3 @@ def invoicepdf(request, id):
      
 
 
-def facturation(orders):
-                
-       minus_balances(orders.prefetch_related(
-        'order_orderProduct_items__product__product_taxProduct_items',
-        'client__client_balances',
-        'contract__product_type',
-        'contract__contract_invoice_items__invoice_InvoiceLine_items'
-        
-       ).select_related('invoice').all())
-       
-       Orderclient.objects.filter( id__in=orders.values_list('client_order_id', flat=True).distinct() ).update(state=States.VALID)
-       
-       for order in orders.all():
-           
-           notify_a_client( order.client.id ,title=" validation ✅ : ",content=f" Mr. {order.client.firstName} {order.client.lastName} , Your order has been confirmed and an amount has been deducted from your account for the order corresponding to the following contract: {order.contract.product_type.name} ",link='')
-            

@@ -15,28 +15,9 @@ logging=logging.getLogger(__name__)
 from django.db import transaction
 from django.db.models import Case, When, F, Value, DecimalField
 from collections import defaultdict
-from user.views import notify_a_client
-
-
-
-def facturation(orders):
-       
-                
-       minus_balances(orders.prefetch_related(
-        'order_orderProduct_items__product__product_taxProduct_items',
-        'client__client_balances',
-        'contract__product_type',
-        'contract__contract_invoice_items__invoice_InvoiceLine_items'
-        
-       ).select_related('invoice').all())
-       print("bouklilaa")
-       Orderclient.objects.filter( id__in=orders.values_list('client_order_id', flat=True).distinct() ).update(state=States.VALID)
-       
-       for order in orders.all():
-           
-           notify_a_client( order.client.id ,title=" validation ✅ : ",content=f" Mr. {order.client.firstName} {order.client.lastName} , Your order has been confirmed and an amount has been deducted from your account for the order corresponding to the following contract: {order.contract.product_type.name} ",link='')
-             
     
+
+
 def minus_balances(ordersValidated):
         
         invoices=[]
@@ -107,7 +88,6 @@ def minus_balances(ordersValidated):
         print("123456") 
         update_invoices_bulk(invoices)
         Order.objects.filter(id__in=order_facteurs).update(states=States.INVOICED)
-        Orderclient.objects.filter(clientOrder_order_items__id__in=order_facteurs).update(state=States.INVOICED)
         print(len(connection.queries))
         
         
