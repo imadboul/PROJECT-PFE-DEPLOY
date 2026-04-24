@@ -13,3 +13,6 @@ export const validateOrderAdmin = (id) =>
      api.put("/orders/validated/", {
           ids: [id],
      });
+
+export const validateOrderAdminAll = (data) =>
+     api.put(`/orders/validated/v_all/`, data);
