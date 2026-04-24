@@ -6,6 +6,9 @@ class Balance(models.Model):
     id = models.AutoField
     client = models.ForeignKey(Client , on_delete=models.CASCADE,related_name='client_balances')
     productType = models.ForeignKey(ProductType, on_delete= models.CASCADE, related_name='balances')
+    first_amount=models.DecimalField(max_digits=12, decimal_places=2, default= Decimal('0'))
+    total_invoices=models.DecimalField(max_digits=12, decimal_places=2, default= Decimal('0'))
+    client_payment=models.DecimalField(max_digits=12, decimal_places=2, default= Decimal('0'))
     amount = models.DecimalField(max_digits=12, decimal_places=2, default= Decimal('0'))
     
     

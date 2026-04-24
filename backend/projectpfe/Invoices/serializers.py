@@ -10,6 +10,7 @@ from .models import StatesInv
 from Tax_Service.taxCalcul import facturation
 from catalog.models import Contract
 from Tax_Service.serilazers import get_now
+from Orders_Manage.serializers import contractSerializerOne
 
 class InvoiceLineFilterSerializer(serializers.ModelSerializer):
     product=serializers.CharField(source='product.name')
@@ -19,17 +20,17 @@ class InvoiceLineFilterSerializer(serializers.ModelSerializer):
         
 class InvoiceFilterSerializerOne(serializers.ModelSerializer):
     invoice_InvoiceLine_items=InvoiceLineFilterSerializer(many=True)
-    contract_type=serializers.CharField(source='contract.name',read_only=True)
     client_firstName=serializers.CharField(source='contract.client.firstName',read_only=True)
     client_lastName=serializers.CharField(source='contract.client.lastName',read_only=True)
     invoice_order_items=OrderInvoicesSerializer(many=True)
+    contract=contractSerializerOne()
     validated_by=serializers.SerializerMethodField()
     def get_validated_by(self,obj):
         return obj.validated_by.firstName if obj.validated_by else None
         
     class Meta:
         model=Invoice
-        fields=['id','client_firstName','client_lastName','contract_type','type','states','date_de_facteration','validated_by','HT','TVA','TTC','invoice_InvoiceLine_items','invoice_order_items']
+        fields=['id','client_firstName','client_lastName','contract','type','states','date_de_facteration','validated_by','HT','TVA','TTC','invoice_InvoiceLine_items','invoice_order_items']
 
 
 # pour la validation des facteurs 
@@ -70,7 +71,8 @@ class InvoicedOrNewInvoiceSerializer(serializers.Serializer):
             
             orders=Order.objects.filter(id__in=validated_data['ids'])
             facturation(orders)
-            Invoice.objects.filter(id=new_invoice).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
+            
+            Invoice.objects.filter(id=new_invoice.id).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
             
         elif invoice_type=="new_invoice":
             
