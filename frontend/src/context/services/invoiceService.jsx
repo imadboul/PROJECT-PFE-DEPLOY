@@ -25,3 +25,7 @@ export const invoiceOrders = (ids, contractId,invoiceId) =>
     contract: contractId,
     invoice_id: invoiceId,
   });
+
+  export const getOrders = (params = {}) =>
+  api.get("/orders/filter/", { params });
+ 

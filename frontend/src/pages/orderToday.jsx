@@ -183,17 +183,17 @@ export default function OrderToday() {
 
                     {o._type === "accepted" && (
                       <>
-                      <p><strong>Pickup Date:</strong> {o.pickup_date}</p>
-                      <p><strong>Client Order:</strong> {o.id}</p>
+                        <p><strong>Pickup Date:</strong> {o.pickup_date}</p>
+                        <p><strong>Client Order:</strong> {o.id}</p>
                       </>
                     )}
                     {o._type === "loading" && (
                       <>
-                      <p><strong>Date Created:</strong> {o.date_created?.split("T")[0]}</p>
-                      <p><strong>Client Order:</strong> {o.client_order}</p>
+                        <p><strong>Date Created:</strong> {o.date_created?.split("T")[0]}</p>
+                        <p><strong>Client Order:</strong> {o.client_order}</p>
                       </>
                     )}
-                    
+
                   </div>
                   <div className="flex items-center justify-between">
                     <p className={getStateClass(state)}>
@@ -288,12 +288,14 @@ export default function OrderToday() {
                 <div className="flex gap-6">
                   {selectedOrder._type === "loading" && selectedOrder.states === "loading" && (
                     <>
-                      <NavLink
-                        to={`/rechargmentOrder/${selectedOrder.id}`}
-                        className="text-xl cursor-pointer text-orange-600 hover:text-orange-700 transition"
-                      >
-                        <i className="fa-solid fa-pen-clip"></i>
-                      </NavLink>
+                      {selectedOrder.type === "normal" && (
+                        < NavLink
+                          to={`/rechargmentOrder/${selectedOrder.id}`}
+                          className="text-xl cursor-pointer text-orange-600 hover:text-orange-700 transition"
+                        >
+                          <i className="fa-solid fa-pen-clip"></i>
+                        </NavLink>
+                      )}
                       <button
                         onClick={() => handleValidate(selectedOrder.id)}
                         className="text-xl cursor-pointer text-orange-600 hover:text-orange-700 transition"
@@ -308,7 +310,8 @@ export default function OrderToday() {
             </div>
           </div>
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }
