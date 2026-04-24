@@ -40,12 +40,18 @@ class OrderValidateView(generics.UpdateAPIView):
     @class_role_required(['admin', 'superAdmin'])
     @transaction.atomic()
     def update(self, request, *args, **kwargs):
-                 
+        
+         validate_type=kwargs['validate_type']          
          serializer=ValidateOrdersSerializer(data=request.data)
          serializer.is_valid(raise_exception=True)
          ids=serializer.validated_data['ids'] # type: ignore
-         user=request.user_id            
-         nbOrdes = Order.objects.select_for_update().filter(id__in=ids, states=States.LOADING).update(states=States.VALID,validated_by=user)  
+         user=request.user_id    
+           
+         if validate_type == 'v_all':
+                nbOrdes=Order.objects.select_for_update().filter(states=States.LOADING).update(states=States.VALID,validated_by=user)
+         else:  
+                nbOrdes = Order.objects.select_for_update().filter(id__in=ids, states=States.LOADING).update(states=States.VALID,validated_by=user)
+                  
          return success_response(data=nbOrdes,message='number Order validated successfully',status_code=200)
         
  
