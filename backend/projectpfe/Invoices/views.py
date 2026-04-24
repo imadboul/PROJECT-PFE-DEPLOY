@@ -18,9 +18,11 @@ from order_client.models import Orderclient
 from Tax_Service.taxCalcul import facturation 
 
 
-@method_decorator(jwt_must, name='dispatch')
-@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
+
 class ValidateInvoice(generics.UpdateAPIView):
+     
+    @class_jwt_must
+    @class_role_required(['admin', 'superAdmin'])
     @transaction.atomic()
     def update(self, request, *args, **kwargs):
             
@@ -60,7 +62,7 @@ class ValidateInvoice(generics.UpdateAPIView):
                            facturation(orders)
                            nbi=Invoice.objects.filter(id__in=ids , states=StatesInv.NO_VALID).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                            
-            elif role=='Admin':
+            elif role=='admin':
                  
                match type_validation:
                       case "v_contract": 
@@ -88,11 +90,12 @@ class ValidateInvoice(generics.UpdateAPIView):
                                   
             return Response({"data":"Invoices validated successfully","nbr invoice validated":nbi})
  
-@method_decorator(jwt_must, name='dispatch')
-@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
+
 class InvoicedOrNewInvoice(generics.CreateAPIView):
     queryset = Invoice.objects.all()
     serializer_class = InvoicedOrNewInvoiceSerializer
+    @class_jwt_must
+    @class_role_required(['admin', 'superAdmin'])
     @transaction.atomic
     def create(self,request,*args,**kwargs):
             user=request.user_id
@@ -112,10 +115,11 @@ class InvoicedOrNewInvoice(generics.CreateAPIView):
      
  
  
-@method_decorator(jwt_must, name='dispatch')
-@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')             
+   
 class InvoiceValidatedList(generics.ListAPIView):
-    
+
+    @class_jwt_must
+    @class_role_required(['admin', 'superAdmin'])    
     def list(self, request, *args, **kwargs):
         role=request.role
         user=request.user_id
@@ -123,7 +127,7 @@ class InvoiceValidatedList(generics.ListAPIView):
            clients = Client.objects.filter(client_contracts__contract_invoice_items__states=StatesInv.NO_VALID).distinct()
            product_types = ProductType.objects.filter(contracts__contract_invoice_items__states=StatesInv.NO_VALID).distinct()
            
-        elif role=='Admin':
+        elif role=='admin':
              clients=Client.objects.filter(manager=user,client_contracts__contract_invoice_items__states=StatesInv.NO_VALID).distinct()
              product_types = ProductType.objects.filter(contracts__client__manager=user,contracts__contract_invoice_items__states=StatesInv.NO_VALID).distinct()
         response = {
@@ -140,15 +144,15 @@ class InvoiceValidatedList(generics.ListAPIView):
  
  
              
-@method_decorator(jwt_must, name='dispatch')
-@method_decorator(role_required(['client','Admin', 'superAdmin']), name='dispatch')
+
 
 class InvoiceList(generics.ListAPIView):
      
     serializer_class = InvoiceFilterSerializerOne
     filterset_class  = InvoiceFilter
     pagination_class = MyPagination
-     
+    @class_jwt_must
+    @class_role_required(['admin', 'superAdmin'])
     def list(self, request, *args, **kwargs):
          
         role=request.role
@@ -156,7 +160,7 @@ class InvoiceList(generics.ListAPIView):
         
         if role=='superAdmin':
              self.queryset=Invoice.objects.select_related('contract__client').all()
-        elif role=='Admin':
+        elif role=='admin':
              self.queryset=Invoice.objects.select_related('contract__client').filter(contract__client__manager=user).all()
         elif role=='client':
              self.queryset=Invoice.objects.select_related('contract__client').filter(contract__client__id=user , states=StatesInv.VALID).all()
