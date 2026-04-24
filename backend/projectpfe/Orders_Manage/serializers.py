@@ -105,8 +105,8 @@ class OrderSerializer(serializers.ModelSerializer):
         
         with transaction.atomic():
              
-             invoice, created = Invoice.objects.get_or_create( contract=validated_data['contract'], states=StatesInv.NO_VALID)  
-                 
+             invoice, created = Invoice.objects.get_or_create( contract=validated_data['contract'], states=StatesInv.NO_VALID , type = 'normal')  
+             
              order_items=validated_data.pop( 'order_orderProduct_items' )
             
              order=Order.objects.create(**validated_data,invoice=invoice)
