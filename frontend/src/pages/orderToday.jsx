@@ -182,12 +182,18 @@ export default function OrderToday() {
                   <div className="flex items-center justify-between">
 
                     {o._type === "accepted" && (
+                      <>
                       <p><strong>Pickup Date:</strong> {o.pickup_date}</p>
+                      <p><strong>Client Order:</strong> {o.id}</p>
+                      </>
                     )}
                     {o._type === "loading" && (
+                      <>
                       <p><strong>Date Created:</strong> {o.date_created?.split("T")[0]}</p>
+                      <p><strong>Client Order:</strong> {o.client_order}</p>
+                      </>
                     )}
-                    <p><strong>Client Order:</strong> {o.client_order}</p>
+                    
                   </div>
                   <div className="flex items-center justify-between">
                     <p className={getStateClass(state)}>
@@ -258,7 +264,7 @@ export default function OrderToday() {
               ) : (
                 <p><strong>Date Created:</strong> {selectedOrder.date_created?.split("T")[0]}</p>
               )}
-              <p><strong>Client Order:</strong> {selectedOrder.client_order}</p>
+              <p><strong>Client Order:</strong> {selectedOrder.id}</p>
               {selectedOrder._type === "validated" ? (
                 <p>
                   <strong className="text-white">Type:</strong> {selectedOrder.type}
