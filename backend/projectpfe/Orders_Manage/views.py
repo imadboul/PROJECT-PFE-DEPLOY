@@ -59,8 +59,13 @@ class RectificativeOrderView(generics.CreateAPIView):
     @class_role_required(['admin', 'superAdmin'])
     @transaction.atomic()
     def create(self, request, *args, **kwargs):
-
-            serializer=self.get_serializer(data=request.data)
+            user=request.user_id
+            role=request.role
+            rectification_type=kwargs['rectification_type']
+            if role=="superAdmin" and rectification_type=="invoiced":
+                serializer=self.get_serializer(data=request.data,context={'user':user})
+            else:
+                 serializer=self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
             

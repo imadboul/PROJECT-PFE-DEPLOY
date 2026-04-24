@@ -29,7 +29,7 @@ def facturation(orders):
         'contract__contract_invoice_items__invoice_InvoiceLine_items'
         
        ).select_related('invoice').all())
-       print("bouklilaa")
+       
        Orderclient.objects.filter( id__in=orders.values_list('client_order_id', flat=True).distinct() ).update(state=States.VALID)
        
        for order in orders.all():
@@ -104,7 +104,7 @@ def minus_balances(ordersValidated):
             })
                 
         update_or_save_invoiceLins(invoicesLins,invoiceLins_map )
-        print("123456") 
+        
         update_invoices_bulk(invoices)
         Order.objects.filter(id__in=order_facteurs).update(states=States.INVOICED)
         Orderclient.objects.filter(clientOrder_order_items__id__in=order_facteurs).update(state=States.INVOICED)
