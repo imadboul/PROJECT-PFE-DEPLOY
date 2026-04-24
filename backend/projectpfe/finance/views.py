@@ -49,6 +49,8 @@ def getbalance(request):
         print(request.role) 
         if request.role == 'client':
             queryset = Balance.objects.filter(client_id=request.user_id)
+        elif request.role == 'admin':
+            queryset = Balance.objects.filter(client__manager__id = request.user_id)
         else:
             queryset = Balance.objects.all()
 
@@ -71,6 +73,7 @@ def get_payment(request,id):
     
 @api_view(['POST'])
 @jwt_must
+@role_required(['admin','superAdmin'])
 def validatePayment(request):
     serializer = paymentserializer(data = request.data)
     

@@ -36,7 +36,6 @@ def jwt_must(func):
 
     return wrapper
         
-    return wrapper
 
 
 def role_required(roles):
@@ -52,5 +51,39 @@ def role_required(roles):
         
 
 
+def class_jwt_must(func):
+    @wraps(func)
+    def wrapper(self, request, *args, **kwargs):
+        auth = request.headers.get("Auth")
+        if not auth or not auth.startswith("Bearer "):
+            return error_response("Unauthorized", status_code=401)
 
+        token = auth.split(" ")[1]
+        try:
+            data = decode_jwt(token)
+        except Exception as e:
+            return error_response("invalid token", errors=str(e), status_code=401)
+
+        if not data or data == "expired" or data.get("type") != "access":
+            return error_response("invalid token", status_code=401)
+
+        if not Client.objects.filter(id=data.get("user_id")).exists():
+            return error_response("invalid user", status_code=401)
+
+        request.user_id = data["user_id"]  # type: ignore
+        request.role = data.get("role")    # type: ignore
+
+        return func(self, request, *args, **kwargs)
+    return wrapper
+
+
+def class_role_required(roles):
+    def dec(func):
+        @wraps(func)
+        def wrapper(self, request, *args, **kwargs):
+            if request.role not in roles:  # type: ignore
+                return error_response("you do not have permission", status_code=401)
+            return func(self, request, *args, **kwargs)
+        return wrapper
+    return dec
 

@@ -23,6 +23,7 @@ def error_response(message="Error", errors=None, status_code=status.HTTP_400_BAD
         "message": message,
         "errors": errors
     }, status=status_code)
+
     
     
 def paginated_response(paginator, serializer):

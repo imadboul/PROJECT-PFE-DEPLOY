@@ -11,14 +11,16 @@ from django.utils.decorators import method_decorator
 from user.wraps import *
 
 
-@method_decorator(jwt_must, name='dispatch')
-@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
+
 
 class TaxSaveView(generics.CreateAPIView):
     
     queryset = Tax.objects.all()
     serializer_class = TaxSerializer
     
+    
+    @class_jwt_must
+    @class_role_required(['admin', 'superAdmin'])
     def create(self, request, *args, **kwargs):
         
         with transaction.atomic():
@@ -30,11 +32,11 @@ class TaxSaveView(generics.CreateAPIView):
     
     
         
-@method_decorator(jwt_must, name='dispatch')
-@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')       
+  
 
 class TaxListView(generics.ListAPIView):
-    
+    @class_jwt_must
+    @class_role_required(['admin', 'superAdmin'])
     def get(self, request, *args, **kwargs):
         
         search_type=kwargs['search_type'] 

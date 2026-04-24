@@ -100,14 +100,14 @@ class OrderSerializer(serializers.ModelSerializer):
 
         
 
-        #bouklila
+        
         return super().validate(data)   
     
     def create(self, validated_data):
         
         with transaction.atomic():
              
-             invoice,created = Invoice.objects.get_or_create( contract=validated_data['contract'], states=StatesInv.NO_VALID)  
+             invoice,created = Invoice.objects.get_or_create( contract=validated_data['contract'], states=StatesInv.NO_VALID, type='normal')  
                  
              order_items=validated_data.pop( 'order_orderProduct_items' )
             
@@ -221,7 +221,6 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
                 user=self.context.get('user')
                 order=Order.objects.filter(id=newOrder.id)
                 facturation(order)
-                
                 Invoice.objects.filter(id=newOrder.invoice.id).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
                 
             return newOrder   

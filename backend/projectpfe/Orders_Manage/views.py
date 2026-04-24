@@ -14,13 +14,14 @@ from django.utils.decorators import method_decorator
 from django.db import connection
 
 
-@method_decorator(jwt_must, name='dispatch')
-@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
+
 class OrderCreateView(generics.CreateAPIView):
     
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     
+    @class_jwt_must
+    @class_role_required(['admin', 'superAdmin'])
     def create(self,request,*args,**kwargs):
     
             serializer=self.get_serializer(data=request.data)
@@ -32,11 +33,11 @@ class OrderCreateView(generics.CreateAPIView):
             
        
 
-@method_decorator(jwt_must, name='dispatch')
-@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
+
 class OrderValidateView(generics.UpdateAPIView):
     
-    
+    @class_jwt_must
+    @class_role_required(['admin', 'superAdmin'])
     @transaction.atomic()
     def update(self, request, *args, **kwargs):
                  
@@ -48,12 +49,14 @@ class OrderValidateView(generics.UpdateAPIView):
          return success_response(data=nbOrdes,message='number Order validated successfully',status_code=200)
         
  
-@method_decorator(jwt_must, name='dispatch')
-@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')  
+
 class RectificativeOrderView(generics.CreateAPIView):
     
     queryset=Order.objects.all()
     serializer_class=RectificativeOrderSerializer
+    
+    @class_jwt_must
+    @class_role_required(['admin', 'superAdmin'])
     @transaction.atomic()
     def create(self, request, *args, **kwargs):
             user=request.user_id
@@ -71,22 +74,23 @@ class RectificativeOrderView(generics.CreateAPIView):
 
 
 
-@method_decorator(jwt_must, name='dispatch')
-@method_decorator(role_required(['Admin', 'superAdmin']), name='dispatch')
+
 class OrderListView(generics.ListAPIView):
     
     
     serializer_class = OrderFilterSerializerThri
     filterset_class  = FilterOrder
     pagination_class = MyPagination
-
+    
+    @class_jwt_must
+    @class_role_required(['admin', 'superAdmin'])
     def list(self, request, *args, **kwargs):
         user=request.user_id
         role=request.role
         
         if role=='superAdmin':
             self.queryset = Order.objects.select_related(  'contract__product_type','invoice').prefetch_related('order_orderProduct_items__product')
-        elif role=='Admin':
+        elif role=='admin':
             self.queryset = Order.objects.select_related(  'contract__product_type','invoice').prefetch_related('order_orderProduct_items__product').filter(client__manager=user)
         else:
             raise serializers.ValidationError("The is role not exist")
