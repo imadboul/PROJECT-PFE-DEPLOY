@@ -71,17 +71,22 @@ class InvoicedOrNewInvoiceSerializer(serializers.Serializer):
             
             orders=Order.objects.filter(id__in=validated_data['ids'])
             facturation(orders)
-            
             Invoice.objects.filter(id=new_invoice.id).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
+            
             
         elif invoice_type=="new_invoice":
             
             orders=Order.objects.filter(invoice=validated_data['invoice_id'])
             facturation(orders)
             Invoice.objects.filter(id=validated_data['invoice_id']).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
+            
         else:
             
             raise serializers.ValidationError(" error invoice type not exist in url ")
         
+        if not Order.objects.filter(invoice=validated_data['invoice_id']).exists():
+                Invoice.objects.filter(id=validated_data['invoice_id']).delete()
+        
         return new_invoice
       
+#bouklila
