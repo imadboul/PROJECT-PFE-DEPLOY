@@ -31,12 +31,12 @@ def order(request):
                 context={'user_id': request.user_id}
             )
 
-            print('imad')
+            
 
             if serializer.is_valid():
                 order = serializer.save(client_id=request.user_id)  # type: ignore
 
-                print('imadsss')
+                
 
                 notify_all_admin(
                     'VALIDATE AN ORDER',
@@ -101,10 +101,18 @@ def getclients(request):
 
         if valid_date is None:
             return error_response( message="wrong date",errors="Invalid date format. Use YYYY-MM-DD" )
-        queryset = Client.objects.filter(client_Ordersclient_items__pickup_date__lte = date,client_Ordersclient_items__isnull=False).distinct()
+        if request.role == 'admin':
+            queryset = Client.objects.filter(client_Ordersclient_items__pickup_date__lte = date,client_Ordersclient_items__isnull=False, manager__id = request.user_id).distinct()
+        else:
+            queryset = Client.objects.filter(client_Ordersclient_items__pickup_date__lte = date,client_Ordersclient_items__isnull=False).distinct()
+            
 
     else:
-        queryset = Client.objects.filter(client_Ordersclient_items__isnull=False).distinct()
+        if request.role == 'admin':
+            queryset = Client.objects.filter(client_Ordersclient_items__isnull=False,manager__id = request.user_id ).distinct()
+        else:
+            queryset = Client.objects.filter(client_Ordersclient_items__isnull=False).distinct()
+
 
     result_page = paginator.paginate_queryset(queryset, request)
 
