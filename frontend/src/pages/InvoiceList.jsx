@@ -4,7 +4,6 @@ import { handleApiErrors } from "../utils/handleApiErrors";
 import {
   getInvoices,
   getInvoicePDF,
-  validateInvoicesById,
   createNewInvoice,
   invoiceOrders
 } from "../context/services/invoiceService";
@@ -57,19 +56,6 @@ export default function InvoiceList() {
       fetchInvoices(1);
   }, [showValid]);
 
-  const handleValidate = async (id) => {
-    try {
-      setLoading(true);
-      await validateInvoicesById(id);
-      toast.success("Invoice validated successfully");
-      setSelectedInvoice(null);
-      fetchInvoices();
-    } catch (error) {
-      handleApiErrors(error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCreateNewInvoice = async (invoiceData) => {
     try {
@@ -270,22 +256,21 @@ export default function InvoiceList() {
                 </div>
               )}
 
-              {/* ✅ أزرار التحكم محسنة */}
               <div className="flex gap-2 mt-4">
                 {selectedInvoice.states === "pending" && (
                   ["admin", "superAdmin"].includes(user?.role) && (
                     <>
                       <button
-                        onClick={() => handleValidate(selectedInvoice.id)}
+                        onClick={() => handleInvoiceOrders(selectedInvoice.id)}
                         className="flex-1 py-2 bg-green-600 hover:bg-green-700 rounded text-white text-sm font-bold transition"
                       >
-                        <i className="fa-solid fa-check mr-1"></i> Validate
+                        <i className="fa-solid fa-check mr-1"></i> invoiced
                       </button>
                       <button
-                        onClick={() => setSelectedInvoice(null)}
+                        onClick={() => handleCreateNewInvoice(selectedInvoice.id)}
                         className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded text-white text-sm"
                       >
-                        Cancel
+                        <i className="fa-solid fa-check mr-1"></i> New invoice
                       </button>
                     </>
                   )

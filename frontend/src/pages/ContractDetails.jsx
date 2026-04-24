@@ -219,7 +219,7 @@ export default function ContractDetails() {
                 <div className="flex gap-4">
                   {selectedContract.state === "pending" && (
                     <>
-                      {["admin", "superAdmin"].includes(user?.role) && (
+                      {["superAdmin"].includes(user?.role) && (
                         <>
                           <button
                             onClick={() => handleValidate(selectedContract.id)}

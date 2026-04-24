@@ -28,34 +28,43 @@ export default function RechargmentOrder() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const resChargemnt = await getChargmentOrderAdmin();
-                const allChargements = resChargemnt.data?.data?.results || [];
+                const res = await getChargmentOrderAdmin();
+                const all = res.data?.data?.results || [];
 
-                const order = allChargements.find(o => o.id == id);
-                if (!order) { toast.error("Order not found"); return; }
+                const order = all.find(o => o.id == id);
+                if (!order) {
+                    toast.error("Order not found");
+                    return;
+                }
 
                 setSelectedOrder(order);
-                setSelectedContract({ contract: order.contract.id , product_type: order.contract.product_type });
+                setSelectedContract(order.contract);
 
-                setProducts(
-                    order.order_orderProduct_items.map(i => ({
-                        product: i.product.id,
-                        productName: i.product.name,
-                        qte: i.qte,
-                        unit: i.unit
-                    }))
-                );
+                setProducts([]);
+
+                const mapped = (order.order_orderProduct_items || []).map(i => ({
+                    product: i.product.id,
+                    productName: i.product.name,
+                    qte: i.qte,
+                    unit: i.unit
+                }));
+
+                setProducts([...mapped]);
 
             } catch (error) {
                 handleApiErrors(error);
             }
         };
+
         fetchData();
     }, [id]);
 
     const handleChange = (i, field, value) => {
         const updated = [...products];
-        updated[i][field] = value;
+        updated[i] = {
+            ...updated[i],
+            [field]: value
+        };
         setProducts(updated);
     };
 
@@ -65,12 +74,28 @@ export default function RechargmentOrder() {
             return;
         }
 
-        const invalid = products.some(
-            p => !p.product || !p.qte || !p.unit || Number(p.qte) <= 0
-        );
+        const cleanProducts = products
+            .filter(p => {
+                return (
+                    p.product &&
+                    p.qte !== "" &&
+                    p.qte !== null &&
+                    p.qte !== undefined &&
+                    p.unit &&
+                    Number(p.qte) > 0
+                );
+            })
+            .map(p => ({
+                product: p.product,
+                qte: Number(p.qte),
+                unit: p.unit
+            }));
 
-        if (invalid) {
-            toast.error("Fill all quantities and units");
+        console.log("RAW PRODUCTS:", products);
+        console.log("CLEAN PRODUCTS:", cleanProducts);
+
+        if (cleanProducts.length === 0) {
+            toast.error("No valid products to submit");
             return;
         }
 
@@ -80,14 +105,13 @@ export default function RechargmentOrder() {
             const payload = {
                 id_parent: selectedOrder.id,
                 type_choise: typeChoise,
-                order_orderProduct_items: products.map(p => ({
-                    product: p.product,
-                    qte: Number(p.qte),
-                    unit: p.unit
-                }))
+                order_orderProduct_items: cleanProducts
             };
 
+            console.log("FINAL PAYLOAD:", payload);
+
             await rechargmentOrderAdmin(payload);
+
             toast.success("Order created successfully");
             navigate("/orderToday");
 
@@ -166,7 +190,7 @@ export default function RechargmentOrder() {
                                 <input
                                     type="number"
                                     placeholder="Qte"
-                                    
+                                    value={p.qte}
                                     onChange={(e) => handleChange(i, "qte", e.target.value)}
                                     className="w-1/3 p-2 bg-black/30 text-white border border-white/20 rounded placeholder:text-white/40 focus:outline-none focus:border-orange-500"
                                 />
@@ -192,8 +216,9 @@ export default function RechargmentOrder() {
                                         singleValue: (base) => ({ ...base, color: "#fff" }),
                                         placeholder: (base) => ({ ...base, color: "rgba(255,255,255,0.4)" }),
                                     }}
-                                    onChange={(val) => handleChange(i, "unit", val.value)}
-                                   
+                                    value={unitOptions.find(u => u.value === p.unit) || null}
+                                    onChange={(val) => handleChange(i, "unit", val?.value || "")}
+
                                 />
                             </div>
                         ))

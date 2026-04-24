@@ -10,7 +10,6 @@ import BalanceList from "./pages/Balance";
 import Navbar from "./component/Navbar";
 import Notifications from "./pages/Notifications";
 import ProtectedRoute from "./component/ProtectedRoute";
-import SuperAdminRoute from "./component/SuperAdminRoute";
 import AddProductType from "./component/AddProductType";
 import RequestContract from "./component/RequestContract";
 import RequestPayment from "./component/RequestPayment";
@@ -32,6 +31,7 @@ import TaxList from "./pages/TaxList";
 import AddTax from "./component/AddTax";
 import InvoiceList from "./pages/InvoiceList";
 import ValidateInvoice from "./pages/ValidateInvoice";
+import AdminRoute from "./component/AdminRoute"
 
 /* Layout */
 function Layout() {
@@ -75,60 +75,60 @@ function App() {
           <Route
             path="/Sign"
             element={
-              <SuperAdminRoute>
+              <AdminRoute>
                 <Sign />
-              </SuperAdminRoute>
+              </AdminRoute>
             }
           />
           <Route path="/AddProduct" element={
-            <SuperAdminRoute>
+            <AdminRoute>
               <AddProduct />
-            </SuperAdminRoute>} />
+            </AdminRoute>} />
 
            <Route path="/OrderToday" element={
-            <SuperAdminRoute>
+            <AdminRoute>
               <OrderToday />
-            </SuperAdminRoute>} /> 
+            </AdminRoute>} /> 
 
           <Route path="/AddProductType" element={
-            <SuperAdminRoute>
+            <AdminRoute>
               <AddProductType />
-            </SuperAdminRoute>} />
+            </AdminRoute>} />
 
           <Route path="/EditProductType/:id" element={
-            <SuperAdminRoute>
+            <AdminRoute>
               <EditProductType />
-            </SuperAdminRoute>} />
+            </AdminRoute>} />
 
           <Route path="/EditProduct/:id" element={
-            <SuperAdminRoute>
+            <AdminRoute>
               <EditProduct />
-            </SuperAdminRoute>} />
+            </AdminRoute>} />
             
           <Route path="/Bills" element={
-            <SuperAdminRoute>
+            <AdminRoute>
               <BillsList />
-            </SuperAdminRoute>} />
+            </AdminRoute>} />
 
             <Route path="/chargmentOrder/:id" element={
-            <SuperAdminRoute>
+            <AdminRoute>
               <ChargmentOrder />
-            </SuperAdminRoute>} />
+            </AdminRoute>} />
 
             <Route path="/rechargmentOrder/:id" element={
-            <SuperAdminRoute>
+            <AdminRoute>
               <RechargmentOrder />
-            </SuperAdminRoute>} />
+            </AdminRoute>} />
 
             <Route path="/AddTax" element={
-            <SuperAdminRoute>
+            <AdminRoute>
               <AddTax />
-            </SuperAdminRoute>} />
+            </AdminRoute>} />
 
             <Route path="/TaxList" element={
-            <SuperAdminRoute>
+            <AdminRoute>
               <TaxList />
-            </SuperAdminRoute>} />
+            </AdminRoute>} />
 
 
 
