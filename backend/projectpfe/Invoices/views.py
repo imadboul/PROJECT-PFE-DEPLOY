@@ -152,7 +152,7 @@ class InvoiceList(generics.ListAPIView):
     filterset_class  = InvoiceFilter
     pagination_class = MyPagination
     @class_jwt_must
-    @class_role_required(['admin', 'superAdmin'])
+    @class_role_required(['client','admin', 'superAdmin'])
     def list(self, request, *args, **kwargs):
          
         role=request.role
