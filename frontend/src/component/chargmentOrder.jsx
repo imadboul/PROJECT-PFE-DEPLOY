@@ -61,20 +61,23 @@ export default function ChargmentOrder() {
     setSelectedOrder(order);
     setSelectedContract(contract);
 
-const orderProducts = order.orderclient_Orderproductclient_items || [];
+    const orderProducts = order.orderclient_Orderproductclient_items || [];
 
-const filteredProducts = orderProducts.map(op => {
-  const productData = allProducts.find(p => p.name === op.product);
+    const mapped = orderProducts.map(op => {
+      const productData = allProducts.find(p =>
+        p.name?.toLowerCase().trim() === op.product?.toLowerCase().trim()
+      );
 
-  return {
-    product: productData?.id || null,
-    productName: op.product,
-    qte: "",
-    unit: null
-  };
-});
+      return {
+        product: productData?.id || null,
+        productName: op.product,
+        qte: "",
+        unit: null
+      };
+    });
 
-setProducts(filteredProducts);
+    setProducts(mapped);
+
 
   }, [id, orders, allProducts]);
 
@@ -114,9 +117,10 @@ setProducts(filteredProducts);
           unit: p.unit
         }))
 
-      };
+      };console.log(payload)
 
       await chargmentOrderAdmin(payload);
+      
 
       toast.success("Order created successfully");
       navigate("/orderToday");
@@ -139,15 +143,15 @@ setProducts(filteredProducts);
         className="w-full max-w-xl bg-black/60 p-6 rounded-xl"
       >
         <div>
-        <button
+          <button
             className="text-white text-2xl cursor-pointer font-bold hover:text-orange-500"
             onClick={() => window.history.back()}
           >
             <i className="fa-solid fa-arrow-left"></i>
           </button>
-        <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
-          Chargment Order
-        </h2>
+          <h2 className="text-2xl font-bold text-center mb-6 text-orange-500">
+            Chargment Order
+          </h2>
         </div>
 
         {/* CONTRACT */}
@@ -163,8 +167,8 @@ setProducts(filteredProducts);
         {/* CLIENT */}
         <div className="p-2 mb-4 bg-black/30 text-white rounded border">
           Client: {selectedOrder
-  ? `${selectedOrder.client_firstName} ${selectedOrder.client_lastName}`
-: "-"}
+            ? `${selectedOrder.client_firstName} ${selectedOrder.client_lastName}`
+            : "-"}
         </div>
 
         {/* PRODUCTS */}
