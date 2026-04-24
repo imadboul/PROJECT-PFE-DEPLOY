@@ -36,7 +36,6 @@ def jwt_must(func):
 
     return wrapper
         
-    return wrapper
 
 
 def role_required(roles):
