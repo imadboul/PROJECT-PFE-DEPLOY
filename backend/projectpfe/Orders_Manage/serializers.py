@@ -13,6 +13,8 @@ from Tax_Service.taxCalcul import convert_unit
 from user.views import notify_a_client
 from order_client.serializers import contractSerializerOne
 from django.db.models import F
+from Tax_Service.taxCalcul import facturation 
+from Tax_Service.serilazers import get_now
   
 
 
@@ -79,7 +81,7 @@ class OrderSerializer(serializers.ModelSerializer):
             if product['product'].product_type.id != product_type_id:
                 raise serializers.ValidationError(f"c'est product {product['product'].name} n'appartie pas a type de product")
         
-        order_client=Orderclient.objects.filter(id=data['client_order'].id).first()  
+        order_client=Orderclient.objects.filter(id=data['client_order'].id,state=States.ACCEPTED).first()  
         
         if not order_client:
             raise serializers.ValidationError("c'est order client n'exists pas ")
@@ -105,7 +107,7 @@ class OrderSerializer(serializers.ModelSerializer):
         
         with transaction.atomic():
              
-             invoice, created = Invoice.objects.get_or_create( contract=validated_data['contract'], states=StatesInv.NO_VALID)  
+             invoice,created = Invoice.objects.get_or_create( contract=validated_data['contract'], states=StatesInv.NO_VALID)  
                  
              order_items=validated_data.pop( 'order_orderProduct_items' )
             
@@ -177,10 +179,10 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
             with transaction.atomic():    
                 
                 invoice=Invoice.objects.filter(id=order.invoice.id,states=StatesInv.NO_VALID).first()
-                
+                facteuration=False
                 if not invoice:
                     invoice=Invoice.objects.create( contract=order.contract, type=validated_data['type_choise'] )
-                    
+                    facteuration=True
                     
                 order_items=validated_data.pop('order_orderProduct_items')
                 
@@ -214,7 +216,14 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
             qte*=plus_or_minus
             OrderProduct.objects.bulk_create(order_products)
             Contract.objects.filter(id=order.contract.id).update(qte_used=F('qte_used')+qte)
-             
+            
+            if facteuration :
+                user=self.context.get('user')
+                order=Order.objects.filter(id=newOrder.id)
+                facturation(order)
+                
+                Invoice.objects.filter(id=newOrder.invoice.id).update(states=StatesInv.VALID,date_de_facteration=get_now(),validated_by=user)
+                
             return newOrder   
    
             
