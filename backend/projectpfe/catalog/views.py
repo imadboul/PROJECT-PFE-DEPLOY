@@ -317,13 +317,15 @@ def get_contract(request, id):
         
 @api_view(['GET'])
 @jwt_must
-@role_required(['Admin', 'superAdmin'])
+@role_required(['admin', 'superAdmin'])
 def getclients(request):
 
     paginator = MyPagination()
 
-    
-    queryset = Client.objects.filter(client_contracts__isnull=False).distinct()
+    if request.role == 'admin':
+        queryset = Client.objects.filter(client_contracts__isnull=False,manager_id = request.user_id).distinct()
+    else:
+        queryset = Client.objects.filter(client_contracts__isnull=False).distinct()
 
     result_page = paginator.paginate_queryset(queryset, request)
 

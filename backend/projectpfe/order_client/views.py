@@ -72,7 +72,10 @@ def order(request):
             if client_id:
                 queryset = Orderclient.objects.filter(client_id = client_id)
             else:
-                queryset = Orderclient.objects.all()
+                if request.role == 'admin':
+                    queryset = Orderclient.objects.filter(client__manager__id = request.user_id)
+                else:
+                    queryset = Orderclient.objects.all()
 
         result_page = paginator.paginate_queryset(queryset, request)
         orders = OrderreadSerializer(result_page, many=True)
@@ -87,7 +90,7 @@ def order(request):
         
 @api_view(['GET'])
 @jwt_must
-@role_required(['Admin', 'superAdmin'])
+@role_required(['admin', 'superAdmin'])
 def getclients(request):
 
     paginator = MyPagination()
@@ -122,6 +125,7 @@ def getclients(request):
         
 @api_view(['POST'])
 @jwt_must
+@role_required(['admin','superAdmin'])
 def validateorder(request):
     try:
 
