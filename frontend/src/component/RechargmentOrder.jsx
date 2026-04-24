@@ -40,60 +40,59 @@ export default function RechargmentOrder() {
                 setSelectedOrder(order);
                 setSelectedContract(order.contract);
 
-                const mapped = (order.order_orderProduct_items || []).map(i => ({
-                    product: i.product.id,
-                    productName: i.product.name,
-                    qte: i.qte || "",
-                    unit: i.unit || ""
+                // ✅ IMPORTANT: reset clean state
+                const mapped = order.order_orderProduct_items.map(item => ({
+                    product: item.product.id,
+                    productName: item.product.name,
+                    qte: "",
+                    unit: ""
                 }));
 
                 setProducts(mapped);
 
-            } catch (error) {
-                handleApiErrors(error);
+            } catch (err) {
+                handleApiErrors(err);
             }
         };
 
         fetchData();
     }, [id]);
 
-    const handleChange = (i, field, value) => {
-        const updated = [...products];
-        updated[i] = {
-            ...updated[i],
-            [field]: value
-        };
-        setProducts(updated);
+    // ================= UPDATE FIELD =================
+    const handleChange = (index, field, value) => {
+        setProducts(prev => {
+            const copy = [...prev];
+            copy[index] = {
+                ...copy[index],
+                [field]: value
+            };
+            return copy;
+        });
     };
 
+    // ================= SUBMIT =================
     const onSubmit = async () => {
-        if (!selectedContract || !selectedOrder) {
-            toast.error("Data not loaded yet");
+        if (!selectedOrder || !selectedContract) {
+            toast.error("Data not loaded");
             return;
         }
 
+        // ✅ CLEAN DATA (VERY IMPORTANT)
         const cleanProducts = products
-            .filter(p => {
-                return (
-                    p.product &&
-                    p.qte !== "" &&
-                    p.qte !== null &&
-                    p.qte !== undefined &&
-                    p.unit &&
-                    Number(p.qte) > 0
-                );
-            })
+            .filter(p =>
+                p.product &&
+                p.qte !== "" &&
+                p.unit !== "" &&
+                Number(p.qte) > 0
+            )
             .map(p => ({
-                product: p.product,
+                product: Number(p.product),
                 qte: Number(p.qte),
                 unit: p.unit
             }));
 
-        console.log("RAW PRODUCTS:", products);
-        console.log("CLEAN PRODUCTS:", cleanProducts);
-
         if (cleanProducts.length === 0) {
-            toast.error("No valid products to submit");
+            toast.error("No valid products");
             return;
         }
 
@@ -113,8 +112,8 @@ export default function RechargmentOrder() {
             toast.success("Order created successfully");
             navigate("/orderToday");
 
-        } catch (error) {
-            handleApiErrors(error);
+        } catch (err) {
+            handleApiErrors(err);
         } finally {
             setLoading(false);
         }
@@ -140,7 +139,7 @@ export default function RechargmentOrder() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <div className="p-2 bg-black/30 text-white rounded border border-white/20">
                         <span className="text-white text-sm">Contract:</span>{" "}
-                        {selectedContract ? `${selectedContract.contract} - ${selectedContract.product_type}` : "-"}
+                        {selectedContract ? `${selectedContract.id} - ${selectedContract.product_type}` : "-"}
                     </div>
 
                     <div className="p-2 bg-black/30 text-white rounded border border-white/20">
@@ -188,7 +187,7 @@ export default function RechargmentOrder() {
                                 <input
                                     type="number"
                                     placeholder="Qte"
-                                    value={p.qte}
+                                    value={p.qte || ""}
                                     onChange={(e) => handleChange(i, "qte", e.target.value)}
                                     className="w-1/3 p-2 bg-black/30 text-white border border-white/20 rounded placeholder:text-white/40 focus:outline-none focus:border-orange-500"
                                 />
