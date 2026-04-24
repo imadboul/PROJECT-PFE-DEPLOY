@@ -174,7 +174,7 @@ export default function InvoiceList() {
           >
             <div className="space-y-2 text-sm">
               <div className="flex justify-between items-center">
-                <p className="text-lg font-semibold">Invoice #{inv.id}</p>
+                <p className="text-lg font-semibold">Invoice {inv.id}</p>
                 <span className={`text-xs px-2 py-1 rounded ${inv.states === "validated"
                   ? "bg-green-500/30 text-green-300"
                   : "bg-orange-500/30 text-orange-300"
@@ -248,7 +248,7 @@ export default function InvoiceList() {
             </button>
 
             <div className="space-y-3 text-sm">
-              <p className="text-lg font-bold">Invoice #{selectedInvoice.id}</p>
+              <p className="text-lg font-bold">Invoice {selectedInvoice.id}</p>
 
               <div className="bg-white/5 p-3 rounded">
                 <p><strong>Client:</strong> {selectedInvoice.client_firstName} {selectedInvoice.client_lastName}</p>
@@ -315,23 +315,36 @@ export default function InvoiceList() {
                               : "border-white/20 bg-white/5 hover:border-orange-500/50"
                               }`}
                           >
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <p className="font-semibold">Order #{order.id}</p>
-                                {order.client_name && (
-                                  <p className="text-xs text-white/70 mt-1">{order.client_name}</p>
-                                )}
-                              </div>
-                              <div className="text-right">
-                                <p className="text-orange-400 font-bold">
-                                  {order.amount ? parseFloat(order.amount).toFixed(2) : "0.00"} DA
-                                </p>
-                                {selectedOrderIds.includes(order.id) && (
-                                  <p className="text-xs text-orange-400 mt-1">✓ Selected</p>
-                                )}
-                              </div>
+                            <div className="flex justify-between items-center mb-2">
+                              <p className="font-semibold">Order #{order.id}</p>
+
+                              <p className="text-xs text-white/70">
+                                {new Date(order.date_created).toLocaleDateString()}
+                              </p>
+                            </div>
+
+                            <div className="space-y-1">
+                              {order.order_orderProduct_items?.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="flex justify-between text-sm text-white/80"
+                                >
+                                  <p>{item.product?.name}</p>
+                                  <p>{item.qte} {item.unit}</p>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="text-right">
+                              <p className="text-orange-400 font-bold">
+                                {order.amount ? parseFloat(order.amount).toFixed(2) : "0.00"} DA
+                              </p>
+                              {selectedOrderIds.includes(order.id) && (
+                                <p className="text-xs text-orange-400 mt-1">✓ Selected</p>
+                              )}
                             </div>
                           </div>
+
                         ))}
                       </div>
                     )}
