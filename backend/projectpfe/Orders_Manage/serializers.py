@@ -198,13 +198,17 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
             order_products =[]
             qte=0
             order_client_items=order.client_order.orderclient_Orderproductclient_items.all()
+            
             for item in order_items:
-                order_products.append( OrderProduct( product=item['product'], qte=item['qte'], unit=item['unit'], order=order )  )
+                
+                order_products.append( OrderProduct( product=item['product'], qte=item['qte'], unit=item['unit'], order=newOrder )  )
                 qte+=item['qte']
+                
                 for item_client in order_client_items:
-                   if item_client.product==item['product']: 
+                    
+                    if item_client.product==item['product']: 
                       qte_convert=convert_unit( item['qte'] , item_client.product.density , item['unit'] ,item_client.unit)*plus_or_minus
-                      OrderProductclient.objects.filter(id=item_client.id).update(qte_taken=F('qte_taken')+ qte_convert)
+                      OrderProductclient.objects.filter(id=item_client.id).update(qte_taken=F('qte_taken')+qte_convert)
              
             
             qte*=plus_or_minus
