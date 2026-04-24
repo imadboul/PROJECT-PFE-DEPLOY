@@ -40,16 +40,14 @@ export default function RechargmentOrder() {
                 setSelectedOrder(order);
                 setSelectedContract(order.contract);
 
-                setProducts([]);
-
                 const mapped = (order.order_orderProduct_items || []).map(i => ({
                     product: i.product.id,
                     productName: i.product.name,
-                    qte: i.qte,
-                    unit: i.unit
+                    qte: i.qte || "",
+                    unit: i.unit || ""
                 }));
 
-                setProducts([...mapped]);
+                setProducts(mapped);
 
             } catch (error) {
                 handleApiErrors(error);
