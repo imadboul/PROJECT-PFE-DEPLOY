@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getOrders } from "../context/services/orderService";
 import { handleApiErrors } from "../utils/handleApiErrors";
 import { NavLink } from "react-router-dom";
-import { getChargmentOrderAdmin, validateOrderAdmin } from "../context/services/orderAdmin";
+import { getChargmentOrderAdmin, validateOrderAdmin, validateOrderAdminAll } from "../context/services/orderAdmin";
 import toast from "react-hot-toast";
 
 export default function OrderToday() {
@@ -21,6 +21,23 @@ export default function OrderToday() {
       fetchOrders();
     } catch (error) {
       handleApiErrors(error);
+    }
+  };
+  const handleValidateAll = async () => {
+    try {
+      setLoading(true);
+
+      const ids = allOrders.loadingOrders.map(o => o.id);
+
+      await validateOrderAdminAll({ ids });
+
+      toast.success("All orders validated");
+
+      fetchOrders();
+    } catch (error) {
+      handleApiErrors(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -121,8 +138,14 @@ export default function OrderToday() {
   return (
     <div className="p-6 flex justify-center relative z-10">
       <div className="w-full max-w-3xl flex flex-col gap-4">
-
-        <h1 className="text-xl text-white font-bold mb-2">Today Orders</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-xl text-white font-bold mb-2">Today Orders</h1>
+          <button
+            className="border border-white text-green-300 cursor-pointer px-4 py-2 rounded hover:bg-green-500/50 hover:text-green-500"
+            onClick={handleValidateAll}>
+            Validate All
+          </button>
+        </div>
 
         {/* TABS */}
         <div className="flex gap-3 mb-4">
@@ -142,6 +165,7 @@ export default function OrderToday() {
             </button>
           ))}
         </div>
+
 
         {/* ORDERS LIST */}
         {getCurrentOrders().length === 0 ? (
@@ -183,17 +207,17 @@ export default function OrderToday() {
 
                     {o._type === "accepted" && (
                       <>
-                      <p><strong>Pickup Date:</strong> {o.pickup_date}</p>
-                      <p><strong>Client Order:</strong> {o.id}</p>
+                        <p><strong>Pickup Date:</strong> {o.pickup_date}</p>
+                        <p><strong>Client Order:</strong> {o.id}</p>
                       </>
                     )}
                     {o._type === "loading" && (
                       <>
-                      <p><strong>Date Created:</strong> {o.date_created?.split("T")[0]}</p>
-                      <p><strong>Client Order:</strong> {o.client_order}</p>
+                        <p><strong>Date Created:</strong> {o.date_created?.split("T")[0]}</p>
+                        <p><strong>Client Order:</strong> {o.client_order}</p>
                       </>
                     )}
-                    
+
                   </div>
                   <div className="flex items-center justify-between">
                     <p className={getStateClass(state)}>
@@ -288,12 +312,14 @@ export default function OrderToday() {
                 <div className="flex gap-6">
                   {selectedOrder._type === "loading" && selectedOrder.states === "loading" && (
                     <>
-                      <NavLink
-                        to={`/rechargmentOrder/${selectedOrder.id}`}
-                        className="text-xl cursor-pointer text-orange-600 hover:text-orange-700 transition"
-                      >
-                        <i className="fa-solid fa-pen-clip"></i>
-                      </NavLink>
+                      {selectedOrder.type === "normal" && (
+                        < NavLink
+                          to={`/rechargmentOrder/${selectedOrder.id}`}
+                          className="text-xl cursor-pointer text-orange-600 hover:text-orange-700 transition"
+                        >
+                          <i className="fa-solid fa-pen-clip"></i>
+                        </NavLink>
+                      )}
                       <button
                         onClick={() => handleValidate(selectedOrder.id)}
                         className="text-xl cursor-pointer text-orange-600 hover:text-orange-700 transition"
@@ -308,7 +334,8 @@ export default function OrderToday() {
             </div>
           </div>
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }

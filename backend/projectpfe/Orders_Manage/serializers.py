@@ -155,10 +155,10 @@ class RectificativeOrderSerializer(serializers.ModelSerializer):
             orderProducts=order.order_orderProduct_items.all()
             name="None"
             
-            for item1 in orderProducts:
+            for item2 in data['order_orderProduct_items']:
                 
                 test=False
-                for item2 in data['order_orderProduct_items']:
+                for item1 in orderProducts:
                     name=item2['product']
                     
                     if item1.product==item2['product']:

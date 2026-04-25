@@ -5,8 +5,11 @@ import {
   getInvoices,
   getInvoicePDF,
   createNewInvoice,
-  invoiceOrders
+  invoiceOrders,
+  getOrders,
+  validateInvoicesById
 } from "../context/services/invoiceService";
+
 import { AuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -17,6 +20,11 @@ export default function InvoiceList() {
   const [showValid, setShowValid] = useState(true);
   const [page, setPage] = useState(1);
   const { user } = useContext(AuthContext);
+
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [selectedOrderIds, setSelectedOrderIds] = useState([]);
+  const [actionType, setActionType] = useState(null);
 
   const [pagination, setPagination] = useState({
     next: null,
@@ -52,22 +60,44 @@ export default function InvoiceList() {
     }
   };
 
+
   useEffect(() => {
-      fetchInvoices(1);
+    fetchInvoices(1);
   }, [showValid]);
 
+  const handleSelectInvoice = async (invoice) => {
+    setSelectedInvoice(invoice);
 
-  const handleCreateNewInvoice = async (invoiceData) => {
+    if (invoice.states === "pending") {
+      setOrders(invoice.invoice_order_items || []);
+      setSelectedOrderIds([]);
+    }
+  };
+  const toggleOrderSelection = (orderId) => {
+    setSelectedOrderIds(prev =>
+      prev.includes(orderId)
+        ? prev.filter(id => id !== orderId)
+        : [...prev, orderId]
+    );
+  };
+
+  const handleCreateNewInvoice = async () => {
+    if (selectedOrderIds.length === 0) {
+      toast.error("Please select at least one order");
+      return;
+    }
+
     try {
       setLoading(true);
       await createNewInvoice(
-        invoiceData.orderIds,
-        invoiceData.contractId,
-        invoiceData.id
+        selectedOrderIds,
+        selectedInvoice.contract.id,
+        selectedInvoice.id
       );
       toast.success("New invoice created successfully");
       fetchInvoices();
       setSelectedInvoice(null);
+      setSelectedOrderIds([]);
     } catch (error) {
       handleApiErrors(error);
     } finally {
@@ -75,23 +105,42 @@ export default function InvoiceList() {
     }
   };
 
-  const handleInvoiceOrders = async (invoiceData) => {
+  const handleInvoiceOrders = async () => {
+    if (selectedOrderIds.length === 0) {
+      toast.error("Please select at least one order");
+      return;
+    }
+
     try {
       setLoading(true);
       await invoiceOrders(
-        invoiceData.orderIds,
-        invoiceData.contractId,
-        invoiceData.id
+        selectedOrderIds,
+        selectedInvoice.contract.id,
+        selectedInvoice.id
       );
       toast.success("Orders invoiced successfully");
       fetchInvoices();
       setSelectedInvoice(null);
+      setSelectedOrderIds([]);
     } catch (error) {
       handleApiErrors(error);
     } finally {
       setLoading(false);
     }
   };
+  const handleValidatedById = async (id) => {
+    try {
+      setLoading(true)
+      await validateInvoicesById(id)
+      setSelectedInvoice(null);
+      toast.success("Orders invoiced successfully");
+      fetchInvoices();
+    } catch (error) {
+      handleApiErrors(error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const viewPDF = async (id) => {
     try {
@@ -113,16 +162,22 @@ export default function InvoiceList() {
         {/* Header */}
         <h1 className="text-white text-xl font-bold">Invoices</h1>
 
-
-
-          <div className="flex self-end gap-2">
-            <button
-              onClick={() => setShowValid(v => !v)}
+        <div className="flex justify-between items-center gap-2">
+          {["admin", "superAdmin"].includes(user?.role) && (
+            <NavLink
+              to="/validateInvoice"
               className="border border-white text-white cursor-pointer px-4 py-2 rounded hover:bg-white/10 text-sm"
             >
-              {showValid ? "📋 Pending" : "✅ Validated"}
-            </button>
-          </div>
+              Validated By Method
+            </NavLink>)}
+          <button
+            onClick={() => setShowValid(v => !v)}
+            className="border border-white text-white cursor-pointer px-4 py-2 rounded hover:bg-white/10 text-sm"
+          >
+            {showValid ? "📋 Pending" : "✅ Validated"}
+          </button>
+
+        </div>
 
         {/* List */}
         {invoices.length === 0 && (
@@ -132,7 +187,7 @@ export default function InvoiceList() {
         {invoices.map((inv) => (
           <div
             key={inv.id}
-            onClick={() => setSelectedInvoice(inv)}
+            onClick={() => handleSelectInvoice(inv)}
             className={`cursor-pointer bg-black/50 text-white rounded-2xl p-5 border transition
               ${inv.states === "validated"
                 ? "border-green-500/30 hover:bg-green-500/10"
@@ -146,23 +201,21 @@ export default function InvoiceList() {
                   ? "bg-green-500/30 text-green-300"
                   : "bg-orange-500/30 text-orange-300"
                   }`}>
-                  {inv.states}
+                  {inv.states === "validated" ? "✓ Validated" : "⏳ Pending"}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-
                 <p><strong>Client:</strong> {inv.client_firstName} {inv.client_lastName}</p>
-                <p><strong>Contract:</strong> {inv.contract?.id} - {inv.contract?.product_type}</p>
-
+                <p><strong>Contract:</strong> {inv.contract?.id}</p>
               </div>
               <div className="flex items-center justify-between">
                 <p><strong>Type:</strong> {inv.type}</p>
                 <p><strong>Date:</strong> {inv.date_de_facteration
-                  ? new Date(inv.date_de_facteration).toLocaleDateString("fr-FR", {
+                  ? new Date(inv.date_de_facteration).toLocaleDateString("en-US", {
                     day: "2-digit",
                     month: "2-digit",
-                    year: "2-digit"
+                    year: "numeric"
                   })
                   : "—"}
                 </p>
@@ -204,23 +257,26 @@ export default function InvoiceList() {
       {/* Modal */}
       {selectedInvoice && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-black border border-white text-white p-6 rounded-xl w-[450px] relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-black border border-white text-white p-6 rounded-xl w-[500px] relative max-h-[90vh] overflow-y-auto">
 
             <button
-              onClick={() => setSelectedInvoice(null)}
-              className="absolute top-2 right-3 cursor-pointer text-2xl text-white hover:text-red-500"
+              onClick={() => {
+                setSelectedInvoice(null);
+                setSelectedOrderIds([]);
+              }}
+              className="absolute top-2 right-3 cursor-pointer text-xl text-white hover:text-red-500"
             >
               ✕
             </button>
 
             <div className="space-y-3 text-sm">
-              <p className="text-lg font-bold">Invoice #{selectedInvoice.id}</p>
+              <p className="text-lg font-bold">Invoice {selectedInvoice.id}</p>
 
               <div className="bg-white/5 p-3 rounded">
                 <p><strong>Client:</strong> {selectedInvoice.client_firstName} {selectedInvoice.client_lastName}</p>
                 <p><strong>Type:</strong> {selectedInvoice.type}</p>
                 <p className={selectedInvoice.states === "validated" ? "text-green-400" : "text-orange-400"}>
-                  <strong>State:</strong> {selectedInvoice.states.toUpperCase()}
+                  <strong>Status:</strong> {selectedInvoice.states === "validated" ? "Validated" : "Pending"}
                 </p>
                 {selectedInvoice.validated_by && (
                   <p><strong>Validated by:</strong> {selectedInvoice.validated_by}</p>
@@ -236,55 +292,146 @@ export default function InvoiceList() {
                 </p>
               </div>
 
-              {/* Invoice Lines */}
-              {selectedInvoice.invoice_InvoiceLine_items?.length > 0 && (
-                <div>
-                  <p className="text-xs text-white/50 uppercase tracking-wide mb-2">📦 Items</p>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {selectedInvoice.invoice_InvoiceLine_items.map((line) => (
-                      <div key={line.id} className="bg-white/5 rounded p-2 text-xs">
-                        <p><strong>{line.product}</strong></p>
-                        <div className="grid grid-cols-2 gap-1 mt-1 text-white/70">
-                          <p>Qte: {line.qte} {line.unit}</p>
-                          <p>Tax: {line.tax_name}</p>
-                          <p>Price: {line.tax_price} DA</p>
-                          <p>TVA: {line.Tva} DA</p>
+              {selectedInvoice.invoice_order_items?.map((order) => (
+
+                <div key={order.id} className="space-y-2">
+
+
+                  {order.order_orderProduct_items?.map((item) => (
+                    <div className="border border-white/80 bg-white/5 p-2 rounded-lg">
+                      <div
+                        key={item.id}
+                        className="text-sm text-white/80"
+                      >
+                        <p>Order:{item.order}</p>
+                        <div className="flex justify-between items-center">
+                          <p>Product:{item.product?.name}</p>
+                          <p>Qte:{item.qte} {item.unit}</p>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
+
                 </div>
+
+              ))}
+            </div>
+
+            {/* Orders Section - NEW */}
+            {selectedInvoice.states === "pending" && (
+              ["admin", "superAdmin"].includes(user?.role) && (
+                <div className="mt-4 border-t border-white/20 pt-4">
+                  <p className="text-xs text-white/50 uppercase tracking-wide mb-3">
+                    📦 Orders ({selectedOrderIds.length}/{orders.length})
+                  </p>
+
+                  {loadingOrders ? (
+                    <div className="flex justify-center py-4">
+                      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  ) : orders.length === 0 ? (
+                    <p className="text-center text-white/50 py-4">No available orders</p>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {orders.map((order) => (
+                        <div
+                          key={order.id}
+                          onClick={() => toggleOrderSelection(order.id)}
+                          className={`p-4 rounded-lg cursor-pointer border-2 transition ${selectedOrderIds.includes(order.id)
+                              ? "border-orange-500 bg-orange-500/10"
+                              : "border-white/20 bg-white/5 hover:border-orange-500/50"
+                            }`}
+                        >
+                          {/* Header Order */}
+                          <div className="flex justify-between items-center mb-2">
+                            <p className="font-semibold text-white">
+                              Order {order.id}
+                            </p>
+
+                            <p className="text-xs text-white/70">
+                              {new Date(order.date_created).toLocaleDateString()}
+                            </p>
+                          </div>
+
+                          {/* Products */}
+                          <div className="space-y-2">
+                            {order.order_orderProduct_items?.map((item) => (
+                              <div
+                                key={item.id}
+                                className="flex justify-between text-sm text-white/80 border border-white/10 p-2 rounded"
+                              >
+                                <p>{item.product?.name}</p>
+                                <p>
+                                  {item.qte} {item.unit}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Footer */}
+                          <div className="flex justify-between items-center mt-3">
+                            <p className="text-orange-400 font-bold">
+                              {order.amount ? parseFloat(order.amount).toFixed(2) : "0.00"} DA
+                            </p>
+
+                            {selectedOrderIds.includes(order.id) && (
+                              <p className="text-xs text-orange-400">✓ Selected</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {orders.length > 0 && (
+                    <div className="mt-3 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                      <p className="text-sm">
+                        <strong>Selected Orders:</strong>{" "}
+                        <span className="text-orange-400 font-bold">{selectedOrderIds.length}</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 mt-4">
+              {selectedInvoice.states === "pending" && (
+                ["admin", "superAdmin"].includes(user?.role) && (
+                  <>
+                    <button
+                      onClick={handleInvoiceOrders}
+                      disabled={loading || selectedOrderIds.length === 0}
+                      className="flex-1 py-2 bg-green-600 hover:bg-green-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded text-white text-sm font-bold transition"
+                    >
+                      <i className="fa-solid fa-file-invoice"></i> Invoiced ({selectedOrderIds.length})
+                    </button>
+                    <button
+                      onClick={handleCreateNewInvoice}
+                      disabled={loading || selectedOrderIds.length === 0}
+                      className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded text-white text-sm font-bold transition"
+                    >
+                      <i className="fa-solid fa-newspaper"></i> New ({selectedOrderIds.length})
+                    </button>
+                    <button
+                      onClick={() => handleValidatedById(selectedInvoice.id)}
+                      className="flex-1 py-2 bg-orange-600 hover:bg-orange-700 cursor-pointer rounded text-white text-sm font-bold transition"
+                    >
+                      <i className="fa-solid fa-check"></i>  validated
+                    </button>
+                  </>
+                )
               )}
 
-              <div className="flex gap-2 mt-4">
-                {selectedInvoice.states === "pending" && (
-                  ["admin", "superAdmin"].includes(user?.role) && (
-                    <>
-                      <button
-                        onClick={() => handleInvoiceOrders(selectedInvoice.id)}
-                        className="flex-1 py-2 bg-green-600 hover:bg-green-700 rounded text-white text-sm font-bold transition"
-                      >
-                        <i className="fa-solid fa-check mr-1"></i> invoiced
-                      </button>
-                      <button
-                        onClick={() => handleCreateNewInvoice(selectedInvoice.id)}
-                        className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded text-white text-sm"
-                      >
-                        <i className="fa-solid fa-check mr-1"></i> New invoice
-                      </button>
-                    </>
-                  )
-                )}
-
-                {selectedInvoice.states === "validated" && (
-                  <button
-                    onClick={() => viewPDF(selectedInvoice.id)}
-                    className="w-full py-2 text-orange-600 hover:text-orange-700 rounded cursor-pointer transition text-xl font-bold"
-                  >
-                    <i className="fa-solid fa-file-pdf mr-1"></i>
-                  </button>
-                )}
-              </div>
+              {selectedInvoice.states === "validated" && (
+                <button
+                  onClick={() => viewPDF(selectedInvoice.id)}
+                  className="w-full py-2 text-orange-600 hover:text-orange-700 cursor-pointer rounded text-2xl font-bold transition"
+                >
+                  <i className="fa-solid fa-file-pdf"></i>
+                </button>
+              )}
             </div>
           </div>
         </div>
