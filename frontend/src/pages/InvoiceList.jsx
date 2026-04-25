@@ -6,7 +6,8 @@ import {
   getInvoicePDF,
   createNewInvoice,
   invoiceOrders,
-  getOrders
+  getOrders,
+  validateInvoicesById
 } from "../context/services/invoiceService";
 
 import { AuthContext } from "../context/AuthContext";
@@ -127,6 +128,19 @@ export default function InvoiceList() {
       setLoading(false);
     }
   };
+  const handleValidatedById = async (id) => {
+    try {
+      setLoading(true)
+      await validateInvoicesById(id)
+      setSelectedInvoice(null);
+      toast.success("Orders invoiced successfully");
+      fetchInvoices();
+    } catch (error) {
+      handleApiErrors(error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const viewPDF = async (id) => {
     try {
@@ -323,38 +337,48 @@ export default function InvoiceList() {
                         <div
                           key={order.id}
                           onClick={() => toggleOrderSelection(order.id)}
-                          className={`p-3 rounded-lg cursor-pointer border-2 transition ${selectedOrderIds.includes(order.id)
-                            ? "border-orange-500 bg-orange-500/10"
-                            : "border-white/20 bg-white/5 hover:border-orange-500/50"
+                          className={`p-4 rounded-lg cursor-pointer border-2 transition ${selectedOrderIds.includes(order.id)
+                              ? "border-orange-500 bg-orange-500/10"
+                              : "border-white/20 bg-white/5 hover:border-orange-500/50"
                             }`}
                         >
+                          {/* Header Order */}
                           <div className="flex justify-between items-center mb-2">
-                            <p className="font-semibold">Order {order.id}</p>
+                            <p className="font-semibold text-white">
+                              Order {order.id}
+                            </p>
 
                             <p className="text-xs text-white/70">
                               {new Date(order.date_created).toLocaleDateString()}
                             </p>
                           </div>
 
-                          <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
+                          {/* Products */}
+                          <div className="space-y-2">
                             {order.order_orderProduct_items?.map((item) => (
-                              <div key={item.id}
-                                className="flex justify-between text-sm text-white/80">
+                              <div
+                                key={item.id}
+                                className="flex justify-between text-sm text-white/80 border border-white/10 p-2 rounded"
+                              >
                                 <p>{item.product?.name}</p>
-                                <p>{item.qte} {item.unit}</p>
+                                <p>
+                                  {item.qte} {item.unit}
+                                </p>
                               </div>
                             ))}
                           </div>
-                          <div className="text-right">
+
+                          {/* Footer */}
+                          <div className="flex justify-between items-center mt-3">
                             <p className="text-orange-400 font-bold">
                               {order.amount ? parseFloat(order.amount).toFixed(2) : "0.00"} DA
                             </p>
+
                             {selectedOrderIds.includes(order.id) && (
-                              <p className="text-xs text-orange-400 mt-1">✓ Selected</p>
+                              <p className="text-xs text-orange-400">✓ Selected</p>
                             )}
                           </div>
                         </div>
-
                       ))}
                     </div>
                   )}
@@ -379,16 +403,22 @@ export default function InvoiceList() {
                     <button
                       onClick={handleInvoiceOrders}
                       disabled={loading || selectedOrderIds.length === 0}
-                      className="flex-1 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white text-sm font-bold transition"
+                      className="flex-1 py-2 bg-green-600 hover:bg-green-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded text-white text-sm font-bold transition"
                     >
-                      ✓ Invoiced ({selectedOrderIds.length})
+                      <i className="fa-solid fa-file-invoice"></i> Invoiced ({selectedOrderIds.length})
                     </button>
                     <button
                       onClick={handleCreateNewInvoice}
                       disabled={loading || selectedOrderIds.length === 0}
-                      className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white text-sm font-bold transition"
+                      className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded text-white text-sm font-bold transition"
                     >
-                      + New ({selectedOrderIds.length})
+                      <i className="fa-solid fa-newspaper"></i> New ({selectedOrderIds.length})
+                    </button>
+                    <button
+                      onClick={() => handleValidatedById(selectedInvoice.id)}
+                      className="flex-1 py-2 bg-orange-600 hover:bg-orange-700 cursor-pointer rounded text-white text-sm font-bold transition"
+                    >
+                      <i className="fa-solid fa-check"></i>  validated
                     </button>
                   </>
                 )

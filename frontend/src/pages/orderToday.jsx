@@ -27,12 +27,13 @@ export default function OrderToday() {
     try {
       setLoading(true);
 
-      await validateOrderAdminAll();
+      const ids = allOrders.loadingOrders.map(o => o.id);
+
+      await validateOrderAdminAll({ ids });
 
       toast.success("All orders validated");
 
-      fetchOrders()
-
+      fetchOrders();
     } catch (error) {
       handleApiErrors(error);
     } finally {
@@ -141,7 +142,7 @@ export default function OrderToday() {
           <h1 className="text-xl text-white font-bold mb-2">Today Orders</h1>
           <button
             className="border border-white text-green-300 cursor-pointer px-4 py-2 rounded hover:bg-green-500/50 hover:text-green-500"
-            onClick={() => handleValidateAll ()}>
+            onClick={handleValidateAll}>
             Validate All
           </button>
         </div>

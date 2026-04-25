@@ -10,9 +10,9 @@ export const rechargmentOrderAdmin = (data) =>
      api.post(`/orders/rectificative/no_invoiced/`, data);
 
 export const validateOrderAdmin = (id) =>
-     api.put("/orders/validated/", {
+     api.put("/orders/validated/all/", {
           ids: [id],
      });
 
 export const validateOrderAdminAll = (data) =>
-     api.put(`/orders/validated/v_all/`, data);
+  api.put(`/orders/validated/all/`, data);

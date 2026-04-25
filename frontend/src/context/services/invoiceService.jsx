@@ -12,20 +12,25 @@ export const getInvoicePDF = (id) =>
 export const validateInvoices = (type, data) =>
   api.put(`/invoices/validate/${type}/`, data);
 
-export const createNewInvoice = (ids, contractId,invoiceId) =>
+export const createNewInvoice = (ids, contractId, invoiceId) =>
   api.post("/invoices/invoicedorinvoice/new_invoice/", {
     ids,
     contract: contractId,
     invoice_id: invoiceId,
   });
 
-export const invoiceOrders = (ids, contractId,invoiceId) =>
+export const invoiceOrders = (ids, contractId, invoiceId) =>
   api.post("/invoices/invoicedorinvoice/invoiced/", {
     ids,
     contract: contractId,
     invoice_id: invoiceId,
   });
 
-  export const getOrders = (params = {}) =>
+export const getOrders = (params = {}) =>
   api.get("/orders/filter/", { params });
- 
+
+
+export const validateInvoicesById = (id) =>
+  api.put("/invoices/validate/v_id/", {
+    ids: [id],
+  });
