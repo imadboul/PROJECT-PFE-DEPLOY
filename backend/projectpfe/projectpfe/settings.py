@@ -15,6 +15,12 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SUPABASE_URL = "https://vlxoaznxmndxpllbkzjf.supabase.co"
+
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZseG9hem54bW5keHBsbGJrempmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMzU1NjgsImV4cCI6MjA5MjcxMTU2OH0.Q0sSi0PHYekKeCYJ7yHwJja8vmcTL98ooJvhsCtDGmc"
+
+SUPABASE_BUCKET = "receipts"
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/

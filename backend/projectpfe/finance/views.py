@@ -31,7 +31,7 @@ def payments(request):
             
     if request.method == 'POST':
         
-        serializer = paymentcreateserializer(data = request.data)
+        serializer = paymentcreateserializer(data = request.data,context={"request": request})
         
         if serializer.is_valid():
             

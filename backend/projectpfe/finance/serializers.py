@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from .receiptstorage import upload_receipt
 
 
 class balanceserializer(serializers.ModelSerializer):
@@ -30,6 +31,7 @@ class paymentserializer(serializers.Serializer):
           except Payment.DoesNotExist:
               raise serializers.ValidationError(" payment does not exist or already validated or rejected")
           return data
+
         
 
 class paymentreadserializer(serializers.ModelSerializer):
@@ -62,6 +64,13 @@ class paymentcreateserializer(serializers.ModelSerializer):
             raise serializers.ValidationError("amount too large")
         
         return value
+    def validate_receipt(self, value):
+        max_size = 1 * 1024 * 1024  
+
+        if value.size > max_size:
+            raise serializers.ValidationError("Image must not exceed 1MB")
+
+        return value
         
     def validate(self,data):
          amount = data.get('amount')
@@ -78,6 +87,16 @@ class paymentcreateserializer(serializers.ModelSerializer):
 
             
          return data
+     
+    def create(self, validated_data):
+        request = self.context.get("request")
+        file = request.FILES.get("receipt") # type: ignore
+
+        if file:
+            url = upload_receipt(file)
+            validated_data["receipt_url"] = url
+
+        return super().create(validated_data)
      
 
              
