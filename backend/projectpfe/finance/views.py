@@ -93,8 +93,6 @@ def validatePayment(request):
             
             balance.amount += payment.amount # type: ignore
             balance.save()
-            
-        
         return success_response(message=f"payment {payment.state}",status_code=200) 
     else:
         return error_response(message="failed",errors=serializer.errors)

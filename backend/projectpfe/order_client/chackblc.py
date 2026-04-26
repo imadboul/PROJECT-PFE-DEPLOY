@@ -45,7 +45,8 @@ def tax_priceobject(taxActiv,orderProduct,Tva):
        
         qte_unit=convert_unit(orderProduct.qte,orderProduct.product.density,orderProduct.unit,orderProduct.product.unit) 
         
-        TTC=((qte_unit*orderProduct.product.unit_price)+total_tax)*(1+Tva/100)
+        TTC=((qte_unit*orderProduct.product.unit_price)+total_tax)*(Decimal("1") + Decimal(str(Tva)) / Decimal("100"))
+        
         
         
         return TTC  
