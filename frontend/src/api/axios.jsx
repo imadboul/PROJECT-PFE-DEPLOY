@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: "https://project-pfe.onrender.com/",
 });
 
 api.interceptors.request.use((config) => {
@@ -35,7 +35,7 @@ api.interceptors.response.use(
         }
 
         const res = await axios.post(
-          "http://127.0.0.1:8000/client/refresh/",
+          "https://project-pfe.onrender.com/client/refresh/",
           { refresh: refreshToken }
         );
 
