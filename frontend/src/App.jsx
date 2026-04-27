@@ -24,7 +24,7 @@ import Orders from "./pages/Orders";
 import OrderDetails from "./pages/OrderDetails";
 import BillsList from "./pages/Bills";
 import ContractClient from "./pages/ContractClient";
-import OrderToday from "./pages/OrderToday";
+import OrderToday from "./pages/orderToday";
 import ChargmentOrder from "./component/chargmentOrder";
 import RechargmentOrder from "./component/RechargmentOrder";
 import TaxList from "./pages/TaxList";
