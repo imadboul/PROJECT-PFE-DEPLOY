@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import toast from "react-hot-toast";
-import { getTaxes, getTaxProducts } from "../context/services/taxService";
+import { getTaxes, getTaxProducts } from "../context/services/TaxService";
 import { handleApiErrors } from "../utils/handleApiErrors";
 
 export default function TaxList() {
