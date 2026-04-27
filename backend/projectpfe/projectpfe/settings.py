@@ -63,7 +63,10 @@ EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS") == "True"
 CORS_ALLOW_ALL_ORIGINS = True
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "project-pfe.onrender.com",
+    ".onrender.com",
+]
 
 #filters-----exception
 REST_FRAMEWORK = {
