@@ -11,15 +11,18 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from urllib.parse import urlparse
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SUPABASE_URL = "https://vlxoaznxmndxpllbkzjf.supabase.co"
-
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZseG9hem54bW5keHBsbGJrempmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMzU1NjgsImV4cCI6MjA5MjcxMTU2OH0.Q0sSi0PHYekKeCYJ7yHwJja8vmcTL98ooJvhsCtDGmc"
-
-SUPABASE_BUCKET = "receipts"
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET")
 
 
 # Quick-start development settings - unsuitable for production
@@ -46,17 +49,16 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#)0wm+gv6-meh=5ncygvaiq_8rrmr(^xglxmgr@s5r^1x^a(a&'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG") == "True"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST='smtp.gmail.com'
-EMAIL_HOST_USER='boootspring@gmail.com'
-EMAIL_HOST_PASSWORD='rxveqdwkngivrhbn'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS") == "True"
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -126,10 +128,20 @@ WSGI_APPLICATION = 'projectpfe.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+tmpPostgres = urlparse(DATABASE_URL)
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': tmpPostgres.path.replace('/', ''),
+        'USER': tmpPostgres.username,
+        'PASSWORD': tmpPostgres.password,
+        'HOST': tmpPostgres.hostname,
+        'PORT': tmpPostgres.port or 5432,
     }
 }
 
