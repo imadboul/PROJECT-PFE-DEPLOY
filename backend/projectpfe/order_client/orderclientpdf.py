@@ -129,7 +129,7 @@ def generate_pdf(order_id):
     elements.append(Spacer(1,10)) 
     
     table_data = [
-    ['ID', 'Product', 'type', 'Unit Price','Unit','density', 'Max Qty', 'Taken Qty','Qty left']]
+    ['ID', 'Product', 'type', 'Unit Price','Unit','density', 'Max Qty','order Unit', 'Taken Qty','Qty left']]
     
     for item in products:
         table_data.append([
@@ -140,6 +140,7 @@ def generate_pdf(order_id):
             item.product.unit,
             str(item.product.density),
             str(item.qte),
+            str(item.unit),
             str(item.qte_taken),
             str(item.qte -item.qte_taken )
             ])

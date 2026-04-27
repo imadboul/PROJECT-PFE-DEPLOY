@@ -66,6 +66,8 @@ CORS_ALLOW_ALL_ORIGINS = True
 ALLOWED_HOSTS = [
     "project-pfe.onrender.com",
     ".onrender.com",
+    'localhost',
+    '127.0.0.1',
 ]
 
 #filters-----exception
