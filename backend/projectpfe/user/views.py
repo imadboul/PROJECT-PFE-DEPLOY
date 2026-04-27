@@ -14,7 +14,7 @@ from .auth import create_jwt ,decode_jwt
 from .wraps import jwt_must
 import json
 
-# توليد token للتأكيد
+
 def generatetoken(client: Client):
     data = {'client_id': client.id}
     return signing.dumps(data, salt="email-verification")
@@ -37,7 +37,7 @@ def signup(request):
         user = serializer.save()
 
         token = generatetoken(user) # type: ignore
-        verify_link = f"http://localhost:8000/client/verifyEmail/{token}/"
+        verify_link = f"https://project-pfe.onrender.com/client/verifyEmail/{token}/"
         
         
 
